@@ -27,7 +27,16 @@
     "cross-env": "^7.0.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
-    "serve-static": "^1.14.1"
+    "serve-static": "^1.14.1",
+    "@nestjs/platform-fastify": "^9.3.9",
+    "@fastify/static": "^6.9.0",
+    "@nestjs/typeorm": "^9.0.1",
+    "mysql2": "^3.2.0",
+    "pg": "^8.10.0",
+    "typeorm": "^0.3.12",
+    "@nestjs/mongoose": "^9.2.1",
+    "dotenv": "^16.0.3",
+    "mongoose": "^6.10.2"
   },
   "devDependencies": {
     "@nestjs/schematics": "^9.0.4",

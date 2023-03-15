@@ -4,13 +4,21 @@ import {
   NestModule,
   RequestMethod,
 } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
-import { join } from "path";
-import shopify from "./utils/shopify.js";
-import { ProductModule } from "./product/product.module.js";
-import { Request, Response, NextFunction } from "express";
+
 import { readFileSync } from "fs";
+import { Request, Response, NextFunction } from "express";
+import { join } from "path";
+
+import { FastifyReply, FastifyRequest, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerDefault } from "fastify";
+
+import shopify from "./utils/shopify.js";
 import GDPRWebhookHandlers from "./utils/gdpr.js";
+import { ProductModule } from "./product/product.module.js";
+import { ShopModule } from "./microservices/shops/shop.module.js";
+// import { DataSource } from "typeorm";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -19,6 +27,22 @@ const STATIC_PATH =
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: '1191994',
+      database: 'better-carts',
+      entities: [],
+      synchronize: false,
+    }),
+    MongooseModule.forRoot(
+      'mongodb+srv://romanenkodmytriy:1191994spiri@bettercarts.zp3jd1t.mongodb.net/better-carts?retryWrites=true&w=majority',
+      {
+        connectionName: 'logs',
+      }),
+    ShopModule,
     ProductModule,
     ConfigModule.forRoot({
       isGlobal: true,

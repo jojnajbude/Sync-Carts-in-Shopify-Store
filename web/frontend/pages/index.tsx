@@ -7,17 +7,18 @@ import {
   Stack,
   Link,
   Heading,
+  Button,
 } from '@shopify/polaris'
 import { TitleBar } from '@shopify/app-bridge-react'
 
 import { trophyImage } from '../assets'
 
 import { ProductsCard } from '../components'
+import { useEffect } from 'react'
 
 export default function HomePage() {
   return (
     <Page narrowWidth>
-      <TitleBar title="App name" primaryAction={null} />
       <Layout>
         <Layout.Section>
           <Card sectioned>
