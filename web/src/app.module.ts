@@ -12,13 +12,10 @@ import { readFileSync } from "fs";
 import { Request, Response, NextFunction } from "express";
 import { join } from "path";
 
-import { FastifyReply, FastifyRequest, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerDefault } from "fastify";
-
 import shopify from "./utils/shopify.js";
 import GDPRWebhookHandlers from "./utils/gdpr.js";
-import { ProductModule } from "./product/product.module.js";
 import { ShopModule } from "./microservices/shops/shop.module.js";
-// import { DataSource } from "typeorm";
+import { CartModule } from "./microservices/carts/cart.module.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -43,7 +40,7 @@ const STATIC_PATH =
         connectionName: 'logs',
       }),
     ShopModule,
-    ProductModule,
+    CartModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

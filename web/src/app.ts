@@ -8,9 +8,6 @@ import {
 } from "@nestjs/platform-express";
 import { Express } from "express";
 
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { FastifyStaticOptions } from "@nestjs/platform-fastify/interfaces/external/fastify-static-options.interface.js";
-
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -20,35 +17,11 @@ const STATIC_PATH =
     ? `${process.cwd()}/frontend/dist`
     : `${process.cwd()}/frontend/`;
 
-// const staticOptions: FastifyStaticOptions = {
-//   acceptRanges: true,
-//   cacheControl: true,
-//   decorateReply: true,
-//   dotfiles: 'allow',
-//   etag: true,
-//   extensions: ['.js'],
-//   immutable: true,
-//   index: ['1'],
-//   lastModified: true,
-//   maxAge: '',
-//   prefix: '',
-//   prefixAvoidTrailingSlash: false,
-//   root: STATIC_PATH,
-//   schemaHide: true,
-//   serve: true,
-//   wildcard: true,
-//   list: false,
-//   setHeaders: (res: any, pathName: any) => {
-//     res.setHeader('test', pathName)
-//   },
-//   preCompressed: false
-// }
-
 export class App {
   public async start(server: Express) {
     const app = await NestFactory.create<NestExpressApplication>(
       AppModule,
-      new ExpressAdapter()
+      new ExpressAdapter(server)
     );
     app.useGlobalPipes(new ValidationPipe());
     app.useStaticAssets(STATIC_PATH, { index: false });
