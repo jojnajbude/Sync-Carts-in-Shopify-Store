@@ -15,5 +15,8 @@
     "@shopify/app": "3.29.0",
     "@shopify/cli": "3.29.0"
   },
-  "author": "DevIT"
+  "author": "DevIT",
+  "devDependencies": {
+    "@types/pg": "^8.6.6"
+  }
 }

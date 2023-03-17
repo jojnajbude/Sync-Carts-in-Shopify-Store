@@ -1,13 +1,15 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Res } from "@nestjs/common";
+import { Response } from "express";
 import { ShopService } from "./shop.service.js";
-import { Shops } from "./shop.entity.js";
+import { Shop } from "./shop.entity.js";
 
-@Controller('shops')
+@Controller('/api/shop')
 export class ShopController {
   constructor(private shopService: ShopService) {}
 
-  @Get('shop') 
-  takeShopData() {
-    return this.shopService.getShopData()
+  @Get() 
+  async getShopData(@Res() res: Response) {
+    const shop = await this.shopService.getShopData(res.locals.shopify.session)
+    res.status(200).send(shop)
   }
 }

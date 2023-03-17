@@ -11,23 +11,25 @@ import {
   Icon,
   EmptySearchResult,
 } from '@shopify/polaris'
-import { DeleteMajor } from '@shopify/polaris-icons'
-import { useLocation } from 'react-router-dom'
+import { useAuthenticatedFetch, useAppQuery } from '../hooks'
 
 export default function cartsSummary() {
-  const [carts, setCarts] = useState([])
+  const [carts, setCarts] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const fetch = useAuthenticatedFetch()
 
   useEffect(() => {
-    const getCarts = async () => {
+    const getShop = async () => {
       try {
         const result = await fetch('/api/carts/all')
-        console.log(result)
+        const cartData = await result.json()
+        setCarts(cartData)
       } catch (error) {
         console.log(error)
       }
     }
 
-    getCarts()
+    getShop()
   })
 
   const initialCarts = [
@@ -268,11 +270,7 @@ export default function cartsSummary() {
 
   const promotedBulkActions = [
     {
-      content: 'Freeze timers',
-      onAction: () => console.log('Todo: implement bulk edit'),
-    },
-    {
-      content: 'Unfreeze timers',
+      content: 'Expend timers',
       onAction: () => console.log('Todo: implement bulk edit'),
     },
     {
@@ -316,30 +314,30 @@ export default function cartsSummary() {
     }
   }
 
-  const rowMarkup = initialCarts.map(
-    (
-      { id, qty, cartTotal, shortestTime, customer, email, reservedIndicator },
-      index
-    ) => (
-      <IndexTable.Row
-        id={id}
-        key={id}
-        selected={selectedResources.includes(id)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          <Text fontWeight="semibold" as="span">
-            {id}
-          </Text>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{customer}</IndexTable.Cell>
-        <IndexTable.Cell>{cartTotal}</IndexTable.Cell>
-        <IndexTable.Cell>{createBadge(reservedIndicator)}</IndexTable.Cell>
-        <IndexTable.Cell>{shortestTime}</IndexTable.Cell>
-        <IndexTable.Cell>{qty}</IndexTable.Cell>
-      </IndexTable.Row>
-    )
-  )
+  // const rowMarkup = carts.map(
+  //   (
+  //     { id, qty, cartTotal, shortestTime, customer, email, reservedIndicator },
+  //     index
+  //   ) => (
+  //     <IndexTable.Row
+  //       id={id}
+  //       key={id}
+  //       selected={selectedResources.includes(id)}
+  //       position={index}
+  //     >
+  //       <IndexTable.Cell>
+  //         <Text fontWeight="semibold" as="span">
+  //           {id}
+  //         </Text>
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>{customer}</IndexTable.Cell>
+  //       <IndexTable.Cell>{cartTotal}</IndexTable.Cell>
+  //       <IndexTable.Cell>{createBadge(reservedIndicator)}</IndexTable.Cell>
+  //       <IndexTable.Cell>{shortestTime}</IndexTable.Cell>
+  //       <IndexTable.Cell>{qty}</IndexTable.Cell>
+  //     </IndexTable.Row>
+  //   )
+  // )
 
   return (
     <Page
@@ -350,7 +348,7 @@ export default function cartsSummary() {
       <Layout>
         <Layout.Section>
           <AlphaCard>
-            {initialCarts.length ? (
+            {
               <IndexTable
                 resourceName={resourceName}
                 itemCount={initialCarts.length}
@@ -371,15 +369,32 @@ export default function cartsSummary() {
                   { title: 'Items Quantity' },
                 ]}
               >
-                {rowMarkup}
+                {carts.map(
+                  (
+                    { id, qty, cartTotal, shortestTime, customer, email, reservedIndicator },
+                    index
+                  ) => (
+                    <IndexTable.Row
+                      id={id}
+                      key={id}
+                      selected={selectedResources.includes(id)}
+                      position={index}
+                    >
+                      <IndexTable.Cell>
+                        <Text fontWeight="semibold" as="span">
+                          {id}
+                        </Text>
+                      </IndexTable.Cell>
+                      <IndexTable.Cell>{customer}</IndexTable.Cell>
+                      <IndexTable.Cell>{cartTotal}</IndexTable.Cell>
+                      <IndexTable.Cell>{createBadge(reservedIndicator)}</IndexTable.Cell>
+                      <IndexTable.Cell>{shortestTime}</IndexTable.Cell>
+                      <IndexTable.Cell>{qty}</IndexTable.Cell>
+                    </IndexTable.Row>
+                  )
+                )}
               </IndexTable>
-            ) : (
-              <EmptySearchResult
-                title={'No carts yet'}
-                description={'Try changing the filters or search term'}
-                withIllustration
-              />
-            )}
+            }
           </AlphaCard>
         </Layout.Section>
       </Layout>

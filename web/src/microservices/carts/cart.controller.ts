@@ -8,7 +8,7 @@ export class CartController {
 
   @Get('all')
   async getShopCarts(@Res() res: Response) {
-    const carts = await this.cartService.getShopCarts()
-    res.status(201).send(carts)
+    const carts = await this.cartService.getShopCarts(1)
+    res.status(200).send(carts)
   }
 }

@@ -16,6 +16,9 @@ import shopify from "./utils/shopify.js";
 import GDPRWebhookHandlers from "./utils/gdpr.js";
 import { ShopModule } from "./microservices/shops/shop.module.js";
 import { CartModule } from "./microservices/carts/cart.module.js";
+import { ProductModule } from "./product/product.module.js";
+import { getShopDataMiddleware } from "./middlewares/getShopData.middleware.js";
+import { Shop } from "./microservices/shops/shop.entity.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -31,7 +34,7 @@ const STATIC_PATH =
       username: 'postgres',
       password: '1191994',
       database: 'better-carts',
-      entities: [],
+      entities: [Shop],
       synchronize: false,
     }),
     MongooseModule.forRoot(
@@ -39,6 +42,7 @@ const STATIC_PATH =
       {
         connectionName: 'logs',
       }),
+    ProductModule,
     ShopModule,
     CartModule,
     ConfigModule.forRoot({
@@ -87,5 +91,9 @@ export class AppModule implements NestModule {
       )
       .exclude({ path: "/api/(.*)", method: RequestMethod.ALL })
       .forRoutes({ path: "/*", method: RequestMethod.ALL });
+
+    consumer
+      .apply(getShopDataMiddleware)
+      .forRoutes({ path: "/*", method: RequestMethod.ALL})
   }
 }

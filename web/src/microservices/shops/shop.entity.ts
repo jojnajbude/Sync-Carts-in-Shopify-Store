@@ -1,10 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Shops {
+export class Shop {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  first_name: string;
+  shop_name: string;
 }
