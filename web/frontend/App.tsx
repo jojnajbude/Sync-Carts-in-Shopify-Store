@@ -2,6 +2,9 @@ import { BrowserRouter } from 'react-router-dom'
 import { NavigationMenu } from '@shopify/app-bridge-react'
 import Routes from './Routes'
 
+import { Provider } from 'react-redux'
+import { store } from '../frontend/services/store'
+
 import {
   AppBridgeProvider,
   QueryProvider,
@@ -17,25 +20,27 @@ export default function App() {
     <PolarisProvider>
       <BrowserRouter>
         <AppBridgeProvider>
-          <QueryProvider>
-            <NavigationMenu
-              navigationLinks={[
-                {
-                  label: 'Carts summary',
-                  destination: '/summary',
-                },
-                {
-                  label: 'Analytics',
-                  destination: '/analytics',
-                },
-                {
-                  label: 'Settings',
-                  destination: '/settings',
-                },
-              ]}
-            />
-            <Routes pages={pages} />
-          </QueryProvider>
+          <Provider store={store}>
+            <QueryProvider>
+              <NavigationMenu
+                navigationLinks={[
+                  {
+                    label: 'Carts summary',
+                    destination: '/summary',
+                  },
+                  {
+                    label: 'Analytics',
+                    destination: '/analytics',
+                  },
+                  {
+                    label: 'Settings',
+                    destination: '/settings',
+                  },
+                ]}
+              />
+              <Routes pages={pages} />
+            </QueryProvider>
+          </Provider>
         </AppBridgeProvider>
       </BrowserRouter>
     </PolarisProvider>

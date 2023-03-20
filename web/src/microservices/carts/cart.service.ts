@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { query } from "express";
 import { Repository, DataSource } from "typeorm";
 import { Cart } from "./cart.entity.js";
 
@@ -13,8 +14,9 @@ export class CartService {
 
       await queryRunner.connect();
 
-      const carts = await queryRunner.query(`SELECT * FROM carts WHERE shop_id = '${shopId}'`)
-      console.log(carts)
+      const carts = await queryRunner.query(`SELECT id, customer_name, total, reserved_indicator, reservation_time, qty FROM carts WHERE shop_id = '${shopId}'`)
+
+      await queryRunner.release()
       return carts
     } catch (err) {
       console.log(err)
