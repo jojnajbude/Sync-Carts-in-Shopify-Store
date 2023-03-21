@@ -11,22 +11,20 @@ export class getShopDataMiddleware implements NestMiddleware {
     const session = res.locals.shopify.session;
 
     try {
-      const [shopifyShopData] = await shopify.api.rest.Shop.all({ session, fields: 'id,name' })
+      const [shopifyShopData] = await shopify.api.rest.Shop.all({ session })
 
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
 
       const [shop] = await queryRunner.query(`SELECT * FROM shops WHERE shop_name = '${shopifyShopData.name}'`)
-      console.log(shop)
-
-      await queryRunner.release()
 
       if (shop) {
+        await queryRunner.release()
         next();
       } else {
-        console.log('data doesnt exist')
-        next();
-        // данные магазина отсутствуют в базе данных
+        await queryRunner.query(`INSERT INTO shops (id, shop_name) VALUES (DEFAULT, '${shopifyShopData.name}') RETURNING id`)
+        await queryRunner.release()
+        next()
       }
     } catch (err) {
       console.log(err);

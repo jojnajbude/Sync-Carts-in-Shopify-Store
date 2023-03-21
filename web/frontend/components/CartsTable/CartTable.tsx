@@ -8,14 +8,16 @@ import {
   Badge,
 } from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../../hooks'
-import { useGetShopCartsQuery } from '../../services/api'
+// import { useGetShopCartsQuery } from '../../services/api'
+
+import { Cart } from '../../types/cart'
 
 export default function CartsTable() {
   const [carts, setCarts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useAuthenticatedFetch()
   // const carts = useGetShopCartsQuery()
-  console.log(carts)
+  console.log(carts, isLoading)
 
   useEffect(() => {
     const getShop = async () => {
@@ -95,11 +97,11 @@ export default function CartsTable() {
   )
 
   function sortCarts(
-    carts: any,
+    carts: Cart[],
     index: number,
     direction: 'ascending' | 'descending'
-  ): any {
-    return carts.sort((rowA, rowB) => {
+  ): Cart[] {
+    return carts.sort((rowA: Cart, rowB: Cart) => {
       const key = Object.keys(rowA)[index]
       const amountA = rowA[key]
       const amountB = rowB[key]
@@ -124,6 +126,7 @@ export default function CartsTable() {
         <AlphaCard>
           {
             <IndexTable
+              loading={carts.length ? false : true}
               resourceName={resourceName}
               itemCount={carts.length}
               selectedItemsCount={
@@ -131,7 +134,6 @@ export default function CartsTable() {
               }
               onSort={handleSort}
               defaultSortDirection="descending"
-              sortColumnIndex={4}
               onSelectionChange={handleSelectionChange}
               hasMoreItems
               bulkActions={bulkActions}
