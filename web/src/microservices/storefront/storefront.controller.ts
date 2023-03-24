@@ -8,8 +8,8 @@ export class StorefrontController {
   constructor (private storefrontService: StorefrontService) {}
 
   @Get('cart/update')
-  async updateCartData(@Query() query: { user_id: number, shop_id: string }, @Res() res: Response) {
-    const cart = await this.storefrontService.getCartData(query.user_id, query.shop_id);
+  async updateCartData(@Query() query: { user_id: string, shop_id: string, cart_id: string }, @Res() res: Response) {
+    const cart = await this.storefrontService.getCartData(query.user_id, query.shop_id, query.cart_id);
 
     res.status(200).send(cart)
   }
@@ -18,6 +18,6 @@ export class StorefrontController {
   async getShopCarts(@Body() addToCart: AddToCart, @Res() res: Response ) {
     // const cartData = await this.storefrontService.getCartData(customer_id, shop_id, product)
 
-    res.status(200).send({ id: 'working' })
+    res.status(200).send({ id: 'here' })
   }
 }

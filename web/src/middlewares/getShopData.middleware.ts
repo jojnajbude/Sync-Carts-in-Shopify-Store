@@ -10,7 +10,6 @@ export class getShopDataMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
     const sessionJSON = await JSON.stringify(session)
-    console.log(sessionJSON)
 
     try {
       const [shopifyShopData] = await shopify.api.rest.Shop.all({ session })

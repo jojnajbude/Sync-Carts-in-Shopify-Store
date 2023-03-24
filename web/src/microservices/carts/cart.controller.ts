@@ -17,8 +17,6 @@ export class CartController {
       session: session,
     })
 
-    console.log(customer)
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
