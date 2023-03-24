@@ -13,17 +13,18 @@ export class CartController {
     const session = res.locals.shopify.session;
     const [shopifyShopData] = await shopify.api.rest.Shop.all({ session })
 
+    const [customer] = await shopify.api.rest.Customer.all({
+      session: session,
+    })
+
+    console.log(customer)
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
-    const [shop] = await queryRunner.query(`SELECT * FROM shops WHERE shop_name = '${shopifyShopData.name}'`)
+    const [shop] = await queryRunner.query(`SELECT * FROM shops WHERE shopify_shop_id = '${shopifyShopData.id}'`)
 
     const carts = await this.cartService.getShopCarts(shop.id)
     res.status(200).send(carts)
-  }
-
-  @Get('create')
-  createCart(@Res() res: Response) {
-    res.status(201).send('working')
   }
 }

@@ -16,6 +16,7 @@ import shopify from "./utils/shopify.js";
 import GDPRWebhookHandlers from "./utils/gdpr.js";
 import { ShopModule } from "./microservices/shops/shop.module.js";
 import { CartModule } from "./microservices/carts/cart.module.js";
+import { StorefrontModule } from "./microservices/storefront/storefront.module.js";
 import { ProductModule } from "./product/product.module.js";
 import { getShopDataMiddleware } from "./middlewares/getShopData.middleware.js";
 import { Shop } from "./microservices/shops/shop.entity.js";
@@ -45,6 +46,7 @@ const STATIC_PATH =
     ProductModule,
     ShopModule,
     CartModule,
+    StorefrontModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -89,11 +91,15 @@ export class AppModule implements NestModule {
             .send(readFileSync(join(STATIC_PATH, "index.html")));
         }
       )
-      .exclude({ path: "/api/(.*)", method: RequestMethod.ALL })
+      .exclude(
+        { path: "/api/(.*)", method: RequestMethod.ALL },
+        { path: "/storefront/(.*)", method: RequestMethod.ALL }
+      )
       .forRoutes({ path: "/*", method: RequestMethod.ALL });
 
     consumer
       .apply(getShopDataMiddleware)
+      .exclude({ path: "/storefront/(.*)", method: RequestMethod.ALL })
       .forRoutes({ path: "/*", method: RequestMethod.ALL})
   }
 }

@@ -25,6 +25,7 @@ export class App {
     );
     app.useGlobalPipes(new ValidationPipe());
     app.useStaticAssets(STATIC_PATH, { index: false });
+    app.enableCors()
     await app.listen(PORT);
   }
 }

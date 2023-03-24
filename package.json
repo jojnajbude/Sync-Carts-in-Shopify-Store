@@ -12,8 +12,10 @@
     "deploy": "shopify app deploy"
   },
   "dependencies": {
+    "@shopify/admin-ui-extensions": "^1.1.0",
     "@shopify/app": "3.29.0",
-    "@shopify/cli": "3.29.0"
+    "@shopify/cli": "3.29.0",
+    "dotenv": "^16.0.3"
   },
   "author": "DevIT",
   "devDependencies": {

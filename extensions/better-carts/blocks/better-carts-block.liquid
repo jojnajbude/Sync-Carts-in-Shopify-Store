@@ -1,7 +1,17 @@
+<script>
+  {% if customer %}
+    window.customer = {
+      id: {{ customer.id }},
+      shop: '{{ shop.id }}'
+    };
+  {% endif %}
+</script>
+
 <script
   src="{{ 'better-carts.js' | asset_url }}"
   type="module"
-  defer></script>
+  defer>
+</script>
 
 {% schema %}
   {
