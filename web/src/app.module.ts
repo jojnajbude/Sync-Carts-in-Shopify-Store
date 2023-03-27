@@ -20,6 +20,9 @@ import { StorefrontModule } from "./microservices/storefront/storefront.module.j
 import { ProductModule } from "./product/product.module.js";
 import { getShopDataMiddleware } from "./middlewares/getShopData.middleware.js";
 import { Shop } from "./microservices/shops/shop.entity.js";
+import { Item } from "./microservices/items/item.entity.js";
+import { Customer } from "./microservices/customers/customer.entity.js";
+import { Cart } from "./microservices/carts/cart.entity.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -32,11 +35,11 @@ const STATIC_PATH =
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'postgres',
+      username: 'dmitrijromanenko',
       password: '1191994',
-      database: 'better-carts',
-      entities: [Shop],
-      synchronize: false,
+      database: 'better_carts',
+      entities: [Shop, Item, Customer, Cart],
+      synchronize: true,
     }),
     MongooseModule.forRoot(
       'mongodb+srv://romanenkodmytriy:1191994spiri@bettercarts.zp3jd1t.mongodb.net/better-carts?retryWrites=true&w=majority',

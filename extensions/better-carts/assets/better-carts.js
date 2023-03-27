@@ -49,24 +49,26 @@ function swapAddToCartBtn() {
   const addToCartBtn = document.querySelector('form[action="/cart/add"] button[type="submit"]');
 
   if (addToCartBtn) {
-    const betterCartBtn = addToCartBtn.cloneNode(true);
+    let betterCartBtn = document.querySelector('#better-carts-btn');
 
-    betterCartBtn.setAttribute('type', 'button')
-    betterCartBtn.addEventListener('click', addToCart);
-    
-    addToCartBtn.parentNode.insertBefore(betterCartBtn, addToCartBtn);
-    addToCartBtn.style.display = "none";
+    if (!betterCartBtn) {
+      betterCartBtn = addToCartBtn.cloneNode(true);
+
+      betterCartBtn.setAttribute('type', 'button');
+      betterCartBtn.setAttribute('id', 'better-carts-btn')
+      betterCartBtn.addEventListener('click', addToCart);
+      
+      addToCartBtn.parentNode.insertBefore(betterCartBtn, addToCartBtn);
+      addToCartBtn.style.display = "none";
+    }
   } 
 }
 
 async function addToCart() {
-  const addCart = await fetch(`${APP_URL}/storefront/cart/add`, {
-    method: 'POST',
-    body: JSON.stringify()
-  })
-  const data = await addCart.json()
+  const variantId = document.querySelector('input[name="id"]').value;
+  const qty = document.querySelector('input[name="quantity"]').value;
 
-  console.log(data)
+  const addCart = await fetch(`${APP_URL}/storefront/cart/add?customer=${window.customer.id}&shop=${window.customer.shop}&variant=${variantId}&qty=${qty}`);
 
   const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
   button.click()

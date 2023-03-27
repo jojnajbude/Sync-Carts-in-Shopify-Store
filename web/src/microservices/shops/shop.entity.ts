@@ -1,10 +1,16 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity('shops')
 export class Shop {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  shop_name: string;
+  domain: string;
+
+  @Column()
+  shopify_id: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  session: string | null;
 }

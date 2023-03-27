@@ -1,16 +1,16 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('carts')
-export class Cart {
+@Entity('items')
+export class Item {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  customer_id: number;
+  variant_id:number;
 
   @Column()
-  shop_id: number;
+  qty: number;
 
   @Column()
-  cart_token: number;
+  cart_id: number;
 }

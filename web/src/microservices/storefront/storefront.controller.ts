@@ -14,10 +14,10 @@ export class StorefrontController {
     res.status(200).send(cart)
   }
 
-  @Post('cart/add')
-  async getShopCarts(@Body() addToCart: AddToCart, @Res() res: Response ) {
-    // const cartData = await this.storefrontService.getCartData(customer_id, shop_id, product)
+  @Get('cart/add')
+  async addToCart(@Query() query: { customer: string, shop: string, variant: string, qty: string }, @Res() res: Response ) {
+    const reqStatus = await this.storefrontService.addToCart(query.customer, query.shop, query.variant, query.qty); 
 
-    res.status(200).send({ id: 'here' })
+    res.status(200).send('ok')
   }
 }

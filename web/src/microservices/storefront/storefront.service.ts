@@ -40,4 +40,28 @@ export class StorefrontService {
       // queryRunner.query(`INSERT INTO customers (id, shop_id, name, email, phone_number) VALUES (DEFAULT, ${shop_id})`)
     }
   }
+
+  async addToCart(customer: string, shop: string, variant: string, qty: string) {
+    const productData = JSON.stringify({
+      variant,
+      qty
+    })
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    const [session] = await queryRunner.query(`SELECT shop_session FROM shops WHERE shopify_shop_id=${shop}`);
+
+    const [cart] = await queryRunner.query(`SELECT * FROM carts WHERE shop_id=${shop} AND customer_id=${customer}`);
+
+    const currentVariant = cart.products.find((product: { variant: string, qty: string }) => product.variant === variant);
+    console.log(currentVariant)
+    console.log(productData)
+
+    if (currentVariant) {
+      await queryRunner.query(`UPDATE carts SET products = ARRAY_REPLACE(products, '${currentVariant}', '${productData}') WHERE id = ${cart.id}`)
+    } else {
+      const handleAdd = await queryRunner.query(`UPDATE carts SET products = ARRAY_APPEND(products, '${productData}') WHERE id = ${cart.id}`)
+    }
+  }
 }
