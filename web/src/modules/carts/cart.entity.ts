@@ -5,12 +5,12 @@ export class Cart {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   customer_id: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   shop_id: number;
 
   @Column()
-  cart_token: number;
+  cart_token: string;
 }

@@ -1,7 +1,6 @@
 import { Controller, Get, Res } from "@nestjs/common";
 import { Response } from "express";
 import { ShopService } from "./shop.service.js";
-import { Shop } from "./shop.entity.js";
 
 @Controller('/api/shop')
 export class ShopController {

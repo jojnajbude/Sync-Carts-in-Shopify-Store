@@ -14,15 +14,15 @@ import { join } from "path";
 
 import shopify from "./utils/shopify.js";
 import GDPRWebhookHandlers from "./utils/gdpr.js";
-import { ShopModule } from "./microservices/shops/shop.module.js";
-import { CartModule } from "./microservices/carts/cart.module.js";
-import { StorefrontModule } from "./microservices/storefront/storefront.module.js";
+import { ShopModule } from "./modules/shops/shop.module.js";
+import { CartModule } from "./modules/carts/cart.module.js";
+import { StorefrontModule } from "./modules/storefront/storefront.module.js";
 import { ProductModule } from "./product/product.module.js";
 import { getShopDataMiddleware } from "./middlewares/getShopData.middleware.js";
-import { Shop } from "./microservices/shops/shop.entity.js";
-import { Item } from "./microservices/items/item.entity.js";
-import { Customer } from "./microservices/customers/customer.entity.js";
-import { Cart } from "./microservices/carts/cart.entity.js";
+import { Shop } from "./modules/shops/shop.entity.js";
+import { Item } from "./modules/items/item.entity.js";
+import { Customer } from "./modules/customers/customer.entity.js";
+import { Cart } from "./modules/carts/cart.entity.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -46,8 +46,8 @@ const STATIC_PATH =
       {
         connectionName: 'logs',
       }),
-    ProductModule,
     ShopModule,
+    ProductModule,
     CartModule,
     StorefrontModule,
     ConfigModule.forRoot({

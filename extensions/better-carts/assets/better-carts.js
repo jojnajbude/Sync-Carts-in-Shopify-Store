@@ -67,8 +67,9 @@ function swapAddToCartBtn() {
 async function addToCart() {
   const variantId = document.querySelector('input[name="id"]').value;
   const qty = document.querySelector('input[name="quantity"]').value;
+  const cart = getCartCookie();
 
-  const addCart = await fetch(`${APP_URL}/storefront/cart/add?customer=${window.customer.id}&shop=${window.customer.shop}&variant=${variantId}&qty=${qty}`);
+  const addCart = await fetch(`${APP_URL}/storefront/cart/add?customer=${window.customer.id}&shop=${window.customer.shop}&cart=${cart}&variant=${variantId}&qty=${qty}`);
 
   const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
   button.click()

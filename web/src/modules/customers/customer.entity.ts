@@ -5,16 +5,16 @@ export class Customer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   shop_id: number;
 
-  @Column()
-  name: string;
+  @Column({ nullable: true })
+  name?: string;
 
-  @Column()
+  @Column({ type: 'bigint' })
   shopify_user_id: number;
 
-  @Column()
+  @Column({ default: 'normal' })
   priority: string;
 
   @Column()

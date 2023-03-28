@@ -8,7 +8,7 @@ export class Shop {
   @Column()
   domain: string;
 
-  @Column()
+  @Column({ type: 'bigint' })
   shopify_id: number;
 
   @Column({ type: 'varchar', nullable: true })
