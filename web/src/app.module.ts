@@ -23,6 +23,7 @@ import { Shop } from "./modules/shops/shop.entity.js";
 import { Item } from "./modules/items/item.entity.js";
 import { Customer } from "./modules/customers/customer.entity.js";
 import { Cart } from "./modules/carts/cart.entity.js";
+import { injectSnippet } from "./middlewares/injectSnippet.middleware.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -104,5 +105,9 @@ export class AppModule implements NestModule {
       .apply(getShopDataMiddleware)
       .exclude({ path: "/storefront/(.*)", method: RequestMethod.ALL })
       .forRoutes({ path: "/*", method: RequestMethod.ALL})
+
+    consumer
+      .apply(injectSnippet)
+      .forRoutes({ path: "/", method: RequestMethod.ALL })
   }
 }

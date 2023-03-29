@@ -16,7 +16,4 @@ export class Customer {
 
   @Column({ default: 'normal' })
   priority: string;
-
-  @Column()
-  cart_id: string
 }

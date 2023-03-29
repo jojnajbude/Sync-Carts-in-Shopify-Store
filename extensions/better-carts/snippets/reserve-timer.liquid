@@ -1,0 +1,61 @@
+<better-carts-timer class="better-carts-timer">
+  <span id="bc-countdown" style="color: {{ color }}"></span> 
+</better-carts-timer>
+
+<script>
+  class BetterCartsTimer extends HTMLElement {
+    constructor() {
+      super();
+
+      this.initializeTimer();
+    }
+
+    async initializeTimer() {
+      if (!Date.prototype.addHours) {
+        Date.prototype.addHours = function(h) {
+          this.setTime(this.getTime() + (h * 60 * 60 * 1000));
+          return this;
+        }
+      }
+      
+      const variantId = {{ variant_id }};
+      const reservationDate = await fetch(`https://better-carts.dev-test.pro/storefront/time?item=${variantId}`);
+      const date = new Date(await reservationDate.json());
+      const endDate = new Date(date).addHours(24);
+
+      let _second = 1000;
+      let _minute = _second * 60;
+      let _hour = _minute * 60;
+      let _day = _hour * 24;
+      let timer;
+
+      function showRemaining(endDate) {
+        let now = new Date();
+        let distance = endDate - now;
+        
+        if (distance < 0) {
+          clearInterval(timer);
+          document.getElementById('bc-countdown').innerHTML = 'Reserve time expired!';
+
+          return;
+        }
+
+        let days = Math.floor(distance / _day);
+        let hours = Math.floor((distance % _day) / _hour);
+        let minutes = Math.floor((distance % _hour) / _minute);
+        let seconds = Math.floor((distance % _minute) / _second);
+
+        document.getElementById('bc-countdown').innerHTML = 'Reserve time: ';
+        document.getElementById('bc-countdown').innerHTML += days + ':';
+        document.getElementById('bc-countdown').innerHTML += hours + ':';
+        document.getElementById('bc-countdown').innerHTML += minutes + ':';
+        document.getElementById('bc-countdown').innerHTML += seconds;
+      }
+
+      timer = setInterval(() => showRemaining(endDate), 1000);
+    }
+  }
+
+
+  window.customElements.define('better-carts-timer', BetterCartsTimer)
+</script>

@@ -11,7 +11,7 @@ export class Item {
   @Column({ type: 'bigint' })
   qty: number;
 
-  @Column()
+  @Column({ nullable: true })
   cart_id: string;
 
   @Column({ type: 'bigint' })
