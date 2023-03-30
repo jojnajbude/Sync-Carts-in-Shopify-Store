@@ -44,11 +44,17 @@ export default function CartsTable() {
             // eslint-disable-next-line prettier/prettier
             const qty = cart.items.reduce((acc: any, cur: any) => acc + Number(cur.qty), 0)
 
-            // const shortestDate = cart.items.sort(
-            //   (a: any, b: any) => a.createdAt.getTime() - b.createdAt.getTime()
-            // )[0]
-            // console.log(shortestDate)
+            const shortestDate = cart.items.sort((a: any, b: any) => {
+              const dateA = new Date(a.createdAt)
+              const dateB = new Date(b.createdAt)
+              return dateA.getTime() - dateB.getTime()
+            })[0].createdAt
+
+            cart.qty = qty
+            cart.reservation_time = shortestDate
           }
+
+          console.log(table)
 
           setCarts(table)
           setIsLoading(false)
