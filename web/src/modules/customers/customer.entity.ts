@@ -1,12 +1,17 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Shop } from "../shops/shop.entity.js";
 
 @Entity('customers')
 export class Customer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'bigint' })
+  @Column()
   shop_id: number;
+
+  @ManyToOne((type) => Shop)
+  @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
+  shop: Shop;
 
   @Column({ nullable: true })
   name?: string;

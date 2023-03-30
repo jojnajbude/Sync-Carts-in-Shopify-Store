@@ -1,5 +1,5 @@
 <better-carts-timer class="better-carts-timer">
-  <span id="bc-countdown" style="color: {{ color }}"></span> 
+  <span id="bc-countdown" style="color: {{ color }}"></span>
 </better-carts-timer>
 
 <script>
@@ -17,9 +17,18 @@
           return this;
         }
       }
-      
+
       const variantId = {{ variant_id }};
-      const reservationDate = await fetch(`https://better-carts.dev-test.pro/storefront/time?item=${variantId}`);
+      console.log(variantId)
+      const userId = window.customer.id;
+      const shopId = window.customer.shop;
+      const cartId = () => {
+        const cookie = document.cookie.split('; ').find((row) => row.startsWith('cart=')) ?. split('=')[1];
+
+        return cookie;
+      }
+
+      const reservationDate = await fetch(`https://better-carts.dev-test.pro/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
       const date = new Date(await reservationDate.json());
       const endDate = new Date(date).addHours(24);
 
@@ -32,7 +41,7 @@
       function showRemaining(endDate) {
         let now = new Date();
         let distance = endDate - now;
-        
+
         if (distance < 0) {
           clearInterval(timer);
           document.getElementById('bc-countdown').innerHTML = 'Reserve time expired!';
@@ -46,10 +55,18 @@
         let seconds = Math.floor((distance % _minute) / _second);
 
         document.getElementById('bc-countdown').innerHTML = 'Reserve time: ';
-        document.getElementById('bc-countdown').innerHTML += days + ':';
-        document.getElementById('bc-countdown').innerHTML += hours + ':';
-        document.getElementById('bc-countdown').innerHTML += minutes + ':';
-        document.getElementById('bc-countdown').innerHTML += seconds;
+        document.getElementById('bc-countdown').innerHTML += days > 9
+          ? days + ':'
+          : '0' + days + ':';
+        document.getElementById('bc-countdown').innerHTML += hours > 9
+          ? hours + ':'
+          : '0' + hours + ':';
+        document.getElementById('bc-countdown').innerHTML += minutes > 9
+          ? minutes + ':'
+          : '0' + minutes + ':';
+        document.getElementById('bc-countdown').innerHTML += seconds > 9
+          ? seconds
+          : '0' + seconds;
       }
 
       timer = setInterval(() => showRemaining(endDate), 1000);

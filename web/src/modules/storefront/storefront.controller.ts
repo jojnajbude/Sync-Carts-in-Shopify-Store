@@ -21,8 +21,8 @@ export class StorefrontController {
   }
 
   @Get('time')
-  async getReserveTime(@Query() query: { item: string }, @Res() res: Response) {
-    const time = await this.storefrontService.getReserveTime(query.item)
+  async getReserveTime(@Query() query: { item: string, cart: string, user: string, shop: string }, @Res() res: Response) {
+    const time = await this.storefrontService.getReserveTime(query.item, query.cart, query.user, query.shop)
 
     time ? res.status(200).send(time) : res.status(404).send(false);
   }

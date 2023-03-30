@@ -25,7 +25,32 @@ export default function CartsTable() {
         if (isLoading) {
           const result = await fetch('/api/carts/all')
           const cartData = await result.json()
-          setCarts(cartData)
+          const table: any[] = []
+
+          for (const item of cartData) {
+            const index = table.findIndex((cart) => cart.id === item.cart_id)
+            if (index !== -1) {
+              table[index].items.push(item)
+            } else {
+              table.push({
+                id: item.cart_id,
+                customer_name: item.name,
+                items: [item],
+              })
+            }
+          }
+
+          for (const cart of table) {
+            // eslint-disable-next-line prettier/prettier
+            const qty = cart.items.reduce((acc: any, cur: any) => acc + Number(cur.qty), 0)
+
+            // const shortestDate = cart.items.sort(
+            //   (a: any, b: any) => a.createdAt.getTime() - b.createdAt.getTime()
+            // )[0]
+            // console.log(shortestDate)
+          }
+
+          setCarts(table)
           setIsLoading(false)
         }
       } catch (error) {
@@ -90,35 +115,35 @@ export default function CartsTable() {
     }
   }
 
-  const handleSort = useCallback(
-    (index: number, direction: 'ascending' | 'descending') =>
-      setCarts(sortCarts(carts, index, direction)),
-    [carts]
-  )
+  // const handleSort = useCallback(
+  //   (index: number, direction: 'ascending' | 'descending') =>
+  //     setCarts(sortCarts(carts, index, direction)),
+  //   [carts]
+  // )
 
-  function sortCarts(
-    carts: Cart[],
-    index: number,
-    direction: 'ascending' | 'descending'
-  ): Cart[] {
-    return carts.sort((rowA: Cart, rowB: Cart) => {
-      const key = Object.keys(rowA)[index]
-      const amountA = rowA[key]
-      const amountB = rowB[key]
+  // function sortCarts(
+  //   carts: Cart[],
+  //   index: number,
+  //   direction: 'ascending' | 'descending'
+  // ): Cart[] {
+  //   return carts.sort((rowA: Cart, rowB: Cart) => {
+  //     const key = Object.keys(rowA)[index]
+  //     const amountA = rowA[key]
+  //     const amountB = rowB[key]
 
-      console.log(amountA, amountB)
+  //     console.log(amountA, amountB)
 
-      if (typeof amountA === 'number') {
-        return direction === 'descending'
-          ? amountB - amountA
-          : amountA - amountB
-      } else {
-        return direction === 'descending'
-          ? amountB.localeCompare(amountA)
-          : amountA.localeCompare(amountB)
-      }
-    })
-  }
+  //     if (typeof amountA === 'number') {
+  //       return direction === 'descending'
+  //         ? amountB - amountA
+  //         : amountA - amountB
+  //     } else {
+  //       return direction === 'descending'
+  //         ? amountB.localeCompare(amountA)
+  //         : amountA.localeCompare(amountB)
+  //     }
+  //   })
+  // }
 
   return (
     <Layout>
@@ -132,7 +157,7 @@ export default function CartsTable() {
               selectedItemsCount={
                 allResourcesSelected ? 'All' : selectedResources.length
               }
-              onSort={handleSort}
+              // onSort={handleSort}
               defaultSortDirection="descending"
               onSelectionChange={handleSelectionChange}
               hasMoreItems

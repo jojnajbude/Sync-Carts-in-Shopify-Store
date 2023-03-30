@@ -1,14 +1,13 @@
 const APP_URL = 'https://better-carts.dev-test.pro';
 
 (function initializeBetterCarts() {
-  initializeObserver();
-  
-  // if (window.customer) {
-  //   swapAddToCartBtn();
-  //   const cookie = getCartCookie();
+  if (window.customer) {
+    initializeObserver();
+    swapAddToCartBtn();
+    const cookie = getCartCookie();
     
-  //   getCart(window.customer.id, window.customer.shop, cookie);
-  // }
+    updateData(window.customer.id, window.customer.shop, cookie);
+  }
 })()
 
 function initializeObserver() {
@@ -37,10 +36,10 @@ function getCartCookie() {
   return cookie;
 }
 
-async function getCart(id, shop, cart_id) {
-  const cart = await fetch(`${APP_URL}/storefront/update?user_id=${id}&shop_id=${shop}&cart_id=${cart_id}`)
+async function updateData(id, shop, cart_id) {
+  const data = await fetch(`${APP_URL}/storefront/update?user_id=${id}&shop_id=${shop}&cart_id=${cart_id}`);
   // ---------------------------------------
-  console.log(cart)
+  console.log(data)
   // ---------------------------------------
 }
 

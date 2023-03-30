@@ -1,29 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import shopify from "../../utils/shopify.js";
-import { Shop } from "../shops/shop.entity.js";
-import { Cart } from "./cart.entity.js";
+import { DataSource } from "typeorm";
+import { getAllCarts } from "../../constants/query.js";
 
 @Injectable()
 export class CartService {
-  constructor(@InjectRepository(Shop) private shopRepository: Repository<Shop>, @InjectRepository(Cart) private cartRepository: Repository<Cart>) {}
+  constructor(private dataSource: DataSource) {}
 
   async getShopCarts(session: Object) {
     try {
-      const [shopifyShopData] = await shopify.api.rest.Shop.all({ session })
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
 
-      const [customer] = await shopify.api.rest.Customer.all({
-        session: session,
-      })
-      
-      const shop = await this.shopRepository.findOneBy({ shopify_id: shopifyShopData.id })
+      const data = await queryRunner.query(getAllCarts);
 
-      if (shop) {
-        const carts = await this.cartRepository.findBy({ shop_id: shop.id });
-
-        return carts
-      }
+      return data;
     } catch (err) {
       console.log(err)
     }
