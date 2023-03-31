@@ -21,6 +21,6 @@ export class Cart {
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 
-  @Column()
+  @Column({nullable: true})
   cart_token: string;
 }

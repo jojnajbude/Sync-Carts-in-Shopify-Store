@@ -13,5 +13,5 @@ export class Shop {
   shopify_id: number;
 
   @Column({ type: 'varchar', nullable: true })
-  session: string | null;
+  session: string;
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Layout,
   IndexTable,
@@ -8,24 +8,25 @@ import {
   Badge,
 } from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../../hooks'
-// import { useGetShopCartsQuery } from '../../services/api'
 
 import { Cart } from '../../types/cart'
+import { Item } from '../../types/items'
 
 export default function CartsTable() {
   const [carts, setCarts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useAuthenticatedFetch()
-  // const carts = useGetShopCartsQuery()
-  console.log(carts, isLoading)
 
   useEffect(() => {
-    const getShop = async () => {
+    let ignore = false
+
+    const getCarts = async () => {
       try {
         if (isLoading) {
           const result = await fetch('/api/carts/all')
           const cartData = await result.json()
-          const table: any[] = []
+          const table: Cart[] = []
+          console.log(cartData)
 
           for (const item of cartData) {
             const index = table.findIndex((cart) => cart.id === item.cart_id)
@@ -36,35 +37,60 @@ export default function CartsTable() {
                 id: item.cart_id,
                 customer_name: item.name,
                 items: [item],
+                total: 0,
+                reserved_indicator: '',
+                reservation_time: undefined,
+                qty: 0,
               })
             }
           }
 
           for (const cart of table) {
-            // eslint-disable-next-line prettier/prettier
-            const qty = cart.items.reduce((acc: any, cur: any) => acc + Number(cur.qty), 0)
+            if (cart.items.every((item) => item.createdAt)) {
+              cart.reserved_indicator = 'all'
+            } else if (cart.items.find((item) => item.createdAt)) {
+              cart.reserved_indicator = 'part'
+            } else {
+              cart.reserved_indicator = 'no'
+            }
 
-            const shortestDate = cart.items.sort((a: any, b: any) => {
+            const total = cart.items.reduce(
+              (acc: number, cur: Item) =>
+                acc + Number(cur.qty) * Number(cur.price),
+              0
+            )
+
+            const qty = cart.items.reduce(
+              (acc: number, cur: Item) => acc + Number(cur.qty),
+              0
+            )
+
+            const shortestDate = cart.items.sort((a: Item, b: Item) => {
               const dateA = new Date(a.createdAt)
               const dateB = new Date(b.createdAt)
               return dateA.getTime() - dateB.getTime()
             })[0].createdAt
 
             cart.qty = qty
+            cart.total = total
             cart.reservation_time = shortestDate
           }
 
-          console.log(table)
-
-          setCarts(table)
-          setIsLoading(false)
+          if (!ignore) {
+            setCarts(table)
+            setIsLoading(false)
+          }
         }
       } catch (error) {
         console.log(error)
       }
     }
 
-    getShop()
+    getCarts()
+
+    return () => {
+      ignore = true
+    }
   }, [carts, isLoading])
 
   const resourceName = {
@@ -203,7 +229,12 @@ export default function CartsTable() {
                       </Text>
                     </IndexTable.Cell>
                     <IndexTable.Cell>{customer_name}</IndexTable.Cell>
-                    <IndexTable.Cell>{cartTotal}</IndexTable.Cell>
+                    <IndexTable.Cell>
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                      }).format(cartTotal)}
+                    </IndexTable.Cell>
                     <IndexTable.Cell>
                       {createBadge(reserved_indicator)}
                     </IndexTable.Cell>

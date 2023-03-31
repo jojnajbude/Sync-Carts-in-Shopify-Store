@@ -12,7 +12,7 @@ export class Item {
   @Column({ type: 'bigint' })
   qty: number;
 
-  @Column()
+  @Column({ nullable: true })
   cart_id: number;
 
   @ManyToOne((type) => Cart)
@@ -24,4 +24,7 @@ export class Item {
 
   @Column({ default: 'reserved' })
   status: string;
+
+  @Column()
+  price: string;
 }

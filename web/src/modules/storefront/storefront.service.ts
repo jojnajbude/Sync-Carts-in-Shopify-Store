@@ -36,8 +36,11 @@ export class StorefrontService {
         let cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
 
         if (!cart) {
-          // cart = await this.cartRepository.findOneBy({ customer_id: user.id, shop_id: shop?.id, cart_token: IsNull() });
-          cart = await this.cartRepository.save({ cart_token: cart_id, customer_id: user.id, shop_id: shop?.id });
+          cart = await this.cartRepository.findOneBy({ customer_id: user.id, shop_id: shop?.id, cart_token: IsNull() });
+
+          if (cart) {
+            cart = await this.cartRepository.save({ id: cart.id, cart_token: cart_id, customer_id: user.id, shop_id: shop?.id });
+          }
         }
 
         return cart;
@@ -50,43 +53,48 @@ export class StorefrontService {
     }
   }
 
-  // async handleCart(id: number, cart_id: string, shop_id: number, user_id: number) {
-  //   if (cart_id !== 'undefined') {
-  //     let cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
-
-  //     if (!cart) {
-  //       const existingCart = await this.cartRepository.findOneBy({ });
-
-  //       if (existingCart) {
-  //         cart = await this.cartRepository.save({ id: existingCart.id, cart_token: cart_id })
-  //       } else {
-  //         cart = await this.cartRepository.save({ customer_id: user_id, shop_id, cart_token: cart_id });
-  //       }
-  //     }
-
-  //     return cart
-  //   }
-    
-  //   return false
-  // }
-
   async addToCart(customer: number, shop: number, cart_token: string, variant: number, qty: number) {
-    if (cart_token === 'undefined') {
-    //   const handleAdding = await this.itemRepository.save({ variant_id: variant, qty });
-    //   const createdCart = await this.cartRepository.save({ });
+    const store = await this.shopsRepository.findOneBy({ shopify_id: shop })
 
-    //   return createdCart;
-    } else {
-      const cart = await this.cartRepository.findOneBy({ cart_token });
-      const item = await this.itemRepository.findOneBy({ variant_id: variant, cart_id: cart?.id });
+    if (store && store.session) {
+      const session = JSON.parse(store?.session);
 
-      if (item) {
-        const newQty = Number(item.qty) + Number(qty);
-        const handleAdding = await this.itemRepository.save({ id: item.id, variant_id: variant, qty: newQty, cart_id: cart?.id });
+      const variantRes = await shopify.api.rest.Variant.find({
+        session,
+        id: variant,
+      })
+
+      const [variantsReserved] = await this.itemRepository.query(
+        `select sum(qty)
+        from items
+        where variant_id = ${variant}
+        AND status = 'reserved'`
+      )
+
+      if (Number(variantsReserved.sum) >= variantRes.inventory_quantity) {
+        return 'All items reserved'
+      }
+
+      const price = variantRes.price;
+
+      if (cart_token === 'undefined') {
+        const user = await this.customerRepository.findOneBy({ shopify_user_id: customer })
+        const createdCart = await this.cartRepository.insert({ customer_id: user?.id, shop_id: store?.id });
+        const handleAdding = await this.itemRepository.save({ variant_id: variant, qty, cart_id: createdCart.raw[0].id, price });
+
         return handleAdding;
       } else {
-        const handleAdding = await this.itemRepository.save({ variant_id: variant, qty, cart_id: cart?.id });
-        return handleAdding;
+        const cart = await this.cartRepository.findOneBy({ cart_token });
+        const item = await this.itemRepository.findOneBy({ variant_id: variant, cart_id: cart?.id });
+
+        if (item) {
+          const newQty = Number(item.qty) + Number(qty);
+          const handleAdding = await this.itemRepository.save({ id: item.id, variant_id: variant, qty: newQty, cart_id: cart?.id, price });
+          return handleAdding;
+        } else {
+          const handleAdding = await this.itemRepository.save({ variant_id: variant, qty, cart_id: cart?.id, price });
+          return handleAdding;
+        }
       }
     }
   }
