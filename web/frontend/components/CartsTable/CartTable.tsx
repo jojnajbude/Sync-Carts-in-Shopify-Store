@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Layout,
   IndexTable,
@@ -12,9 +12,12 @@ import { useAuthenticatedFetch } from '../../hooks'
 import { Cart } from '../../types/cart'
 import { Item } from '../../types/items'
 
+type Sort = 'ascending' | 'descending'
+
 export default function CartsTable() {
   const [carts, setCarts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [sortDirection, setSortDirection] = useState<Sort>('descending')
   const fetch = useAuthenticatedFetch()
 
   useEffect(() => {
@@ -25,60 +28,67 @@ export default function CartsTable() {
         if (isLoading) {
           const result = await fetch('/api/carts/all')
           const cartData = await result.json()
-          const table: Cart[] = []
-          console.log(cartData)
 
-          for (const item of cartData) {
-            const index = table.findIndex((cart) => cart.id === item.cart_id)
-            if (index !== -1) {
-              table[index].items.push(item)
-            } else {
-              table.push({
-                id: item.cart_id,
-                customer_name: item.name,
-                items: [item],
-                total: 0,
-                reserved_indicator: '',
-                reservation_time: undefined,
-                qty: 0,
-              })
-            }
-          }
+          if (cartData.length) {
+            const table: Cart[] = []
 
-          for (const cart of table) {
-            if (cart.items.every((item) => item.createdAt)) {
-              cart.reserved_indicator = 'all'
-            } else if (cart.items.find((item) => item.createdAt)) {
-              cart.reserved_indicator = 'part'
-            } else {
-              cart.reserved_indicator = 'no'
+            for (const item of cartData) {
+              const index = table.findIndex((cart) => cart.id === item.cart_id)
+              if (index !== -1) {
+                table[index].items.push(item)
+              } else {
+                table.push({
+                  id: item.cart_id,
+                  customer_name: item.name,
+                  total: 0,
+                  reserved_indicator: '',
+                  reservation_time: undefined,
+                  qty: 0,
+                  items: [item],
+                })
+              }
             }
 
-            const total = cart.items.reduce(
-              (acc: number, cur: Item) =>
-                acc + Number(cur.qty) * Number(cur.price),
-              0
-            )
+            for (const cart of table) {
+              if (cart.items.every((item) => item.createdAt)) {
+                cart.reserved_indicator = 'all'
+              } else if (cart.items.find((item) => item.createdAt)) {
+                cart.reserved_indicator = 'part'
+              } else {
+                cart.reserved_indicator = 'no'
+              }
 
-            const qty = cart.items.reduce(
-              (acc: number, cur: Item) => acc + Number(cur.qty),
-              0
-            )
+              const total = cart.items.reduce(
+                (acc: number, cur: Item) =>
+                  acc + Number(cur.qty) * Number(cur.price),
+                0
+              )
 
-            const shortestDate = cart.items.sort((a: Item, b: Item) => {
-              const dateA = new Date(a.createdAt)
-              const dateB = new Date(b.createdAt)
-              return dateA.getTime() - dateB.getTime()
-            })[0].createdAt
+              const qty = cart.items.reduce(
+                (acc: number, cur: Item) => acc + Number(cur.qty),
+                0
+              )
 
-            cart.qty = qty
-            cart.total = total
-            cart.reservation_time = shortestDate
-          }
+              const shortestDate = cart.items.sort((a: Item, b: Item) => {
+                const dateA = new Date(a.createdAt)
+                const dateB = new Date(b.createdAt)
+                return dateA.getTime() - dateB.getTime()
+              })[0].createdAt
 
-          if (!ignore) {
-            setCarts(table)
-            setIsLoading(false)
+              cart.qty = qty
+              cart.total = total
+              cart.reservation_time = shortestDate
+            }
+
+            if (!ignore) {
+              setCarts(table)
+              setIsLoading(false)
+            }
+          } else {
+            if (!ignore) {
+              setCarts(cartData)
+              setIsLoading(false)
+            }
           }
         }
       } catch (error) {
@@ -147,35 +157,49 @@ export default function CartsTable() {
     }
   }
 
-  // const handleSort = useCallback(
-  //   (index: number, direction: 'ascending' | 'descending') =>
-  //     setCarts(sortCarts(carts, index, direction)),
-  //   [carts]
-  // )
+  const isDate = (str: string) => {
+    const [y, M, d] = str.split(/[- : T Z]/)
 
-  // function sortCarts(
-  //   carts: Cart[],
-  //   index: number,
-  //   direction: 'ascending' | 'descending'
-  // ): Cart[] {
-  //   return carts.sort((rowA: Cart, rowB: Cart) => {
-  //     const key = Object.keys(rowA)[index]
-  //     const amountA = rowA[key]
-  //     const amountB = rowB[key]
+    return y && Number(M) <= 12 && Number(d) <= 31 ? true : false
+  }
 
-  //     console.log(amountA, amountB)
+  function sortCarts(
+    carts: Cart[],
+    index: number,
+    direction: 'ascending' | 'descending'
+  ): Cart[] {
+    return [...carts].sort((rowA: Cart, rowB: Cart) => {
+      const amountA = rowA[Object.keys(rowA)[index] as keyof Cart]
+      const amountB = rowB[Object.keys(rowB)[index] as keyof Cart]
 
-  //     if (typeof amountA === 'number') {
-  //       return direction === 'descending'
-  //         ? amountB - amountA
-  //         : amountA - amountB
-  //     } else {
-  //       return direction === 'descending'
-  //         ? amountB.localeCompare(amountA)
-  //         : amountA.localeCompare(amountB)
-  //     }
-  //   })
-  // }
+      if (typeof amountA === 'number' && typeof amountB === 'number') {
+        return direction === 'descending'
+          ? amountB - amountA
+          : amountA - amountB
+      } else if (typeof amountA === 'string' && typeof amountB === 'string') {
+        if (isDate(amountA)) {
+          return direction === 'descending'
+            ? new Date(amountB).getTime() - new Date(amountA).getTime()
+            : new Date(amountA).getTime() - new Date(amountB).getTime()
+        }
+
+        return direction === 'descending'
+          ? amountB.localeCompare(amountA)
+          : amountA.localeCompare(amountB)
+      }
+    })
+  }
+
+  const handleSort = useCallback(
+    (index: number, direction: 'ascending' | 'descending') => {
+      const sortDirection =
+        direction === 'descending' ? 'ascending' : 'descending'
+
+      setCarts(sortCarts(carts, index, direction))
+      setSortDirection(sortDirection)
+    },
+    [carts]
+  )
 
   return (
     <Layout>
@@ -183,19 +207,19 @@ export default function CartsTable() {
         <AlphaCard>
           {
             <IndexTable
-              loading={carts.length ? false : true}
+              onSort={handleSort}
+              loading={isLoading}
               resourceName={resourceName}
               itemCount={carts.length}
+              defaultSortDirection={sortDirection}
               selectedItemsCount={
                 allResourcesSelected ? 'All' : selectedResources.length
               }
-              // onSort={handleSort}
-              defaultSortDirection="descending"
               onSelectionChange={handleSelectionChange}
               hasMoreItems
               bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
-              sortable={[true, true, true, true, true, true, true, true]}
+              sortable={[true, true, true, true, true, true]}
               headings={[
                 { title: 'Cart ID' },
                 { title: 'Customer' },

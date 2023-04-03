@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Post, Query, Res } from "@nestjs/common";
-import { Response } from "express";
+import { Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
+import { Response, Request } from "express";
 import { StorefrontService } from "./storefront.service.js";
 
 @Controller('/storefront')
@@ -7,17 +7,59 @@ export class StorefrontController {
   constructor (private storefrontService: StorefrontService) {}
 
   @Get('update')
-  async updateData(@Query() query: { user_id: number, shop_id: number, cart_id: string }, @Res() res: Response) {
-    const cart = await this.storefrontService.getData(query.user_id, query.shop_id, query.cart_id);
+  async updateData(@Query() query: { cart_id: string }, @Res() res: Response) {
+    const cartItems = await this.storefrontService.getData(query.cart_id);
 
-    cart ? res.status(200).send(cart) : res.status(500).send('Server error');
+    cartItems ? res.status(200).send(cartItems) : res.status(500).send('Server error');
   }
 
   @Get('cart/add')
-  async addToCart(@Query() query: { customer: number, shop: number, cart: string, variant: number, qty: number }, @Res() res: Response ) {
-    const req = await this.storefrontService.addToCart(query.customer, query.shop, query.cart, query.variant, query.qty); 
+  async handleAdding(@Query() query: { shop: number, variant: number, qty: number }, @Res() res: Response ) {
+    const result = await this.storefrontService.handleAdding(query.shop, query.variant, query.qty); 
 
-    req ? res.status(200).send(req) : res.status(500).send('Server error');
+    result ? res.status(200).send(result) : res.status(500).send('Server error');
+  }
+
+  @Post('cart/create')
+  async createCart(@Req() req: Request, @Res() res: Response) {
+    const shopDomain = req.get('x-shopify-shop-domain');
+
+    if (shopDomain) {
+      const cart = await this.storefrontService.createCart(shopDomain, req.body);
+      cart ? res.status(200).send(cart) : res.status(500).send('Server error');
+    } else {
+      res.status(404).send('Unable to identify the store');
+    }
+  }
+
+  @Post('cart/update')
+  async updateCart(@Req() req: Request, @Res() res: Response) {
+    const shopDomain = req.get('x-shopify-shop-domain');
+
+    if (shopDomain) {
+      const changedItems = await this.storefrontService.updateCart(req.body);
+      changedItems ? res.status(200).send(changedItems) : res.status(500).send('Server error');
+    } else {
+      res.status(404).send('Unable to identify the store');
+    }
+  }
+
+  @Post('customer/create')
+  async createCustomer(@Req() req: Request, @Res() res: Response) {
+    const shopDomain = req.get('x-shopify-shop-domain');
+
+    if (shopDomain) {
+      const user = await this.storefrontService.createUser(shopDomain, req.body);
+      user ? res.status(200).send(user) : res.status(500).send('Server error');
+    } else {
+      res.status(404).send('Unable to identify the store');
+    }
+  }
+
+  @Post('customer/update')
+  async updateCustomer(@Req() req: Request, @Res() res: Response) {
+      const user = await this.storefrontService.updateUser( req.body);
+      user ? res.status(200).send(user) : res.status(500).send('Server error');
   }
 
   @Get('time')

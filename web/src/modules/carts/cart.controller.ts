@@ -12,6 +12,6 @@ export class CartController {
 
     const carts = await this.cartService.getShopCarts(session)
 
-    res.status(200).send(carts)
+    carts ? res.status(200).send(carts) : res.status(404).send('Not found')
   }
 }

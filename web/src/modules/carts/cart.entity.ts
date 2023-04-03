@@ -7,7 +7,7 @@ export class Cart {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true})
   customer_id: number;
 
   @ManyToOne((type) => Customer)

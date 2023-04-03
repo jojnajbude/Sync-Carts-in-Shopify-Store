@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { IsNull, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
@@ -16,44 +16,16 @@ export class StorefrontService {
     @InjectRepository(Item) private itemRepository: Repository<Item>
   ) {}
 
-  async getData(user_id: number, shop_id: number, cart_id: string) {
-    try {
-      let user = await this.customerRepository.findOneBy({ shopify_user_id: user_id });
-      const shop = await this.shopsRepository.findOneBy({ shopify_id: shop_id });
-      
-      if (!user) {
-        // const session = JSON.parse(shop.session)
+  async getData(cart_id: string) {
+    const cartItems = await this.itemRepository.createQueryBuilder('items')
+      .leftJoin('items.cart', 'carts')
+      .where('carts.cart_token = :token', { token: cart_id })
+      .getMany();
 
-        //     const data = await shopify.api.rest.Customer.find({
-        //       session,
-        //       id: user_id
-        //     })``
-
-        user = await this.customerRepository.save({ shopify_user_id: user_id, shop_id: shop?.id });
-      }
-
-      if (cart_id !== 'undefined') {
-        let cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
-
-        if (!cart) {
-          cart = await this.cartRepository.findOneBy({ customer_id: user.id, shop_id: shop?.id, cart_token: IsNull() });
-
-          if (cart) {
-            cart = await this.cartRepository.save({ id: cart.id, cart_token: cart_id, customer_id: user.id, shop_id: shop?.id });
-          }
-        }
-
-        return cart;
-      }
-
-      return false;
-    } catch (err) {
-      console.log(err);
-      return false
-    }
+    return cartItems;
   }
 
-  async addToCart(customer: number, shop: number, cart_token: string, variant: number, qty: number) {
+  async handleAdding(shop: number, variant: number, qty: number) {
     const store = await this.shopsRepository.findOneBy({ shopify_id: shop })
 
     if (store && store.session) {
@@ -62,41 +34,76 @@ export class StorefrontService {
       const variantRes = await shopify.api.rest.Variant.find({
         session,
         id: variant,
-      })
+      });
 
       const [variantsReserved] = await this.itemRepository.query(
         `select sum(qty)
         from items
         where variant_id = ${variant}
         AND status = 'reserved'`
-      )
+      );
 
-      if (Number(variantsReserved.sum) >= variantRes.inventory_quantity) {
-        return 'All items reserved'
+      if (Number(variantsReserved.sum) + Number(qty) >= variantRes.inventory_quantity) {
+        return 'All items reserved';
       }
 
-      const price = variantRes.price;
+      return 'Can reserve';
+    }
+  }
 
-      if (cart_token === 'undefined') {
-        const user = await this.customerRepository.findOneBy({ shopify_user_id: customer })
-        const createdCart = await this.cartRepository.insert({ customer_id: user?.id, shop_id: store?.id });
-        const handleAdding = await this.itemRepository.save({ variant_id: variant, qty, cart_id: createdCart.raw[0].id, price });
+  async createCart(shop: string, cartData: any) {
+    const store = await this.shopsRepository.findOneBy({ domain: shop });
+    const cart = await this.cartRepository.save({ cart_token: cartData.token, shop_id: store?.id });
 
-        return handleAdding;
-      } else {
-        const cart = await this.cartRepository.findOneBy({ cart_token });
-        const item = await this.itemRepository.findOneBy({ variant_id: variant, cart_id: cart?.id });
+    return cart;
+  }
 
-        if (item) {
-          const newQty = Number(item.qty) + Number(qty);
-          const handleAdding = await this.itemRepository.save({ id: item.id, variant_id: variant, qty: newQty, cart_id: cart?.id, price });
-          return handleAdding;
-        } else {
-          const handleAdding = await this.itemRepository.save({ variant_id: variant, qty, cart_id: cart?.id, price });
-          return handleAdding;
-        }
+  async updateCart(cartData: any) {
+    const items = await this.itemRepository.createQueryBuilder('items')
+      .leftJoin('items.cart', 'carts')
+      .where('carts.cart_token = :token', { token: cartData.token })
+      .getMany();
+
+    const updatedItems = [];
+
+    if (items.length > cartData.line_items.length) {
+      const deletedItem = items.find(item => !cartData.line_items.find((line_item: { id: number; }) => line_item.id === Number(item.variant_id)))
+
+      if (deletedItem) {
+        const removeItem = await this.itemRepository.remove(deletedItem)
+
+        return removeItem
       }
     }
+
+    for (const line_item of cartData.line_items) {
+      const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
+
+      if (item && Number(item.qty) !== line_item.quantity) {
+        updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
+      } else if (!item) {
+        const cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
+        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price }))
+      }
+    }
+
+    return updatedItems;
+  }
+
+  async createUser(shop: string, user: any) {
+    const shopData = await this.shopsRepository.findOneBy({ domain: shop });
+    const customer = await this.customerRepository.save({ shopify_user_id: user.id, shop_id: shopData?.id });
+
+    return customer;
+  }
+
+  async updateUser(user: any) {
+    const customer = await this.customerRepository.findOneBy({ shopify_user_id: user.id });
+
+    // logic of updating name or email or phone
+    // add when receive access
+
+    return customer
   }
 
   async getReserveTime(variant: string, cart_token: string, user: string, shop: string) {

@@ -6,7 +6,9 @@ const APP_URL = 'https://better-carts.dev-test.pro';
     swapAddToCartBtn();
     const cookie = getCartCookie();
     
-    updateData(window.customer.id, window.customer.shop, cookie);
+    if (cookie) {
+      updateData(window.customer.id, window.customer.shop, cookie);
+    }
   }
 })()
 
@@ -37,7 +39,7 @@ function getCartCookie() {
 }
 
 async function updateData(id, shop, cart_id) {
-  const data = await fetch(`${APP_URL}/storefront/update?user_id=${id}&shop_id=${shop}&cart_id=${cart_id}`);
+  const data = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}`);
   // ---------------------------------------
   console.log(data)
   // ---------------------------------------
@@ -67,7 +69,7 @@ async function addToCart() {
   const qty = document.querySelector('input[name="quantity"]').value;
   const cart = getCartCookie();
 
-  const addCart = await fetch(`${APP_URL}/storefront/cart/add?customer=${window.customer.id}&shop=${window.customer.shop}&cart=${cart}&variant=${variantId}&qty=${qty}`)
+  const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.customer.shop}&variant=${variantId}&qty=${qty}`)
   const resText = await addCart.text();
 
   if (resText === 'All items reserved') {

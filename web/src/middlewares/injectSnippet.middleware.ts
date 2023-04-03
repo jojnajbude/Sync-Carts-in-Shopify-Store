@@ -9,7 +9,6 @@ export class injectSnippet implements NestMiddleware {
   constructor() {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    console.log('works')
     const session = res.locals.shopify.session;
 
     const snippet = fs.readFileSync(path.resolve(process.cwd(), '../extensions/better-carts/snippets/reserve-timer.liquid')).toString('utf8');
