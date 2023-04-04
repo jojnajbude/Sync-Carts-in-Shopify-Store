@@ -1,22 +1,22 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { BaseQueryFn } from '@reduxjs/toolkit/query/react'
-import { useAuthenticatedFetch } from '../hooks'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn } from '@reduxjs/toolkit/query/react';
+import { useAuthenticatedFetch } from '../hooks';
 
 interface Cart {
-  id: number
-  customer_id: number
-  qty: number
-  products: any
-  state: string
-  total: number
-  customer_name: string
-  email: string
-  reserved_indicator: string
-  shop_id: number
-  reservation_time: any
+  id: number;
+  customer_id: number;
+  qty: number;
+  products: any;
+  state: string;
+  total: number;
+  customer_name: string;
+  email: string;
+  reserved_indicator: string;
+  shop_id: number;
+  reservation_time: any;
 }
 
-type CartsResponse = Cart[]
+type CartsResponse = Cart[];
 
 // const authenticatedBaseQuery =
 //   ({ baseUrl }: { baseUrl: string } = { baseUrl: '' }): BaseQueryFn =>
@@ -47,6 +47,6 @@ export const api = createApi({
       }),
     }),
   }),
-})
+});
 
-export const { useGetShopCartsQuery } = api
+export const { useGetShopCartsQuery } = api;

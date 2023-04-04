@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Item } from "../items/item.entity.js";
 import { shopifySession } from "../../types/session.js";
 import { Shop } from "../shops/shop.entity.js";
@@ -42,5 +42,18 @@ export class CartService {
     } catch (err) {
       console.log(err)
     }
+  }
+
+  async unreserveItems(ids: number[]) {
+    const updateItems = await this.itemRepository.update({ cart_id: In(ids)}, { status: 'unreserved' })
+
+    return updateItems.affected
+  }
+
+  async removeItems(ids: number[]) {
+    const removedItems = await this.itemRepository.delete({ cart_id: In(ids)})
+    console.log(removedItems)
+
+    return removedItems.affected
   }
 }

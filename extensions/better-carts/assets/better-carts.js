@@ -39,7 +39,7 @@ function getCartCookie() {
 }
 
 async function updateData(id, shop, cart_id) {
-  const data = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}`);
+  const data = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}`);
   // ---------------------------------------
   console.log(data)
   // ---------------------------------------
@@ -104,42 +104,45 @@ class BetterCartsTimer extends HTMLElement {
     const shopId = window.customer.shop;
     const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
 
-    const reservationDate = await fetch(`https://better-carts.dev-test.pro/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
-    const date = new Date(await reservationDate.json());
-    const endDate = new Date(date).addHours(24);
+    const reservationDate = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
+    
+    if (reservationDate) {
+      const date = new Date(await reservationDate.json());
+      const endDate = new Date(date).addHours(24);
 
-    let _second = 1000;
-    let _minute = _second * 60;
-    let _hour = _minute * 60;
-    let _day = _hour * 24;
-    let timer;
+      let _second = 1000;
+      let _minute = _second * 60;
+      let _hour = _minute * 60;
+      let _day = _hour * 24;
+      let timer;
 
-    function showRemaining(endDate) {
-      let now = new Date();
-      let distance = endDate - now;
+      function showRemaining(endDate) {
+        let now = new Date();
+        let distance = endDate - now;
 
-      const text = document.getElementById(`bc-countdown-${variantId}`);
+        const text = document.getElementById(`bc-countdown-${variantId}`);
 
-      if (distance < 0) {
-        clearInterval(timer);
-        text.innerHTML = 'Reserve time expired!';
+        if (distance < 0) {
+          clearInterval(timer);
+          text.innerHTML = 'Reserve time expired!';
 
-        return;
+          return;
+        }
+
+        let days = Math.floor(distance / _day);
+        let hours = Math.floor((distance % _day) / _hour);
+        let minutes = Math.floor((distance % _hour) / _minute);
+        let seconds = Math.floor((distance % _minute) / _second);
+
+        text.innerHTML = 'Reserve time: ';
+        text.innerHTML += days > 9 ? days + ':' : '0' + days + ':';
+        text.innerHTML += hours > 9 ? hours + ':' : '0' + hours + ':';
+        text.innerHTML += minutes > 9 ? minutes + ':' : '0' + minutes + ':';
+        text.innerHTML += seconds > 9 ? seconds : '0' + seconds;
       }
 
-      let days = Math.floor(distance / _day);
-      let hours = Math.floor((distance % _day) / _hour);
-      let minutes = Math.floor((distance % _hour) / _minute);
-      let seconds = Math.floor((distance % _minute) / _second);
-
-      text.innerHTML = 'Reserve time: ';
-      text.innerHTML += days > 9 ? days + ':' : '0' + days + ':';
-      text.innerHTML += hours > 9 ? hours + ':' : '0' + hours + ':';
-      text.innerHTML += minutes > 9 ? minutes + ':' : '0' + minutes + ':';
-      text.innerHTML += seconds > 9 ? seconds : '0' + seconds;
+      timer = setInterval(() => showRemaining(endDate), 1000);
     }
-
-    timer = setInterval(() => showRemaining(endDate), 1000);
   }
 }
 

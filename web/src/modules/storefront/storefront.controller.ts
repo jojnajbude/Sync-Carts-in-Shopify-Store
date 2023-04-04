@@ -7,8 +7,8 @@ export class StorefrontController {
   constructor (private storefrontService: StorefrontService) {}
 
   @Get('update')
-  async updateData(@Query() query: { cart_id: string }, @Res() res: Response) {
-    const cartItems = await this.storefrontService.getData(query.cart_id);
+  async updateData(@Query() query: { cart_id: string, customer: string }, @Res() res: Response) {
+    const cartItems = await this.storefrontService.getData(query.cart_id, query.customer);
 
     cartItems ? res.status(200).send(cartItems) : res.status(500).send('Server error');
   }
@@ -37,7 +37,7 @@ export class StorefrontController {
     const shopDomain = req.get('x-shopify-shop-domain');
 
     if (shopDomain) {
-      const changedItems = await this.storefrontService.updateCart(req.body);
+      const changedItems = await this.storefrontService.updateCart(req.body, shopDomain);
       changedItems ? res.status(200).send(changedItems) : res.status(500).send('Server error');
     } else {
       res.status(404).send('Unable to identify the store');

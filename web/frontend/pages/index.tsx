@@ -7,12 +7,12 @@ import {
   Stack,
   Link,
   Heading,
-} from '@shopify/polaris'
-import { TitleBar } from '@shopify/app-bridge-react'
+} from '@shopify/polaris';
+import { TitleBar } from '@shopify/app-bridge-react';
 
-import { trophyImage } from '../assets'
+import { trophyImage } from '../assets';
 
-import { ProductsCard } from '../components'
+import { ProductsCard } from '../components';
 
 export default function HomePage() {
   return (
@@ -82,5 +82,5 @@ export default function HomePage() {
         </Layout.Section>
       </Layout>
     </Page>
-  )
+  );
 }

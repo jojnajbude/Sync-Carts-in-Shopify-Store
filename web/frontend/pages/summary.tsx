@@ -1,5 +1,5 @@
-import { Page, Button } from '@shopify/polaris'
-import CartsTable from '../components/CartsTable/CartTable'
+import { Page, Button } from '@shopify/polaris';
+import CartsTable from '../components/CartsTable/CartTable';
 
 export default function cartsSummary() {
   return (
@@ -10,5 +10,5 @@ export default function cartsSummary() {
     >
       <CartsTable></CartsTable>
     </Page>
-  )
+  );
 }

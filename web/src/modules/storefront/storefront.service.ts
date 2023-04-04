@@ -16,7 +16,16 @@ export class StorefrontService {
     @InjectRepository(Item) private itemRepository: Repository<Item>
   ) {}
 
-  async getData(cart_id: string) {
+  async getData(cart_id: string, customer_id: string) {
+    if (customer_id !== 'undefined') {
+      const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+      const user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) })
+
+      if(cart?.customer_id !== user?.id) {
+        await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
+      }
+    }
+
     const cartItems = await this.itemRepository.createQueryBuilder('items')
       .leftJoin('items.cart', 'carts')
       .where('carts.cart_token = :token', { token: cart_id })
@@ -58,7 +67,13 @@ export class StorefrontService {
     return cart;
   }
 
-  async updateCart(cartData: any) {
+  async updateCart(cartData: any, shop: string) {
+    let cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
+
+    if (!cart) {
+       cart = await this.createCart(shop, cartData)
+    }
+
     const items = await this.itemRepository.createQueryBuilder('items')
       .leftJoin('items.cart', 'carts')
       .where('carts.cart_token = :token', { token: cartData.token })
@@ -82,8 +97,7 @@ export class StorefrontService {
       if (item && Number(item.qty) !== line_item.quantity) {
         updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
       } else if (!item) {
-        const cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
-        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price }))
+        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price, status: cart.customer_id ? 'reserved' : 'unreserved' }))
       }
     }
 
@@ -110,6 +124,6 @@ export class StorefrontService {
     const cart = await this.cartRepository.findOneBy({ cart_token: cart_token });
     const cartItem = await this.itemRepository.findOneBy({ variant_id: Number(variant), cart_id: cart?.id });
 
-    return cartItem?.createdAt;
+    return cartItem?.status === 'reserved' ? cartItem?.createdAt : false;
   }
 }

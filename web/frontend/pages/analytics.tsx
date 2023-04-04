@@ -1,5 +1,5 @@
-import { LegacyCard, EmptyState } from '@shopify/polaris'
-import React from 'react'
+import { LegacyCard, EmptyState } from '@shopify/polaris';
+import React from 'react';
 
 export default function EmptyStateExample() {
   return (
@@ -11,5 +11,5 @@ export default function EmptyStateExample() {
         <p>Coming soon</p>
       </EmptyState>
     </LegacyCard>
-  )
+  );
 }

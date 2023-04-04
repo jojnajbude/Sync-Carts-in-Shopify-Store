@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react';
 import {
   Layout,
   IndexTable,
@@ -6,36 +6,40 @@ import {
   Text,
   AlphaCard,
   Badge,
-} from '@shopify/polaris'
-import { useAuthenticatedFetch } from '../../hooks'
+} from '@shopify/polaris';
+import { useAuthenticatedFetch } from '../../hooks';
 
-import { Cart } from '../../types/cart'
-import { Item } from '../../types/items'
+import { Cart } from '../../types/cart';
+import { Item } from '../../types/items';
+import PopupModal from '../PopupModal/PopupModal';
 
-type Sort = 'ascending' | 'descending'
+type Sort = 'ascending' | 'descending';
+type Modal = 'remove' | 'un-reserve' | 'expend';
 
 export default function CartsTable() {
-  const [carts, setCarts] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [sortDirection, setSortDirection] = useState<Sort>('descending')
-  const fetch = useAuthenticatedFetch()
+  const [carts, setCarts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sortDirection, setSortDirection] = useState<Sort>('descending');
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<Modal>('remove');
+  const fetch = useAuthenticatedFetch();
 
   useEffect(() => {
-    let ignore = false
+    let ignore = false;
 
     const getCarts = async () => {
       try {
         if (isLoading) {
-          const result = await fetch('/api/carts/all')
-          const cartData = await result.json()
+          const result = await fetch('/api/carts/all');
+          const cartData = await result.json();
 
           if (cartData.length) {
-            const table: Cart[] = []
+            const table: Cart[] = [];
 
             for (const item of cartData) {
-              const index = table.findIndex((cart) => cart.id === item.cart_id)
+              const index = table.findIndex((cart) => cart.id === item.cart_id);
               if (index !== -1) {
-                table[index].items.push(item)
+                table[index].items.push(item);
               } else {
                 table.push({
                   id: item.cart_id,
@@ -45,82 +49,84 @@ export default function CartsTable() {
                   reservation_time: undefined,
                   qty: 0,
                   items: [item],
-                })
+                });
               }
             }
 
             for (const cart of table) {
-              if (cart.items.every((item) => item.createdAt)) {
-                cart.reserved_indicator = 'all'
-              } else if (cart.items.find((item) => item.createdAt)) {
-                cart.reserved_indicator = 'part'
+              if (cart.items.every((item) => item.status === 'reserved')) {
+                cart.reserved_indicator = 'all';
+              } else if (
+                cart.items.find((item) => item.status === 'reserved')
+              ) {
+                cart.reserved_indicator = 'part';
               } else {
-                cart.reserved_indicator = 'no'
+                cart.reserved_indicator = 'no';
               }
 
               const total = cart.items.reduce(
                 (acc: number, cur: Item) =>
                   acc + Number(cur.qty) * Number(cur.price),
                 0
-              )
+              );
 
               const qty = cart.items.reduce(
                 (acc: number, cur: Item) => acc + Number(cur.qty),
                 0
-              )
+              );
 
               const shortestDate = cart.items.sort((a: Item, b: Item) => {
-                const dateA = new Date(a.createdAt)
-                const dateB = new Date(b.createdAt)
-                return dateA.getTime() - dateB.getTime()
-              })[0].createdAt
+                const dateA = new Date(a.createdAt);
+                const dateB = new Date(b.createdAt);
+                return dateA.getTime() - dateB.getTime();
+              })[0].createdAt;
 
-              cart.qty = qty
-              cart.total = total
-              cart.reservation_time = shortestDate
+              cart.qty = qty;
+              cart.total = total;
+              cart.reservation_time = new Date(shortestDate).toLocaleString();
             }
 
             if (!ignore) {
-              setCarts(table)
-              setIsLoading(false)
+              setCarts(table);
+              setIsLoading(false);
             }
           } else {
             if (!ignore) {
-              setCarts(cartData)
-              setIsLoading(false)
+              setCarts(cartData);
+              setIsLoading(false);
             }
           }
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    }
+    };
 
-    getCarts()
+    getCarts();
 
     return () => {
-      ignore = true
-    }
-  }, [carts, isLoading])
+      ignore = true;
+    };
+  }, [carts, isLoading]);
 
   const resourceName = {
     singular: 'cart',
     plural: 'carts',
-  }
+  };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(carts)
+    useIndexResourceState(carts);
 
   const promotedBulkActions = [
     {
-      content: 'Expend timers',
-      onAction: () => console.log('Todo: implement bulk edit'),
+      content: 'Expand timers',
+      onAction: () => openModal('expend'),
     },
     {
       content: 'Un-reserve all items',
-      onAction: () => console.log('Todo: implement bulk edit'),
+      onAction: () => openModal('un-reserve'),
     },
-  ]
+  ];
   const bulkActions = [
     {
       content: 'Send reminder',
@@ -128,9 +134,9 @@ export default function CartsTable() {
     },
     {
       content: 'Remove all items',
-      onAction: () => console.log('Todo: implement bulk remove tags'),
+      onAction: () => openModal('remove'),
     },
-  ]
+  ];
 
   const createBadge = (indicator: string) => {
     switch (true) {
@@ -139,67 +145,82 @@ export default function CartsTable() {
           <Badge status="success" progress="complete">
             All items reserved
           </Badge>
-        )
+        );
 
       case indicator === 'part':
         return (
           <Badge status="attention" progress="partiallyComplete">
             Partially reserved
           </Badge>
-        )
+        );
 
       case indicator === 'no':
         return (
           <Badge status="warning" progress="incomplete">
             No items reserved
           </Badge>
-        )
+        );
     }
-  }
+  };
 
-  const isDate = (str: string) => {
-    const [y, M, d] = str.split(/[- : T Z]/)
+  // const isDate = (str: string) => {
+  //   const [y, M, d] = str.split(/[- : T Z]/);
 
-    return y && Number(M) <= 12 && Number(d) <= 31 ? true : false
-  }
+  //   return y && Number(M) <= 12 && Number(d) <= 31 ? true : false;
+  // };
 
-  function sortCarts(
+  const sortCarts = (
     carts: Cart[],
     index: number,
     direction: 'ascending' | 'descending'
-  ): Cart[] {
+  ): Cart[] => {
     return [...carts].sort((rowA: Cart, rowB: Cart) => {
-      const amountA = rowA[Object.keys(rowA)[index] as keyof Cart]
-      const amountB = rowB[Object.keys(rowB)[index] as keyof Cart]
+      const amountA = rowA[Object.keys(rowA)[index] as keyof Cart];
+      const amountB = rowB[Object.keys(rowB)[index] as keyof Cart];
 
       if (typeof amountA === 'number' && typeof amountB === 'number') {
         return direction === 'descending'
           ? amountB - amountA
-          : amountA - amountB
+          : amountA - amountB;
       } else if (typeof amountA === 'string' && typeof amountB === 'string') {
-        if (isDate(amountA)) {
-          return direction === 'descending'
-            ? new Date(amountB).getTime() - new Date(amountA).getTime()
-            : new Date(amountA).getTime() - new Date(amountB).getTime()
-        }
+        // if (isDate(amountA)) {
+        //   return direction === 'descending'
+        //     ? new Date(amountB).getTime() - new Date(amountA).getTime()
+        //     : new Date(amountA).getTime() - new Date(amountB).getTime();
+        // }
 
         return direction === 'descending'
           ? amountB.localeCompare(amountA)
-          : amountA.localeCompare(amountB)
+          : amountA.localeCompare(amountB);
       }
-    })
-  }
+    });
+  };
 
   const handleSort = useCallback(
     (index: number, direction: 'ascending' | 'descending') => {
       const sortDirection =
-        direction === 'descending' ? 'ascending' : 'descending'
+        direction === 'descending' ? 'ascending' : 'descending';
 
-      setCarts(sortCarts(carts, index, direction))
-      setSortDirection(sortDirection)
+      setCarts(sortCarts(carts, index, direction));
+      setSortDirection(sortDirection);
     },
     [carts]
-  )
+  );
+
+  const openModal = (type: Modal) => {
+    setModalType(type);
+    setShowModal(true);
+  };
+
+  const createModal = () => {
+    return (
+      <PopupModal
+        type={modalType}
+        selectedRows={selectedResources}
+        setShowModal={setShowModal}
+      />
+    );
+  };
 
   return (
     <Layout>
@@ -269,8 +290,9 @@ export default function CartsTable() {
               )}
             </IndexTable>
           }
+          {showModal && createModal()}
         </AlphaCard>
       </Layout.Section>
     </Layout>
-  )
+  );
 }
