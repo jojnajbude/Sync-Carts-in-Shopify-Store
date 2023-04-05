@@ -1,4 +1,4 @@
-import { Page, Button } from '@shopify/polaris';
+import { Page, Button, Frame, FooterHelp } from '@shopify/polaris';
 import CartsTable from '../components/CartsTable/CartTable';
 
 export default function cartsSummary() {
@@ -8,7 +8,10 @@ export default function cartsSummary() {
       fullWidth
       primaryAction={<Button primary>Create new cart</Button>}
     >
-      <CartsTable></CartsTable>
+      <Frame>
+        <CartsTable></CartsTable>
+        <FooterHelp>Blake Rogers. All rights reserved.</FooterHelp>
+      </Frame>
     </Page>
   );
 }

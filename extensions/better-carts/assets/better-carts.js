@@ -106,7 +106,7 @@ class BetterCartsTimer extends HTMLElement {
 
     const reservationDate = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
     
-    if (reservationDate) {
+    if (reservationDate.ok) {
       const date = new Date(await reservationDate.json());
       const endDate = new Date(date).addHours(24);
 

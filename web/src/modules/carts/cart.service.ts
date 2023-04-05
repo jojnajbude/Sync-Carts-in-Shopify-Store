@@ -7,6 +7,16 @@ import { Shop } from "../shops/shop.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Cart } from "./cart.entity.js";
 
+type TableRow = {
+  id: any;
+  customer_name: any;
+  total: number;
+  reserved_indicator: string;
+  reservation_time: string;
+  qty: number;
+  items: any[];
+}
+
 @Injectable()
 export class CartService {
   constructor(
@@ -38,22 +48,119 @@ export class CartService {
         where shops.domain = '${session.shop}'`
       );
 
-      return carts;
+      const table = this.handleTable(carts);
+
+      return table;
     } catch (err) {
       console.log(err)
     }
   }
 
-  async unreserveItems(ids: number[]) {
-    const updateItems = await this.itemRepository.update({ cart_id: In(ids)}, { status: 'unreserved' })
+  async getSortedCarts(session: shopifySession, direction: 'ascending' | 'descending', index: string,) {
+    const table = await this.getShopCarts(session);
 
-    return updateItems.affected
+    if (table) {
+      const sortedTable = await this.sortCarts(table, Number(index), direction);
+      
+      return sortedTable;
+    }
+
+    return false
+  }
+
+  async expandTimers(ids: number[], time: string) {
+    const oldDates = await this.itemRepository.find({ where: { cart_id: In(ids) }});
+    
+    for (const item of oldDates) {
+      item.createdAt = new Date(item.createdAt.getTime() + Number(time));
+    }
+
+    const newTimers = await this.itemRepository.save(oldDates);
+    return newTimers
+  }
+
+  async unreserveItems(ids: number[]) {
+    const updateItems = await this.itemRepository.update({ cart_id: In(ids) }, { status: 'unreserved' })
+
+    return updateItems
   }
 
   async removeItems(ids: number[]) {
     const removedItems = await this.itemRepository.delete({ cart_id: In(ids)})
-    console.log(removedItems)
 
-    return removedItems.affected
+    return removedItems
   }
+
+  handleTable(data: any) {
+    const table = [];
+
+    for (const item of data) {
+      const index = table.findIndex(cart => cart.id === item.cart_id);
+      if (index !== -1) {
+        table[index].items.push(item);
+      } else {
+        table.push({
+          id: item.cart_id,
+          customer_name: item.name,
+          total: 0,
+          reserved_indicator: '',
+          reservation_time: '',
+          qty: 0,
+          items: [item],
+        });
+      }
+    }
+
+    for (const cart of table) {
+      if (cart.items.every(item => item.status === 'reserved')) {
+        cart.reserved_indicator = 'all';
+      } else if (cart.items.find(item => item.status === 'reserved')) {
+        cart.reserved_indicator = 'part';
+      } else {
+        cart.reserved_indicator = 'no';
+      }
+
+      const total = cart.items.reduce(
+        (acc: number, cur: Item) =>
+          acc + Number(cur.qty) * Number(cur.price),
+        0,
+      );
+
+      const qty = cart.items.reduce(
+        (acc: number, cur: Item) => acc + Number(cur.qty),
+        0,
+      );
+
+      const shortestDate = cart.items.sort((a: Item, b: Item) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime();
+      })[0].createdAt;
+
+      cart.qty = qty;
+      cart.total = total;
+      cart.reservation_time = new Date(shortestDate).toLocaleString();
+    }
+
+    return table;
+  }
+
+  sortCarts(carts: TableRow[], index: number, direction: 'ascending' | 'descending') {
+    return [...carts].sort((rowA: TableRow, rowB: TableRow) => {
+      const amountA = rowA[Object.keys(rowA)[index] as keyof TableRow];
+      const amountB = rowB[Object.keys(rowB)[index] as keyof TableRow];
+
+      if (typeof amountA === 'number' && typeof amountB === 'number') {
+        return direction === 'descending'
+          ? amountB - amountA
+          : amountA - amountB;
+      } else if (typeof amountA === 'string' && typeof amountB === 'string') {
+        return direction === 'descending'
+          ? amountB.localeCompare(amountA)
+          : amountA.localeCompare(amountB);
+      } else {
+        return 0
+      }
+    });
+  };
 }

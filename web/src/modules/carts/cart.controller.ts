@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
 import { Response } from "express";
 import { CartService } from "./cart.service.js";
 
@@ -13,6 +13,22 @@ export class CartController {
     const carts = await this.cartService.getShopCarts(session)
 
     carts ? res.status(200).send(carts) : res.status(404).send('Not found')
+  }
+
+  @Get('get')
+  async getSortedCarts(@Query() query: { dir: 'ascending' | 'descending', index: string }, @Res() res: Response) {
+    const session = res.locals.shopify.session;
+
+    const sortedCarts = await this.cartService.getSortedCarts(session, query.dir, query.index)
+
+    sortedCarts ? res.status(200).send(sortedCarts) : res.status(500).send('Server error')
+  }
+
+  @Post('expand')
+  async expandTimers(@Body() body: number[], @Query() query: { ms: string }, @Res() res: Response) {
+    const newTimers = await this.cartService.expandTimers(body, query.ms);
+
+    newTimers ? res.status(200).send(newTimers) : res.status(500).send('Server error')
   }
 
   @Post('unreserve')

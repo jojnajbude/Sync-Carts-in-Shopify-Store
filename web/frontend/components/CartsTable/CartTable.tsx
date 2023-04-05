@@ -6,15 +6,17 @@ import {
   Text,
   AlphaCard,
   Badge,
+  Toast,
 } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../../hooks';
 
 import { Cart } from '../../types/cart';
 import { Item } from '../../types/items';
 import PopupModal from '../PopupModal/PopupModal';
+import TablePagination from '../Pagination/Pagination';
 
 type Sort = 'ascending' | 'descending';
-type Modal = 'remove' | 'un-reserve' | 'expend';
+type Modal = 'remove' | 'unreserve' | 'expand';
 
 export default function CartsTable() {
   const [carts, setCarts] = useState([]);
@@ -22,6 +24,9 @@ export default function CartsTable() {
   const [sortDirection, setSortDirection] = useState<Sort>('descending');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<Modal>('remove');
+  const [activeToast, setActiveToast] = useState(false);
+  const [isError, setIsError] = useState(false);
+
   const fetch = useAuthenticatedFetch();
 
   useEffect(() => {
@@ -33,68 +38,9 @@ export default function CartsTable() {
           const result = await fetch('/api/carts/all');
           const cartData = await result.json();
 
-          if (cartData.length) {
-            const table: Cart[] = [];
-
-            for (const item of cartData) {
-              const index = table.findIndex((cart) => cart.id === item.cart_id);
-              if (index !== -1) {
-                table[index].items.push(item);
-              } else {
-                table.push({
-                  id: item.cart_id,
-                  customer_name: item.name,
-                  total: 0,
-                  reserved_indicator: '',
-                  reservation_time: undefined,
-                  qty: 0,
-                  items: [item],
-                });
-              }
-            }
-
-            for (const cart of table) {
-              if (cart.items.every((item) => item.status === 'reserved')) {
-                cart.reserved_indicator = 'all';
-              } else if (
-                cart.items.find((item) => item.status === 'reserved')
-              ) {
-                cart.reserved_indicator = 'part';
-              } else {
-                cart.reserved_indicator = 'no';
-              }
-
-              const total = cart.items.reduce(
-                (acc: number, cur: Item) =>
-                  acc + Number(cur.qty) * Number(cur.price),
-                0
-              );
-
-              const qty = cart.items.reduce(
-                (acc: number, cur: Item) => acc + Number(cur.qty),
-                0
-              );
-
-              const shortestDate = cart.items.sort((a: Item, b: Item) => {
-                const dateA = new Date(a.createdAt);
-                const dateB = new Date(b.createdAt);
-                return dateA.getTime() - dateB.getTime();
-              })[0].createdAt;
-
-              cart.qty = qty;
-              cart.total = total;
-              cart.reservation_time = new Date(shortestDate).toLocaleString();
-            }
-
-            if (!ignore) {
-              setCarts(table);
-              setIsLoading(false);
-            }
-          } else {
-            if (!ignore) {
-              setCarts(cartData);
-              setIsLoading(false);
-            }
+          if (!ignore) {
+            setCarts(cartData);
+            setIsLoading(false);
           }
         }
       } catch (error) {
@@ -120,17 +66,20 @@ export default function CartsTable() {
   const promotedBulkActions = [
     {
       content: 'Expand timers',
-      onAction: () => openModal('expend'),
+      onAction: () => openModal('expand'),
     },
     {
       content: 'Un-reserve all items',
-      onAction: () => openModal('un-reserve'),
+      onAction: () => openModal('unreserve'),
     },
   ];
   const bulkActions = [
     {
       content: 'Send reminder',
-      onAction: () => console.log('Todo: implement bulk add tags'),
+      onAction: () => {
+        setIsError(true);
+        setActiveToast(true);
+      },
     },
     {
       content: 'Remove all items',
@@ -163,48 +112,23 @@ export default function CartsTable() {
     }
   };
 
-  // const isDate = (str: string) => {
-  //   const [y, M, d] = str.split(/[- : T Z]/);
-
-  //   return y && Number(M) <= 12 && Number(d) <= 31 ? true : false;
-  // };
-
-  const sortCarts = (
-    carts: Cart[],
-    index: number,
-    direction: 'ascending' | 'descending'
-  ): Cart[] => {
-    return [...carts].sort((rowA: Cart, rowB: Cart) => {
-      const amountA = rowA[Object.keys(rowA)[index] as keyof Cart];
-      const amountB = rowB[Object.keys(rowB)[index] as keyof Cart];
-
-      if (typeof amountA === 'number' && typeof amountB === 'number') {
-        return direction === 'descending'
-          ? amountB - amountA
-          : amountA - amountB;
-      } else if (typeof amountA === 'string' && typeof amountB === 'string') {
-        // if (isDate(amountA)) {
-        //   return direction === 'descending'
-        //     ? new Date(amountB).getTime() - new Date(amountA).getTime()
-        //     : new Date(amountA).getTime() - new Date(amountB).getTime();
-        // }
-
-        return direction === 'descending'
-          ? amountB.localeCompare(amountA)
-          : amountA.localeCompare(amountB);
-      }
-    });
-  };
-
   const handleSort = useCallback(
-    (index: number, direction: 'ascending' | 'descending') => {
+    async (index: number, direction: 'ascending' | 'descending') => {
+      setIsLoading(true);
+
       const sortDirection =
         direction === 'descending' ? 'ascending' : 'descending';
 
-      setCarts(sortCarts(carts, index, direction));
+      const carts = await fetch(
+        `/api/carts/get?dir=${direction}&index=${index}`,
+      );
+      const cartsData = await carts.json();
+
+      setCarts(cartsData);
       setSortDirection(sortDirection);
+      setIsLoading(false);
     },
-    [carts]
+    [carts],
   );
 
   const openModal = (type: Modal) => {
@@ -218,8 +142,59 @@ export default function CartsTable() {
         type={modalType}
         selectedRows={selectedResources}
         setShowModal={setShowModal}
+        setIsError={setIsError}
+        setActiveToast={setActiveToast}
+        setIsLoading={setIsLoading}
       />
     );
+  };
+
+  const toggleActiveToast = useCallback(
+    () => setActiveToast(active => !active),
+    [],
+  );
+
+  const toastMarkup = () => {
+    switch (true) {
+      case modalType === 'remove':
+        return (
+          <Toast
+            content={
+              isError
+                ? 'Something went wrong. Try again later.'
+                : 'All items successfully removed'
+            }
+            error={isError}
+            onDismiss={toggleActiveToast}
+          />
+        );
+
+      case modalType === 'unreserve':
+        return (
+          <Toast
+            content={
+              isError
+                ? 'Something went wrong. Try again later.'
+                : 'All items successfully unreserved'
+            }
+            error={isError}
+            onDismiss={toggleActiveToast}
+          />
+        );
+
+      case modalType === 'expand':
+        return (
+          <Toast
+            content={
+              isError
+                ? 'Something went wrong. Try again later.'
+                : 'All items timers successfully expand'
+            }
+            error={isError}
+            onDismiss={toggleActiveToast}
+          />
+        );
+    }
   };
 
   return (
@@ -237,7 +212,6 @@ export default function CartsTable() {
                 allResourcesSelected ? 'All' : selectedResources.length
               }
               onSelectionChange={handleSelectionChange}
-              hasMoreItems
               bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
               sortable={[true, true, true, true, true, true]}
@@ -246,7 +220,7 @@ export default function CartsTable() {
                 { title: 'Customer' },
                 { title: 'Cart Total' },
                 { title: 'Reserved Indicator' },
-                { title: 'Shortest time for reserved items' },
+                { title: 'Shortest expire time for items' },
                 { title: 'Items Quantity' },
               ]}
             >
@@ -260,7 +234,7 @@ export default function CartsTable() {
                     reservation_time,
                     reserved_indicator,
                   },
-                  index
+                  index,
                 ) => (
                   <IndexTable.Row
                     id={id}
@@ -286,11 +260,13 @@ export default function CartsTable() {
                     <IndexTable.Cell>{reservation_time}</IndexTable.Cell>
                     <IndexTable.Cell>{qty}</IndexTable.Cell>
                   </IndexTable.Row>
-                )
+                ),
               )}
             </IndexTable>
           }
           {showModal && createModal()}
+          {activeToast && toastMarkup()}
+          {carts.length > 25 && <TablePagination />}
         </AlphaCard>
       </Layout.Section>
     </Layout>

@@ -5,39 +5,46 @@ import {
   TextField,
   Select,
   Button,
+  Toast,
 } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../../hooks';
 
 type Props = {
-  type: 'remove' | 'un-reserve' | 'expend';
+  type: 'remove' | 'unreserve' | 'expand';
   selectedRows: string[];
   setShowModal: (state: boolean) => void;
+  setIsError: (state: boolean) => void;
+  setActiveToast: (state: boolean) => void;
+  setIsLoading: (state: boolean) => void;
 };
 
 export default function PopupModal({
   type,
   selectedRows,
   setShowModal,
+  setIsError,
+  setActiveToast,
+  setIsLoading,
 }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
   const [textFieldValue, setTextFieldValue] = useState('24');
-  const [selectValue, setSelectValue] = useState('hr');
+  const [selectValue, setSelectValue] = useState('hours');
   const fetch = useAuthenticatedFetch();
 
   const handleTextFieldChange = useCallback(
     (value: string) => setTextFieldValue(value),
-    []
+    [],
   );
 
   const handleSelectChange = useCallback(
     (value: string) => setSelectValue(value),
-    []
+    [],
   );
 
   const unreserveAllItems = async () => {
-    setIsLoading(true);
+    setIsModalLoading(true);
 
-    const reserveItems = await fetch('api/carts/unreserve', {
+    const response = await fetch('api/carts/unreserve', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,13 +52,19 @@ export default function PopupModal({
       body: await JSON.stringify(selectedRows),
     });
 
+    setIsModalLoading(false);
     setShowModal(false);
+
+    response.ok ? setIsError(false) : setIsError(true);
+
+    setActiveToast(true);
+    setIsLoading(true);
   };
 
   const removeAllItems = async () => {
-    setIsLoading(true);
+    setIsModalLoading(true);
 
-    const removeItems = await fetch('/api/carts/remove', {
+    const response = await fetch('/api/carts/remove', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +72,13 @@ export default function PopupModal({
       body: await JSON.stringify(selectedRows),
     });
 
+    setIsModalLoading(false);
     setShowModal(false);
+
+    response.ok ? setIsError(false) : setIsError(true);
+
+    setActiveToast(true);
+    setIsLoading(true);
   };
 
   const closeModal = () => {
@@ -77,9 +96,11 @@ export default function PopupModal({
           destructive: true,
           secondaryButtonText: 'Cancel',
           sencodaryAction: closeModal,
+          toastTextOk: 'All items was removed',
+          toastTextError: 'An error occurred. Try again later',
         };
 
-      case type == 'un-reserve':
+      case type == 'unreserve':
         return {
           title: 'Unreserve all items?',
           text: 'This action will cancel all product timers from the selected carts. Еhey will not be marked as expired',
@@ -88,22 +109,67 @@ export default function PopupModal({
           destructive: false,
           secondaryButtonText: 'Cancel',
           sencodaryAction: closeModal,
+          toastTextOk: 'All items was unreseved',
+          toastTextError: 'An error occurred. Try again later',
         };
 
-      case type === 'expend':
+      case type === 'expand':
         return {
           title: 'Expand reservation time',
+          toastTextOk: 'All items was successfully expend',
+          toastTextError: 'An error occurred. Try again later',
         };
     }
   })();
 
-  const expandTime = () => {
-    console.log(textFieldValue, selectValue);
+  const expandTime = async () => {
+    setIsModalLoading(true);
+
+    const msInHour = 3600000;
+    const msInDay = 86400000;
+    const msInWeek = 604800000;
+    const msInMonth = 2629743833.3;
+
+    let expandTimeInMs = 0;
+
+    switch (true) {
+      case selectValue === 'hours':
+        expandTimeInMs = Number(textFieldValue) * msInHour;
+        break;
+
+      case selectValue === 'days':
+        expandTimeInMs = Number(textFieldValue) * msInDay;
+        break;
+
+      case selectValue === 'weeks':
+        expandTimeInMs = Number(textFieldValue) * msInWeek;
+        break;
+
+      case selectValue === 'months':
+        expandTimeInMs = Number(textFieldValue) * msInMonth;
+        break;
+    }
+
+    const response = await fetch(`api/carts/expand?ms=${expandTimeInMs}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: await JSON.stringify(selectedRows),
+    });
+
+    setIsModalLoading(false);
+    setShowModal(false);
+
+    response.ok ? setIsError(false) : setIsError(true);
+
+    setActiveToast(true);
+    setIsLoading(true);
   };
 
   return (
     <div style={{ height: '500px' }}>
-      {isLoading ? (
+      {isModalLoading ? (
         <Modal
           title={configureModal.title}
           loading={true}
@@ -122,7 +188,7 @@ export default function PopupModal({
           onClose={closeModal}
           title={configureModal.title}
           primaryAction={
-            type !== 'expend'
+            type !== 'expand'
               ? {
                   content: configureModal.primaryButtonText,
                   destructive: configureModal.destructive,
@@ -131,7 +197,7 @@ export default function PopupModal({
               : null
           }
           secondaryActions={
-            type !== 'expend'
+            type !== 'expand'
               ? [
                   {
                     content: configureModal.secondaryButtonText,
@@ -142,7 +208,7 @@ export default function PopupModal({
           }
         >
           <Modal.Section>
-            {type === 'expend' ? (
+            {type === 'expand' ? (
               <TextField
                 label="Set time to expand"
                 type="number"

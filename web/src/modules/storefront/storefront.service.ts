@@ -97,7 +97,7 @@ export class StorefrontService {
       if (item && Number(item.qty) !== line_item.quantity) {
         updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
       } else if (!item) {
-        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price, status: cart.customer_id ? 'reserved' : 'unreserved' }))
+        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price }))
       }
     }
 

@@ -26,6 +26,7 @@ export class StorefrontController {
 
     if (shopDomain) {
       const cart = await this.storefrontService.createCart(shopDomain, req.body);
+
       cart ? res.status(200).send(cart) : res.status(500).send('Server error');
     } else {
       res.status(404).send('Unable to identify the store');
