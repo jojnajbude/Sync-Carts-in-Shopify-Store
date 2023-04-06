@@ -15,6 +15,15 @@ export class CartController {
     carts ? res.status(200).send(carts) : res.status(404).send('Not found')
   }
 
+  @Get('filter')
+  async getFilteredCarts(@Query() query: { index: string }, @Res() res: Response) {
+    const session = res.locals.shopify.session;
+
+    const carts = await this.cartService.getFilteredCarts(session, query.index);
+
+    carts ? res.status(200).send(carts) : res.status(500).send('Server error')
+  }
+
   @Get('get')
   async getSortedCarts(@Query() query: { dir: 'ascending' | 'descending', index: string }, @Res() res: Response) {
     const session = res.locals.shopify.session;

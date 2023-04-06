@@ -5,7 +5,6 @@ import {
   TextField,
   Select,
   Button,
-  Toast,
 } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../../hooks';
 

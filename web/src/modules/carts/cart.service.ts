@@ -68,6 +68,28 @@ export class CartService {
     return false
   }
 
+  async getFilteredCarts(session: shopifySession, index: string) {
+    const table = await this.getShopCarts(session);
+
+    let indicator = '';
+
+    switch (true) {
+      case index === '1':
+        indicator = 'all'
+        break;
+      case index === '2':
+        indicator = 'part'
+        break;
+      case index === '3':
+        indicator = 'no'
+        break;
+    }
+
+    const filteredTable = table?.filter(cart => cart.reserved_indicator === indicator);
+
+    return filteredTable
+  }
+
   async expandTimers(ids: number[], time: string) {
     const oldDates = await this.itemRepository.find({ where: { cart_id: In(ids) }});
     

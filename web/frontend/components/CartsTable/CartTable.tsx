@@ -1,19 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Layout,
   IndexTable,
   useIndexResourceState,
   Text,
-  AlphaCard,
   Badge,
   Toast,
+  Divider,
+  LegacyCard,
 } from '@shopify/polaris';
+
 import { useAuthenticatedFetch } from '../../hooks';
 
-import { Cart } from '../../types/cart';
-import { Item } from '../../types/items';
 import PopupModal from '../PopupModal/PopupModal';
 import TablePagination from '../Pagination/Pagination';
+import IndexTableFilters from '../IndexFilters/IndexFilters';
+import EmptyStateMarkup from '../EmptyStateMarkup/EmptyStateMarkup';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
@@ -26,8 +29,11 @@ export default function CartsTable() {
   const [modalType, setModalType] = useState<Modal>('remove');
   const [activeToast, setActiveToast] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [tableRowsPerPage, setTableRowsPerPage] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetch = useAuthenticatedFetch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let ignore = false;
@@ -49,6 +55,7 @@ export default function CartsTable() {
     };
 
     getCarts();
+    getCurrentTableData();
 
     return () => {
       ignore = true;
@@ -128,7 +135,7 @@ export default function CartsTable() {
       setSortDirection(sortDirection);
       setIsLoading(false);
     },
-    [carts],
+    [carts, isLoading, sortDirection],
   );
 
   const openModal = (type: Modal) => {
@@ -197,14 +204,31 @@ export default function CartsTable() {
     }
   };
 
+  const paginateData = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const getCurrentTableData = () => {
+    return carts.slice(
+      currentPage * tableRowsPerPage - tableRowsPerPage,
+      currentPage * tableRowsPerPage,
+    );
+  };
+
   return (
     <Layout>
       <Layout.Section>
-        <AlphaCard>
-          {
+        <LegacyCard>
+          <IndexTableFilters
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+            setCarts={setCarts}
+            setIsError={setIsError}
+            setActiveToast={setActiveToast}
+          />
+          {!isLoading ? (
             <IndexTable
               onSort={handleSort}
-              loading={isLoading}
               resourceName={resourceName}
               itemCount={carts.length}
               defaultSortDirection={sortDirection}
@@ -224,7 +248,7 @@ export default function CartsTable() {
                 { title: 'Items Quantity' },
               ]}
             >
-              {carts.map(
+              {getCurrentTableData().map(
                 (
                   {
                     id,
@@ -241,6 +265,7 @@ export default function CartsTable() {
                     key={id}
                     selected={selectedResources.includes(id)}
                     position={index}
+                    onClick={() => navigate(`/cart/${id}`)}
                   >
                     <IndexTable.Cell>
                       <Text fontWeight="semibold" as="span">
@@ -263,11 +288,23 @@ export default function CartsTable() {
                 ),
               )}
             </IndexTable>
-          }
+          ) : (
+            <EmptyStateMarkup rows={tableRowsPerPage} />
+          )}
           {showModal && createModal()}
           {activeToast && toastMarkup()}
-          {carts.length > 25 && <TablePagination />}
-        </AlphaCard>
+          <Divider borderStyle="dark" />
+          <LegacyCard.Section>
+            {carts.length > tableRowsPerPage && (
+              <TablePagination
+                tableRowsPerPage={tableRowsPerPage}
+                totalData={carts.length}
+                paginateData={paginateData}
+                currentPage={currentPage}
+              />
+            )}
+          </LegacyCard.Section>
+        </LegacyCard>
       </Layout.Section>
     </Layout>
   );

@@ -36,6 +36,10 @@ export default function App() {
                     label: 'Settings',
                     destination: '/settings',
                   },
+                  {
+                    label: 'Cart',
+                    destination: '/cart',
+                  },
                 ]}
               />
               <Routes pages={pages} />
