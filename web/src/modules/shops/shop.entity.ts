@@ -14,4 +14,7 @@ export class Shop {
 
   @Column({ type: 'varchar', nullable: true })
   session: string;
+
+  @Column({ nullable: true })
+  currency: string;
 }

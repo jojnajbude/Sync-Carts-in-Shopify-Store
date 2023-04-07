@@ -25,7 +25,7 @@ export class getShopDataMiddleware implements NestMiddleware {
 
         next();
       } else {
-        await this.shopsRepository.insert({ domain: shopifyShopData.domain, shopify_id: shopifyShopData.id, session: sessionJSON });
+        await this.shopsRepository.insert({ domain: shopifyShopData.domain, shopify_id: shopifyShopData.id, session: sessionJSON, currency: shopifyShopData.currency });
         next();
       }
     } catch (err) {

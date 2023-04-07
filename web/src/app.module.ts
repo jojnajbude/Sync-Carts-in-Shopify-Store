@@ -25,6 +25,7 @@ import { Customer } from "./modules/customers/customer.entity.js";
 import { Cart } from "./modules/carts/cart.entity.js";
 import { injectSnippet } from "./middlewares/injectSnippet.middleware.js";
 import { createWebhooks } from "./middlewares/createWebhooks.middleware.js";
+import { CustomerModule } from "./modules/customers/customer.module.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -49,6 +50,7 @@ const STATIC_PATH =
         connectionName: 'logs',
       }),
     ShopModule,
+    CustomerModule,
     ProductModule,
     CartModule,
     StorefrontModule,

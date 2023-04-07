@@ -15,6 +15,16 @@ export class CartController {
     carts ? res.status(200).send(carts) : res.status(404).send('Not found')
   }
 
+  @Get('get')
+  async getCart(@Query() query: { cartId: string }, @Res() res: Response) {
+    const session = res.locals.shopify.session;
+
+    const cart = await this.cartService.getCart(query.cartId, session);
+    console.log(cart)
+
+    cart ? res.status(200).send(cart) : res.status(404).send('Not found')
+  }
+
   @Get('filter')
   async getFilteredCarts(@Query() query: { index: string }, @Res() res: Response) {
     const session = res.locals.shopify.session;
@@ -24,7 +34,7 @@ export class CartController {
     carts ? res.status(200).send(carts) : res.status(500).send('Server error')
   }
 
-  @Get('get')
+  @Get('sort')
   async getSortedCarts(@Query() query: { dir: 'ascending' | 'descending', index: string }, @Res() res: Response) {
     const session = res.locals.shopify.session;
 

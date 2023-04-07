@@ -68,6 +68,13 @@ export class StorefrontService {
   }
 
   async updateCart(cartData: any, shop: string) {
+    const store = await this.shopsRepository.findOneBy({ domain: shop });
+    let session = null
+
+    if (store) {
+      session = JSON.parse(store?.session);
+    }
+
     let cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
 
     if (!cart) {
@@ -97,7 +104,20 @@ export class StorefrontService {
       if (item && Number(item.qty) !== line_item.quantity) {
         updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
       } else if (!item) {
-        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price }))
+        const product = await shopify.api.rest.Product.find({
+          session,
+          id: line_item.product_id,
+        })
+
+        const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
+
+        const imgSrc = await shopify.api.rest.Image.find({
+          session,
+          product_id: product.id,
+          id: variant.image_id,
+        })
+
+        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price, title: product.title, image_link: imgSrc.src }))
       }
     }
 

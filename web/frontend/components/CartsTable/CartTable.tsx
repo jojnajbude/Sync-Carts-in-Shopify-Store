@@ -5,7 +5,6 @@ import {
   IndexTable,
   useIndexResourceState,
   Text,
-  Badge,
   Toast,
   Divider,
   LegacyCard,
@@ -17,6 +16,7 @@ import PopupModal from '../PopupModal/PopupModal';
 import TablePagination from '../Pagination/Pagination';
 import IndexTableFilters from '../IndexFilters/IndexFilters';
 import EmptyStateMarkup from '../EmptyStateMarkup/EmptyStateMarkup';
+import CartBadge from '../Badge/CartBadge';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
@@ -94,31 +94,6 @@ export default function CartsTable() {
     },
   ];
 
-  const createBadge = (indicator: string) => {
-    switch (true) {
-      case indicator === 'all':
-        return (
-          <Badge status="success" progress="complete">
-            All items reserved
-          </Badge>
-        );
-
-      case indicator === 'part':
-        return (
-          <Badge status="attention" progress="partiallyComplete">
-            Partially reserved
-          </Badge>
-        );
-
-      case indicator === 'no':
-        return (
-          <Badge status="warning" progress="incomplete">
-            No items reserved
-          </Badge>
-        );
-    }
-  };
-
   const handleSort = useCallback(
     async (index: number, direction: 'ascending' | 'descending') => {
       setIsLoading(true);
@@ -127,7 +102,7 @@ export default function CartsTable() {
         direction === 'descending' ? 'ascending' : 'descending';
 
       const carts = await fetch(
-        `/api/carts/get?dir=${direction}&index=${index}`,
+        `/api/carts/sort?dir=${direction}&index=${index}`,
       );
       const cartsData = await carts.json();
 
@@ -280,7 +255,7 @@ export default function CartsTable() {
                       }).format(cartTotal)}
                     </IndexTable.Cell>
                     <IndexTable.Cell>
-                      {createBadge(reserved_indicator)}
+                      <CartBadge indicator={reserved_indicator}></CartBadge>
                     </IndexTable.Cell>
                     <IndexTable.Cell>{reservation_time}</IndexTable.Cell>
                     <IndexTable.Cell>{qty}</IndexTable.Cell>

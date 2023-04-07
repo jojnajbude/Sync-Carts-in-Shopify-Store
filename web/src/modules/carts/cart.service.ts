@@ -37,7 +37,7 @@ export class CartService {
       //   .getMany();
 
       const carts = await this.itemRepository.query(
-        `select items.*, customers.name 
+        `select items.*, customers.name, customers.shopify_user_id
         from items
         left join carts
         on items.cart_id = carts.id
@@ -48,12 +48,28 @@ export class CartService {
         where shops.domain = '${session.shop}'`
       );
 
-      const table = this.handleTable(carts);
+      const table = this.handleData(carts, session.shop);
 
       return table;
     } catch (err) {
       console.log(err)
     }
+  }
+
+  async getCart(cartId: string, session: shopifySession) {
+    const cartItems = await this.itemRepository.query(
+      `select items.*, customers.name, customers.shopify_user_id, customers.priority
+      from items
+      left join carts
+      on items.cart_id = carts.id
+      left join customers
+      on carts.customer_id = customers.id
+      where items.cart_id = ${cartId}`
+    )
+
+    const cart = await this.handleData(cartItems, session.shop);
+
+    return cart ? cart : false
   }
 
   async getSortedCarts(session: shopifySession, direction: 'ascending' | 'descending', index: string,) {
@@ -113,7 +129,7 @@ export class CartService {
     return removedItems
   }
 
-  handleTable(data: any) {
+  handleData(data: any, shop: string) {
     const table = [];
 
     for (const item of data) {
@@ -129,6 +145,9 @@ export class CartService {
           reservation_time: '',
           qty: 0,
           items: [item],
+          customer_shopify_id: item.shopify_user_id,
+          shop_domain: shop,
+          priority: item.priority,
         });
       }
     }

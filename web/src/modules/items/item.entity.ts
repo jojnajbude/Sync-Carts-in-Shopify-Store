@@ -27,4 +27,10 @@ export class Item {
 
   @Column()
   price: string;
+
+  @Column({ nullable: true })
+  title: string;
+
+  @Column({ nullable: true })
+  image_link: string;
 }
