@@ -104,6 +104,28 @@ export class StorefrontService {
       if (item && Number(item.qty) !== line_item.quantity) {
         updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
       } else if (!item) {
+        const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
+
+        let reservationTime = 0;
+
+        switch(true) {
+          case customer?.priority === 'max':
+            reservationTime = 336;
+            break;
+          case customer?.priority === 'high':
+            reservationTime = 72;
+            break;
+          case customer?.priority === 'normal':
+            reservationTime = 24;
+            break;
+          case customer?.priority === 'low':
+            reservationTime = 8;
+            break;
+          case customer?.priority === 'min':
+            reservationTime = 1;
+            break;
+        }
+
         const product = await shopify.api.rest.Product.find({
           session,
           id: line_item.product_id,
@@ -117,7 +139,19 @@ export class StorefrontService {
           id: variant.image_id,
         })
 
-        updatedItems.push(await this.itemRepository.save({ variant_id: line_item.variant_id, qty: line_item.quantity, cart_id: cart?.id, price: line_item.price, title: product.title, image_link: imgSrc.src }))
+        const expireTime = this.countExpireDate(new Date(), reservationTime);
+        console.log(expireTime);
+
+        updatedItems.push(await this.itemRepository.save({ 
+          variant_id: line_item.variant_id, 
+          qty: line_item.quantity, 
+          cart_id: cart?.id, 
+          price: line_item.price, 
+          title: product.title, 
+          image_link: imgSrc.src, 
+          product_id: variant.product_id,
+          expireAt: expireTime,
+        }))
       }
     }
 
@@ -143,7 +177,14 @@ export class StorefrontService {
   async getReserveTime(variant: string, cart_token: string, user: string, shop: string) {
     const cart = await this.cartRepository.findOneBy({ cart_token: cart_token });
     const cartItem = await this.itemRepository.findOneBy({ variant_id: Number(variant), cart_id: cart?.id });
+    console.log(cartItem)
 
-    return cartItem?.status === 'reserved' ? cartItem?.createdAt : false;
+    return cartItem?.status === 'reserved' ? cartItem : false;
+  }
+
+  countExpireDate(startDate: Date, time: number) {
+    const expandTime = 3600000 * time;
+
+    return new Date(startDate.getTime() + expandTime);
   }
 }

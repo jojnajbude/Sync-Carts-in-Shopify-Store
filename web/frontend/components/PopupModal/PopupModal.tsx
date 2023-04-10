@@ -7,10 +7,11 @@ import {
   Button,
 } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../../hooks';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
-  type: 'remove' | 'unreserve' | 'expand';
-  selectedRows: string[];
+  type: 'remove' | 'unreserve' | 'expand' | 'update';
+  selectedRows: number[];
   setShowModal: (state: boolean) => void;
   setIsError: (state: boolean) => void;
   setActiveToast: (state: boolean) => void;
@@ -28,6 +29,8 @@ export default function PopupModal({
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [textFieldValue, setTextFieldValue] = useState('24');
   const [selectValue, setSelectValue] = useState('hours');
+
+  const navigate = useNavigate();
   const fetch = useAuthenticatedFetch();
 
   const handleTextFieldChange = useCallback(
@@ -43,7 +46,7 @@ export default function PopupModal({
   const unreserveAllItems = async () => {
     setIsModalLoading(true);
 
-    const response = await fetch('api/carts/unreserve', {
+    const response = await fetch('/api/carts/unreserve', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -70,6 +73,10 @@ export default function PopupModal({
       },
       body: await JSON.stringify(selectedRows),
     });
+
+    if (window.location.href.includes('/cart/')) {
+      navigate(-1);
+    }
 
     setIsModalLoading(false);
     setShowModal(false);

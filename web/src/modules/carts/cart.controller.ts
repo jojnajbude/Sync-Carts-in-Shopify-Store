@@ -20,7 +20,6 @@ export class CartController {
     const session = res.locals.shopify.session;
 
     const cart = await this.cartService.getCart(query.cartId, session);
-    console.log(cart)
 
     cart ? res.status(200).send(cart) : res.status(404).send('Not found')
   }

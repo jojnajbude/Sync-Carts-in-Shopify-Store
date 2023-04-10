@@ -1,3 +1,4 @@
+import { timestamp } from "rxjs";
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 
@@ -22,6 +23,9 @@ export class Item {
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
+  @Column({ type: 'timestamp', nullable: true })
+  expireAt: Date;
+
   @Column({ default: 'reserved' })
   status: string;
 
@@ -33,4 +37,7 @@ export class Item {
 
   @Column({ nullable: true })
   image_link: string;
+
+  @Column({ type: 'bigint', nullable: true })
+  product_id: number;
 }

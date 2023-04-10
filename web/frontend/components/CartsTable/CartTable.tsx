@@ -22,6 +22,7 @@ type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
 
 export default function CartsTable() {
+  const [currency, setCurrency] = useState(null);
   const [carts, setCarts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortDirection, setSortDirection] = useState<Sort>('descending');
@@ -41,10 +42,14 @@ export default function CartsTable() {
     const getCarts = async () => {
       try {
         if (isLoading) {
+          const shop = await fetch('api/shop');
+          const [shopData] = await shop.json();
+
           const result = await fetch('/api/carts/all');
           const cartData = await result.json();
 
           if (!ignore) {
+            setCurrency(shopData.currency);
             setCarts(cartData);
             setIsLoading(false);
           }
@@ -60,7 +65,7 @@ export default function CartsTable() {
     return () => {
       ignore = true;
     };
-  }, [carts, isLoading]);
+  }, [carts, isLoading, currency]);
 
   const resourceName = {
     singular: 'cart',
@@ -251,7 +256,7 @@ export default function CartsTable() {
                     <IndexTable.Cell>
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
-                        currency: 'USD',
+                        currency: currency,
                       }).format(cartTotal)}
                     </IndexTable.Cell>
                     <IndexTable.Cell>

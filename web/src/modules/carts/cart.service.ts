@@ -173,10 +173,10 @@ export class CartService {
       );
 
       const shortestDate = cart.items.sort((a: Item, b: Item) => {
-        const dateA = new Date(a.createdAt);
-        const dateB = new Date(b.createdAt);
+        const dateA = new Date(a.expireAt);
+        const dateB = new Date(b.expireAt);
         return dateA.getTime() - dateB.getTime();
-      })[0].createdAt;
+      })[0].expireAt;
 
       cart.qty = qty;
       cart.total = total;

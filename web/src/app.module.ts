@@ -7,6 +7,7 @@ import {
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 
 import { readFileSync } from "fs";
 import { Request, Response, NextFunction } from "express";
@@ -26,6 +27,7 @@ import { Cart } from "./modules/carts/cart.entity.js";
 import { injectSnippet } from "./middlewares/injectSnippet.middleware.js";
 import { createWebhooks } from "./middlewares/createWebhooks.middleware.js";
 import { CustomerModule } from "./modules/customers/customer.module.js";
+import { ItemsModule } from "./modules/items/item.module.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -49,10 +51,12 @@ const STATIC_PATH =
       {
         connectionName: 'logs',
       }),
+    ScheduleModule.forRoot(),
     ShopModule,
     CustomerModule,
     ProductModule,
     CartModule,
+    ItemsModule,
     StorefrontModule,
     ConfigModule.forRoot({
       isGlobal: true,

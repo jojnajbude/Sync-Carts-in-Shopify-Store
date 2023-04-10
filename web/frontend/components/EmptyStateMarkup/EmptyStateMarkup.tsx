@@ -5,7 +5,6 @@ import {
   IndexTable,
   SkeletonThumbnail,
 } from '@shopify/polaris';
-import React from 'react';
 
 type Props = {
   rows: number;
