@@ -1,5 +1,5 @@
 import { InlineError, Badge, Text } from '@shopify/polaris';
-import { useCountdown } from '../../hooks/useCountdown';
+import { useCountdown } from '../hooks/useCountdown';
 
 type Props = {
   expireAt: string;

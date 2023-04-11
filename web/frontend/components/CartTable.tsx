@@ -10,13 +10,13 @@ import {
   LegacyCard,
 } from '@shopify/polaris';
 
-import { useAuthenticatedFetch } from '../../hooks';
+import { useAuthenticatedFetch } from '../hooks';
 
-import PopupModal from '../PopupModal/PopupModal';
-import TablePagination from '../Pagination/Pagination';
-import IndexTableFilters from '../IndexFilters/IndexFilters';
-import EmptyStateMarkup from '../EmptyStateMarkup/EmptyStateMarkup';
-import CartBadge from '../Badge/CartBadge';
+import PopupModal from './PopupModal';
+import TablePagination from './Pagination';
+import IndexTableFilters from './IndexFilters';
+import EmptyStateMarkup from './EmptyStateMarkup';
+import CartBadge from './CartBadge';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';

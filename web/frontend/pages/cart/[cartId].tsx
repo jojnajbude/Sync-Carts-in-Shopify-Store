@@ -10,14 +10,15 @@ import {
   Text,
   Toast,
   Frame,
+  Link,
+  Select,
   SkeletonPage,
   SkeletonBodyText,
 } from '@shopify/polaris';
 
-import CartBadge from '../../components/Badge/CartBadge';
-import PopupModal from '../../components/PopupModal/PopupModal';
-import ProductsList from '../../components/ProductsList.tsx/ProductsList';
-import CartCustomer from '../../components/CartCustomer/CartCustomer';
+import CartBadge from '../../components/CartBadge';
+import PopupModal from '../../components/PopupModal';
+import ProductsList from '../../components/ProductsList';
 
 import { formatter } from '../../services/formatter';
 
@@ -54,6 +55,8 @@ export default function Cart() {
 
           const customer = await customerData.json();
 
+          console.log(customer);
+
           const shop = await fetch(`/api/shop`);
           const [shopData] = await shop.json();
 
@@ -63,7 +66,6 @@ export default function Cart() {
             setCustomer(customer);
             setPriority(cart.priority);
             setCart(cart);
-            console.log(cart);
             setIsLoading(false);
           }
         }
@@ -76,19 +78,6 @@ export default function Cart() {
       ignore = true;
     };
   }, [cart, isLoading]);
-
-  // const priorityLevels = [
-  //   { label: 'Minimal', value: 'min' },
-  //   { label: 'Low', value: 'low' },
-  //   { label: 'Normal', value: 'normal' },
-  //   { label: 'High', value: 'high' },
-  //   { label: 'Max', value: 'max' },
-  // ];
-
-  // const handlePriorityChange = useCallback((value: string) => {
-  //   setIsEditing(true);
-  //   setPriority(value);
-  // }, []);
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -168,6 +157,19 @@ export default function Cart() {
     }
   };
 
+  const priorityLevels = [
+    { label: 'Minimal', value: 'min' },
+    { label: 'Low', value: 'low' },
+    { label: 'Normal', value: 'normal' },
+    { label: 'High', value: 'high' },
+    { label: 'Max', value: 'max' },
+  ];
+
+  const handlePriorityChange = useCallback((value: string) => {
+    setIsEditing(true);
+    setPriority(value);
+  }, []);
+
   const updateCart = async (priority: string) => {
     setIsEditing(false);
     setIsCartUpdating(true);
@@ -205,11 +207,13 @@ export default function Cart() {
           secondaryActions={[
             {
               content: 'Send notification',
-              onAction: () => {},
+              disabled: true,
+              onAction: () => console.log('works'),
             },
             {
               content: 'Mark as paid',
-              onAction: () => {},
+              disabled: true,
+              onAction: () => console.log('works'),
             },
             {
               content: 'Delete cart',
@@ -250,20 +254,13 @@ export default function Cart() {
             </Layout.Section>
 
             <Layout.Section secondary>
-              <CartCustomer
-                cart={cart}
-                customer={customer}
-                priority={customer.priority}
-                setPriority={setPriority}
-                setIsEditing={setIsEditing}
-              ></CartCustomer>
-              {/* <LegacyCard title="Customer">
+              <LegacyCard title="Customer">
                 <LegacyCard.Section>
                   <LegacyStack vertical>
                     <Link
                       url={`https://${cart.shop_domain}/admin/customers/${cart.customer_shopify_id}`}
                     >
-                      Name Surname
+                      {cart.customer_name}
                     </Link>
 
                     <Text color="subdued" as="span">
@@ -275,13 +272,13 @@ export default function Cart() {
                 <LegacyCard.Section title="Contact information">
                   <LegacyStack vertical>
                     <Text color="subdued" as="span">
-                      {'email' in customer
+                      {customer.email
                         ? `Email: ${customer.email}`
                         : 'No email provided'}
                     </Text>
                     <Text color="subdued" as="span">
-                      {'phone' in customer
-                        ? `Phone: ${customer.email}`
+                      {customer.phone
+                        ? `Phone: ${customer.phone}`
                         : 'No phone provided'}
                     </Text>
                   </LegacyStack>
@@ -333,7 +330,7 @@ export default function Cart() {
                     />
                   </LegacyStack>
                 </LegacyCard.Section>
-              </LegacyCard> */}
+              </LegacyCard>
               <PageActions
                 primaryAction={{
                   content: 'Save',

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Page, Button, Frame, FooterHelp } from '@shopify/polaris';
-import CartsTable from '../components/CartsTable/CartTable';
+import CartsTable from '../components/CartTable';
 
 export default function cartsSummary() {
   const navigate = useNavigate();

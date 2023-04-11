@@ -20,21 +20,13 @@ export class injectSnippet implements NestMiddleware {
       })
 
       for (const theme of themes) {
-        const [themeAsset] = await shopify.api.rest.Asset.all({
-          session,
-          theme_id: theme.id,
-          asset: {key: "snippets/reserve-timer.liquid"}
-        })
-
-        if (themeAsset.value !== snippet) {
-          const asset = await new shopify.api.rest.Asset({session})
-          asset.theme_id = theme.id;
-          asset.key = "snippets/reserve-timer.liquid";
-          asset.value = snippet;
-          await asset.save({
-            update: true,
-          });
-        }
+        const asset = await new shopify.api.rest.Asset({session})
+        asset.theme_id = theme.id;
+        asset.key = "snippets/reserve-timer.liquid";
+        asset.value = snippet;
+        await asset.save({
+          update: true,
+        });
       }
       
       next()

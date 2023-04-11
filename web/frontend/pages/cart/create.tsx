@@ -19,16 +19,19 @@ import {
   SkeletonBodyText,
 } from '@shopify/polaris';
 
-import CartBadge from '../../components/Badge/CartBadge';
-import Counter from '../../components/Counter/Counter';
-import PopupModal from '../../components/PopupModal/PopupModal';
+import ProductsList from '../../components/ProductsList';
+import CartBadge from '../../components/CartBadge';
+import Counter from '../../components/Counter';
+import PopupModal from '../../components/PopupModal';
+import AutocompleteSearch from '../../components/AutocompleteSearch';
 
 type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
 
 export default function Cart() {
-  const [cart, setIsCart] = useState({ qty: 0, total: 0 });
+  const [cart, setIsCart] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   const navigate = useNavigate();
   const fetch = useAuthenticatedFetch();
@@ -36,7 +39,7 @@ export default function Cart() {
   const formatter = (price: number) => {
     const formatter = new Intl.NumberFormat(undefined, {
       style: 'currency',
-      currency: customer.currency || 'USD',
+      currency: customer ? customer.currency : 'USD',
     });
 
     return formatter.format(price);
@@ -60,7 +63,17 @@ export default function Cart() {
                 },
               ]}
               sectioned
-            ></LegacyCard>
+            >
+              <AutocompleteSearch
+                type={'products'}
+                setFunction={setIsCart}
+              ></AutocompleteSearch>
+              {/* <ProductsList
+                openModal={openModal}
+                currency={customer.currency}
+                cart={cart}
+              ></ProductsList> */}
+            </LegacyCard>
 
             <LegacyCard title="Payment" sectioned>
               <LegacyStack distribution="fill">
@@ -72,13 +85,13 @@ export default function Cart() {
 
                 <LegacyStack.Item fill>
                   <Text variant="bodyMd" as="h4">
-                    {`${cart.qty} items`}
+                    {`${cart ? cart.qty : 0} items`}
                   </Text>
                 </LegacyStack.Item>
 
                 <LegacyStack.Item>
                   <Text variant="bodyMd" as="p" alignment="end">
-                    {`${customer ? formatter(cart.total) : cart.total}`}
+                    {`${customer ? formatter(cart.total) : formatter(0)}`}
                   </Text>
                 </LegacyStack.Item>
               </LegacyStack>
@@ -166,8 +179,8 @@ export default function Cart() {
                 </LegacyCard.Section>
               </LegacyCard>
             ) : (
-              <LegacyCard title="Customer">
-                <LegacyCard.Section></LegacyCard.Section>
+              <LegacyCard title="Customer" sectioned>
+                <AutocompleteSearch type={'customer'} setFunction={setCustomer}></AutocompleteSearch>
               </LegacyCard>
             )}
           </Layout.Section>
@@ -180,13 +193,13 @@ export default function Cart() {
           primaryAction={{
             content: 'Save',
             loading: false,
-            disabled: false,
+            disabled: !isEditing,
             onAction: () => {},
           }}
           secondaryActions={[
             {
               content: 'Discard',
-              disabled: false,
+              disabled: !isEditing,
               onAction: () => {},
             },
           ]}

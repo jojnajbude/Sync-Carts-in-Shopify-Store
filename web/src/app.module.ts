@@ -115,9 +115,10 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(injectSnippet)
+      .exclude({ path: "/storefront/(.*)", method: RequestMethod.ALL })
       .forRoutes({ path: "/", method: RequestMethod.ALL })
 
-      consumer
+    consumer
       .apply(createWebhooks)
       .exclude({ path: "/storefront/(.*)", method: RequestMethod.ALL })
       .forRoutes({ path: "/*", method: RequestMethod.ALL })

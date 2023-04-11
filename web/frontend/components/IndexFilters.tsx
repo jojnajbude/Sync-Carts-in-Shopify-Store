@@ -1,7 +1,7 @@
 import { IndexFilters, useSetIndexFiltersMode } from '@shopify/polaris';
 import type { AlphaTabProps } from '@shopify/polaris';
 import React, { useState, useCallback } from 'react';
-import { Cart } from '../../types/cart';
+import { Cart } from '../types/cart';
 import { useAuthenticatedFetch } from '@shopify/app-bridge-react';
 
 type Props = {

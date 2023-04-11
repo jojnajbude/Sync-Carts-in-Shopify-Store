@@ -6,7 +6,7 @@ import {
   Select,
   Button,
 } from '@shopify/polaris';
-import { useAuthenticatedFetch } from '../../hooks';
+import { useAuthenticatedFetch } from '../hooks';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {

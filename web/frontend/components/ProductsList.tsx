@@ -6,10 +6,10 @@ import {
   AlphaStack,
   Text,
 } from '@shopify/polaris';
-import Counter from '../Counter/Counter';
-import { formatter } from '../../services/formatter';
+import Counter from './Counter';
+import { formatter } from '../services/formatter';
 
-import { Cart } from '../../types/cart';
+import { Cart } from '../types/cart';
 
 type Props = {
   openModal: (value: 'remove' | 'unreserve' | 'expand' | 'update') => void;

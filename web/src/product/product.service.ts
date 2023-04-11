@@ -17,6 +17,45 @@ const CREATE_PRODUCTS_MUTATION = `
 
 @Injectable()
 export class ProductService {
+  async getProductsByTitle(inputText: string, client: any) {
+    const data = await client.query({
+      data: `{
+        products (first: 25, query: "title:${inputText}*") {
+          edges {
+            node {
+              id
+              title
+              image: featuredImage {
+                id
+                url
+                altText
+              }
+              options {
+                id
+                name
+                position
+                values
+              }
+              totalInventory
+              priceRangeV2 {
+                maxVariantPrice {
+                  amount
+                  currencyCode
+                }
+                minVariantPrice {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+          }
+        }
+      }`
+    })
+
+    return data.body.data.products.edges;
+  }
+
   async create(session: any, count = DEFAULT_PRODUCTS_COUNT) {
     const client = new shopify.api.clients.Graphql({ session });
 

@@ -16,6 +16,24 @@ export class CustomerService {
     });
   }
 
+  async getCustomersByInput(inputText: string, client: any) {
+    const data = await client.query({
+      data: `{
+        customers (first: 25, query: "displayName:${inputText}*") {
+          edges {
+            node {
+              id
+              displayName
+              email
+            }
+          }
+        }
+      }`
+    })
+
+    return data.body.data.customers.edges;
+  }
+
   async updateCustomerPriority(id: string, priority: string) {
     return await this.customerRepository.update({ shopify_user_id: Number(id) }, { priority: priority });
   }

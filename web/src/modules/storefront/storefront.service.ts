@@ -160,7 +160,7 @@ export class StorefrontService {
 
   async createUser(shop: string, user: any) {
     const shopData = await this.shopsRepository.findOneBy({ domain: shop });
-    const customer = await this.customerRepository.save({ shopify_user_id: user.id, shop_id: shopData?.id });
+    const customer = await this.customerRepository.save({ shopify_user_id: user.id, shop_id: shopData?.id, name: `${user.first_name} ${user.last_name}` });
 
     return customer;
   }

@@ -23,6 +23,7 @@ export class StorefrontController {
   @Post('cart/create')
   async createCart(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
+    console.log(req.body)
 
     if (shopDomain) {
       const cart = await this.storefrontService.createCart(shopDomain, req.body);
