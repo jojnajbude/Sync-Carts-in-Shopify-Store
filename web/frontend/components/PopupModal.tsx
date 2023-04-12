@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 
 type Props = {
   type: 'remove' | 'unreserve' | 'expand' | 'update';
-  selectedRows: number[];
+  selectedRows: string[];
   setShowModal: (state: boolean) => void;
   setIsError: (state: boolean) => void;
   setActiveToast: (state: boolean) => void;
@@ -75,7 +75,9 @@ export default function PopupModal({
     });
 
     if (window.location.href.includes('/cart/')) {
-      navigate(-1);
+      navigate('/summary');
+    } else {
+      setIsLoading(true);
     }
 
     setIsModalLoading(false);
@@ -84,7 +86,6 @@ export default function PopupModal({
     response.ok ? setIsError(false) : setIsError(true);
 
     setActiveToast(true);
-    setIsLoading(true);
   };
 
   const closeModal = () => {

@@ -6,6 +6,7 @@ import { shopifySession } from "../../types/session.js";
 import { Shop } from "../shops/shop.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Cart } from "./cart.entity.js";
+import shopify from "../../utils/shopify.js";
 
 type TableRow = {
   id: any;
@@ -58,7 +59,7 @@ export class CartService {
 
   async getCart(cartId: string, session: shopifySession) {
     const cartItems = await this.itemRepository.query(
-      `select items.*, customers.name, customers.shopify_user_id, customers.priority
+      `select items.*, customers.name, customers.id as customer_id, customers.shopify_user_id, customers.priority
       from items
       left join carts
       on items.cart_id = carts.id
@@ -67,9 +68,34 @@ export class CartService {
       where items.cart_id = ${cartId}`
     )
 
+    const customer = await shopify.api.rest.Customer.find({
+      session,
+      id: cartItems[0].shopify_user_id
+    });
+    
+    const customerCarts = await this.cartRepository.find({ where: {customer_id: cartItems[0].customer_id }})
+    const customerCartsIds = customerCarts.map(cart => cart.id);
+    const customersAllItems = await this.itemRepository.find({ where: { cart_id: In(customerCartsIds)}})
+    console.log(customersAllItems)
+
+    const allCustomerItemsQty = customersAllItems.reduce((acc, cur) => acc + Number(cur.qty), 0);
+
+    const itemDropCount = customersAllItems
+    .filter(item => item.status === 'expired')
+    .reduce((acc, cur) => acc + Number(cur.qty), 0)
+
+    const itemDropRate = (itemDropCount / allCustomerItemsQty) * 100;
+    
+    customer.itemDropCount = itemDropCount;
+    customer.itemDropRate = itemDropRate;
+
+    const shop = await shopify.api.rest.Shop.all({
+      session,
+    });
+
     const cart = await this.handleData(cartItems, session.shop);
 
-    return cart ? cart : false
+    return cart && customer && shop ? [cart, customer, shop] : false
   }
 
   async getSortedCarts(session: shopifySession, direction: 'ascending' | 'descending', index: string,) {

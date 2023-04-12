@@ -25,16 +25,20 @@ import { formatter } from '../../services/formatter';
 type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
 
 export default function Cart() {
+  const [initialCart, setInitialCart] = useState(null);
   const [cart, setCart] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [priority, setPriority] = useState('');
+  const [currency, setCurrency] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<Modal>('remove');
   const [activeToast, setActiveToast] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isCartUpdating, setIsCartUpdating] = useState(false);
+
+  const [isTesting, setIsTesting] = useState(true);
 
   const { cartId } = useParams();
   const navigate = useNavigate();
@@ -48,21 +52,11 @@ export default function Cart() {
         const cartData = await fetch(`/api/carts/get?cartId=${cartId}`);
 
         if (cartData.ok) {
-          const [cart] = await cartData.json();
-          const customerData = await fetch(
-            `/api/customers/get?customerId=${cart.customer_shopify_id}`,
-          );
-
-          const customer = await customerData.json();
-
-          console.log(customer);
-
-          const shop = await fetch(`/api/shop`);
-          const [shopData] = await shop.json();
-
-          customer.currency = shopData.currency;
+          const [[cart], customer, [shop]] = await cartData.json();
 
           if (!ignore) {
+            setInitialCart(cart);
+            setCurrency(shop.currency);
             setCustomer(customer);
             setPriority(cart.priority);
             setCart(cart);
@@ -77,7 +71,7 @@ export default function Cart() {
     return () => {
       ignore = true;
     };
-  }, [cart, isLoading]);
+  }, [isLoading]);
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -88,7 +82,7 @@ export default function Cart() {
     return (
       <PopupModal
         type={modalType}
-        selectedRows={[Number(cartId)]}
+        selectedRows={[cartId]}
         setShowModal={setShowModal}
         setIsError={setIsError}
         setActiveToast={setActiveToast}
@@ -198,7 +192,7 @@ export default function Cart() {
     return (
       <Frame>
         <Page
-          breadcrumbs={[{ onAction: () => navigate(-1) }]}
+          breadcrumbs={[{ onAction: () => navigate('/summary') }]}
           title={`Cart #${cartId}`}
           titleMetadata={
             <CartBadge indicator={cart.reserved_indicator}></CartBadge>
@@ -211,9 +205,9 @@ export default function Cart() {
               onAction: () => console.log('works'),
             },
             {
-              content: 'Mark as paid',
+              content: 'Edit card',
               disabled: true,
-              onAction: () => console.log('works'),
+              onAction: () => setIsEditing(true),
             },
             {
               content: 'Delete cart',
@@ -226,8 +220,10 @@ export default function Cart() {
             <Layout.Section>
               <ProductsList
                 openModal={openModal}
-                currency={customer.currency}
+                currency={currency}
                 cart={cart}
+                setCart={setCart}
+                isEdit={isTesting}
               ></ProductsList>
 
               <LegacyCard title="Payment" sectioned>
@@ -246,7 +242,7 @@ export default function Cart() {
 
                   <LegacyStack.Item>
                     <Text variant="bodyMd" as="p" alignment="end">
-                      {`${formatter(cart.total, customer.currency)}`}
+                      {`${formatter(cart.total, currency)}`}
                     </Text>
                   </LegacyStack.Item>
                 </LegacyStack>
@@ -315,10 +311,10 @@ export default function Cart() {
                 <LegacyCard.Section title="Statistic">
                   <LegacyStack vertical>
                     <Text color="subdued" as="span">
-                      Item drop rate:
+                      {`Item drop rate: ${customer.itemDropRate}%`}
                     </Text>
                     <Text color="subdued" as="span">
-                      Item drop count:
+                      {`Item drop count: ${customer.itemDropCount} items`}
                     </Text>
 
                     <Select

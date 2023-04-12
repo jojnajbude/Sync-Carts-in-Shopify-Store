@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthenticatedFetch } from '../../hooks';
 import {
@@ -27,9 +27,12 @@ import AutocompleteSearch from '../../components/AutocompleteSearch';
 
 type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
 
-export default function Cart() {
-  const [cart, setIsCart] = useState(null);
-  const [customer, setCustomer] = useState(null);
+export default function CartEdit() {
+  const { state } = useLocation();
+
+  const [cart, setIsCart] = useState(state ? state.cart : null);
+  const [customer, setCustomer] = useState(state ? state.customer : null);
+  const [priority, setPriority] = useState(state ? state.priority : 'normal');
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -39,40 +42,51 @@ export default function Cart() {
   const formatter = (price: number) => {
     const formatter = new Intl.NumberFormat(undefined, {
       style: 'currency',
-      currency: customer ? customer.currency : 'USD',
+      currency: state ? state.currency : 'USD',
     });
 
     return formatter.format(price);
+  };
+
+  const priorityLevels = [
+    { label: 'Minimal', value: 'min' },
+    { label: 'Low', value: 'low' },
+    { label: 'Normal', value: 'normal' },
+    { label: 'High', value: 'high' },
+    { label: 'Max', value: 'max' },
+  ];
+
+  const handlePriorityChange = useCallback((value: string) => {
+    setIsEditing(true);
+    setPriority(value);
+  }, []);
+
+  const openModal = (type: Modal) => {
+    setModalType(type);
+    setShowModal(true);
   };
 
   return (
     <Frame>
       <Page
         breadcrumbs={[{ onAction: () => navigate(-1) }]}
-        title={`Create cart`}
+        title={`Cart editor`}
         compactTitle
       >
         <Layout>
           <Layout.Section>
-            <LegacyCard
-              title="Products"
-              actions={[
-                {
-                  content: 'Add new product',
-                  onAction: () => {},
-                },
-              ]}
-              sectioned
-            >
+            <LegacyCard title="Products" sectioned>
               <AutocompleteSearch
                 type={'products'}
                 setFunction={setIsCart}
               ></AutocompleteSearch>
-              {/* <ProductsList
-                openModal={openModal}
-                currency={customer.currency}
-                cart={cart}
-              ></ProductsList> */}
+              {cart && (
+                <ProductsList
+                  openModal={openModal}
+                  currency={state.currency}
+                  cart={cart}
+                ></ProductsList>
+              )}
             </LegacyCard>
 
             <LegacyCard title="Payment" sectioned>
@@ -180,7 +194,10 @@ export default function Cart() {
               </LegacyCard>
             ) : (
               <LegacyCard title="Customer" sectioned>
-                <AutocompleteSearch type={'customer'} setFunction={setCustomer}></AutocompleteSearch>
+                <AutocompleteSearch
+                  type={'customer'}
+                  setFunction={setCustomer}
+                ></AutocompleteSearch>
               </LegacyCard>
             )}
           </Layout.Section>

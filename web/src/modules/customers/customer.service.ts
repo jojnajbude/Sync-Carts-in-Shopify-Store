@@ -35,6 +35,13 @@ export class CustomerService {
   }
 
   async updateCustomerPriority(id: string, priority: string) {
+    const query = `select *
+    from items
+    left join carts
+    on items.cart_id = carts.id
+    left join customers
+    on carts.customer_id = customers.id
+    where customer_id = ${id}`
     return await this.customerRepository.update({ shopify_user_id: Number(id) }, { priority: priority });
   }
 }

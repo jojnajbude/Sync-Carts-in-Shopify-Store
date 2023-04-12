@@ -60,12 +60,12 @@ export default function CartsTable() {
     };
 
     getCarts();
-    getCurrentTableData();
+    // getCurrentTableData();
 
     return () => {
       ignore = true;
     };
-  }, [carts, isLoading, currency]);
+  }, [isLoading]);
 
   const resourceName = {
     singular: 'cart',

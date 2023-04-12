@@ -58,6 +58,7 @@ export class CartController {
 
   @Post('remove')
   async removeItems(@Body() body: number[], @Res() res: Response) {
+    console.log(body)
     const removedItems = await this.cartService.removeItems(body)
 
     removedItems ? res.status(200).send(removedItems) : res.status(500).send('Server error')
