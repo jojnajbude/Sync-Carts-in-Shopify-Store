@@ -3,6 +3,7 @@ import { ADJECTIVES } from "../constants/adjectives.js";
 import { NOUNS } from "../constants/nouns.js";
 import { GraphqlQueryError } from "@shopify/shopify-api";
 import shopify from "../utils/shopify.js";
+import { shopifySession } from "../types/session.js";
 
 export const DEFAULT_PRODUCTS_COUNT = 5;
 const CREATE_PRODUCTS_MUTATION = `
@@ -17,6 +18,13 @@ const CREATE_PRODUCTS_MUTATION = `
 
 @Injectable()
 export class ProductService {
+  async getProduct(id: string, session: shopifySession) {
+    return await shopify.api.rest.Product.find({
+      session,
+      id,
+    })
+  }
+
   async getProductsByTitle(inputText: string, client: any) {
     const data = await client.query({
       data: `{

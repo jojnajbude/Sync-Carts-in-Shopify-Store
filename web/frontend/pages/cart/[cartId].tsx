@@ -12,20 +12,25 @@ import {
   Frame,
   Link,
   Select,
+  Button,
+  Icon,
   SkeletonPage,
   SkeletonBodyText,
 } from '@shopify/polaris';
+import { CancelMajor } from '@shopify/polaris-icons';
 
 import CartBadge from '../../components/CartBadge';
 import PopupModal from '../../components/PopupModal';
 import ProductsList from '../../components/ProductsList';
 
 import { formatter } from '../../services/formatter';
+import CustomerCard from '../../components/CustomerCard';
 
 type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
 
 export default function Cart() {
   const [initialCart, setInitialCart] = useState(null);
+  const [initialCustomer, setInitialCustomer] = useState(null);
   const [cart, setCart] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,8 +42,6 @@ export default function Cart() {
   const [isError, setIsError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isCartUpdating, setIsCartUpdating] = useState(false);
-
-  const [isTesting, setIsTesting] = useState(true);
 
   const { cartId } = useParams();
   const navigate = useNavigate();
@@ -56,6 +59,7 @@ export default function Cart() {
 
           if (!ignore) {
             setInitialCart(cart);
+            setInitialCustomer(customer);
             setCurrency(shop.currency);
             setCustomer(customer);
             setPriority(cart.priority);
@@ -72,6 +76,8 @@ export default function Cart() {
       ignore = true;
     };
   }, [isLoading]);
+
+  console.log(cart, customer);
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -151,19 +157,6 @@ export default function Cart() {
     }
   };
 
-  const priorityLevels = [
-    { label: 'Minimal', value: 'min' },
-    { label: 'Low', value: 'low' },
-    { label: 'Normal', value: 'normal' },
-    { label: 'High', value: 'high' },
-    { label: 'Max', value: 'max' },
-  ];
-
-  const handlePriorityChange = useCallback((value: string) => {
-    setIsEditing(true);
-    setPriority(value);
-  }, []);
-
   const updateCart = async (priority: string) => {
     setIsEditing(false);
     setIsCartUpdating(true);
@@ -184,7 +177,8 @@ export default function Cart() {
   };
 
   const cancelChanges = () => {
-    handlePriorityChange(cart.priority);
+    setCart(initialCart);
+    setCustomer(initialCustomer);
     setIsEditing(false);
   };
 
@@ -198,23 +192,26 @@ export default function Cart() {
             <CartBadge indicator={cart.reserved_indicator}></CartBadge>
           }
           compactTitle
-          secondaryActions={[
-            {
-              content: 'Send notification',
-              disabled: true,
-              onAction: () => console.log('works'),
-            },
-            {
-              content: 'Edit card',
-              disabled: true,
-              onAction: () => setIsEditing(true),
-            },
-            {
-              content: 'Delete cart',
-              destructive: true,
-              onAction: () => openModal('remove'),
-            },
-          ]}
+          secondaryActions={
+            !isEditing
+              ? [
+                  {
+                    content: 'Send notification',
+                    disabled: true,
+                    onAction: () => console.log('works'),
+                  },
+                  {
+                    content: 'Edit card',
+                    onAction: () => setIsEditing(true),
+                  },
+                  {
+                    content: 'Delete cart',
+                    destructive: true,
+                    onAction: () => openModal('remove'),
+                  },
+                ]
+              : []
+          }
         >
           <Layout>
             <Layout.Section>
@@ -223,7 +220,7 @@ export default function Cart() {
                 currency={currency}
                 cart={cart}
                 setCart={setCart}
-                isEdit={isTesting}
+                isEditing={isEditing}
               ></ProductsList>
 
               <LegacyCard title="Payment" sectioned>
@@ -250,83 +247,14 @@ export default function Cart() {
             </Layout.Section>
 
             <Layout.Section secondary>
-              <LegacyCard title="Customer">
-                <LegacyCard.Section>
-                  <LegacyStack vertical>
-                    <Link
-                      url={`https://${cart.shop_domain}/admin/customers/${cart.customer_shopify_id}`}
-                    >
-                      {cart.customer_name}
-                    </Link>
+              <CustomerCard
+                isEditing={isEditing}
+                cart={cart}
+                setCart={setCart}
+                customer={customer}
+                setCustomer={setCustomer}
+              ></CustomerCard>
 
-                    <Text color="subdued" as="span">
-                      {`${customer.orders_count} orders`}
-                    </Text>
-                  </LegacyStack>
-                </LegacyCard.Section>
-
-                <LegacyCard.Section title="Contact information">
-                  <LegacyStack vertical>
-                    <Text color="subdued" as="span">
-                      {customer.email
-                        ? `Email: ${customer.email}`
-                        : 'No email provided'}
-                    </Text>
-                    <Text color="subdued" as="span">
-                      {customer.phone
-                        ? `Phone: ${customer.phone}`
-                        : 'No phone provided'}
-                    </Text>
-                  </LegacyStack>
-                </LegacyCard.Section>
-
-                <LegacyCard.Section title="Shipping address">
-                  <LegacyStack vertical>
-                    {customer.default_address.address1 && (
-                      <Text color="subdued" as="span">
-                        {customer.default_address.address1}
-                      </Text>
-                    )}
-
-                    {customer.default_address.city && (
-                      <Text color="subdued" as="span">
-                        {customer.default_address.city}
-                      </Text>
-                    )}
-
-                    {customer.default_address.country && (
-                      <Text color="subdued" as="span">
-                        {customer.default_address.country}
-                      </Text>
-                    )}
-
-                    {customer.default_address.zip && (
-                      <Text color="subdued" as="span">
-                        {customer.default_address.zip}
-                      </Text>
-                    )}
-                  </LegacyStack>
-                </LegacyCard.Section>
-
-                <LegacyCard.Section title="Statistic">
-                  <LegacyStack vertical>
-                    <Text color="subdued" as="span">
-                      {`Item drop rate: ${customer.itemDropRate}%`}
-                    </Text>
-                    <Text color="subdued" as="span">
-                      {`Item drop count: ${customer.itemDropCount} items`}
-                    </Text>
-
-                    <Select
-                      label="Priority"
-                      labelInline
-                      options={priorityLevels}
-                      onChange={handlePriorityChange}
-                      value={priority}
-                    />
-                  </LegacyStack>
-                </LegacyCard.Section>
-              </LegacyCard>
               <PageActions
                 primaryAction={{
                   content: 'Save',

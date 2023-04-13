@@ -18,13 +18,15 @@ import AutocompleteSearch from './AutocompleteSearch';
 import { formatter } from '../services/formatter';
 
 import { Cart } from '../types/cart';
+import { setCustomer } from '@shopify/app-bridge/actions/Cart';
+import { update } from '@shopify/app-bridge/actions/MarketingExternalActivityTopBar';
 
 type Props = {
   openModal: (value: 'remove' | 'unreserve' | 'expand' | 'update') => void;
   currency: string;
   cart: Cart;
   setCart: (value: any) => void;
-  isEdit: boolean;
+  isEditing: boolean;
 };
 
 export default function ProductsList({
@@ -32,18 +34,34 @@ export default function ProductsList({
   currency,
   cart,
   setCart,
-  isEdit,
+  isEditing,
 }: Props) {
-  const handleChange = useCallback(
-    (newValue: string) => console.log(newValue),
-    [],
-  );
+  const handleChange = (newValue: string, item: any) => {
+    const updatedCart = { ...cart };
+    const index = updatedCart.items.findIndex(
+      cartItem => cartItem.id === item.id,
+    );
+
+    updatedCart.items[index].qty = newValue;
+
+    setCart(updatedCart);
+  };
+
+  const removeItem = (item: any) => {
+    const updatedCart = { ...cart };
+    const updatedItems = updatedCart.items.filter(
+      cartItem => cartItem.id !== item.id,
+    );
+    updatedCart.items = updatedItems;
+
+    setCart(updatedCart);
+  };
 
   const setEditableTable = (items: any[]) => {
     return items.map(item => {
       const product = (
         <LegacyStack>
-          <Thumbnail source={item.image_link} alt={item.title} size="small" />
+          <Thumbnail source={item.image_link} alt={item.title} size="medium" />
 
           <Text variant="bodyMd" fontWeight="bold" as="h3">
             {item.title}
@@ -53,20 +71,21 @@ export default function ProductsList({
 
       const qty = (
         <TextField
-          label="Quantity"
+          label=""
           type="number"
           value={item.qty}
-          onChange={handleChange}
+          onChange={newValue => handleChange(newValue, item)}
           autoComplete="off"
         ></TextField>
       );
 
       const close = (
-        <Button plain destructive>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore */}
-          <Icon source={CancelMajor} color="base" />
-        </Button>
+        <Button
+          plain
+          size="medium"
+          icon={<Icon source={CancelMajor} color="subdued" />}
+          onClick={() => removeItem(item)}
+        ></Button>
       );
 
       return [product, qty, formatter(item.price * item.qty, currency), close];
@@ -76,15 +95,19 @@ export default function ProductsList({
   return (
     <LegacyCard
       title="Products"
-      actions={[
-        {
-          content: 'Reset reservation timers',
-          onAction: () => openModal('unreserve'),
-        },
-      ]}
-      sectioned={!isEdit}
+      actions={
+        !isEditing
+          ? [
+              {
+                content: 'Reset reservation timers',
+                onAction: () => openModal('unreserve'),
+              },
+            ]
+          : []
+      }
+      sectioned={!isEditing}
     >
-      {!isEdit ? (
+      {!isEditing ? (
         <ResourceList
           resourceName={{ singular: 'product', plural: 'products' }}
           items={cart.items}
@@ -144,12 +167,14 @@ export default function ProductsList({
           <LegacyCard.Section>
             <AutocompleteSearch
               type={'products'}
-              setFunction={setCart}
+              cart={cart}
+              setCart={setCart}
+              setCustomer={setCustomer}
             ></AutocompleteSearch>
           </LegacyCard.Section>
 
           <DataTable
-            columnContentTypes={['text', 'numeric', 'numeric', 'text']}
+            columnContentTypes={['text', 'text', 'text', 'text']}
             headings={['Product', 'Quantity', 'Total', '']}
             rows={setEditableTable(cart.items)}
             hoverable={false}

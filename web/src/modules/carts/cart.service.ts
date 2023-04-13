@@ -84,7 +84,7 @@ export class CartService {
     .filter(item => item.status === 'expired')
     .reduce((acc, cur) => acc + Number(cur.qty), 0)
 
-    const itemDropRate = (itemDropCount / allCustomerItemsQty) * 100;
+    const itemDropRate = Math.round((itemDropCount / allCustomerItemsQty) * 100);
     
     customer.itemDropCount = itemDropCount;
     customer.itemDropRate = itemDropRate;

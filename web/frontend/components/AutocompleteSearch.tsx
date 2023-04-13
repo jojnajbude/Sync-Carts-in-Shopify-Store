@@ -4,79 +4,135 @@ import {
   Text,
   Thumbnail,
   AlphaStack,
+  Modal,
 } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
-import { useState, useCallback } from 'react';
+import { useCallback, useReducer } from 'react';
 
 import { formatter } from '../services/formatter';
+import VariantsList from './VariantsList';
 
 type Props = {
   type: string;
-  setFunction: (value: any) => void;
+  cart?: any;
+  setCart?: (value: any) => void;
+  setCustomer?: (value: any) => void;
 };
 
-export default function AutocompleteSearch({ type, setFunction }: Props) {
+type State = {
+  isModalOpen: boolean;
+  product: object | null;
+  selectedOptions: any[];
+  inputValue: string;
+  options: any[];
+  isLoading: boolean;
+  willLoadMoreResults: boolean;
+  visibleOptionIndex: number;
+};
+
+type Action = {
+  type:
+    | 'setLoading'
+    | 'changeVisibleOptionIndex'
+    | 'setLoadMoreResults'
+    | 'setInputValue'
+    | 'setVariantModal'
+    | 'closeModal'
+    | 'setOptions';
+
+  value?: any;
+};
+
+export default function AutocompleteSearch({
+  type,
+  cart,
+  setCart,
+  setCustomer,
+}: Props) {
   const paginationInterval = 25;
-  const deselectedOptions = Array.from(Array(100)).map((_, index) => ({
-    value: `product ${index + 1}`,
-    label: `Product ${index + 1}`,
-  }));
 
-  const searchSettings = (type: string) => {
-    switch (true) {
-      case type === 'products':
-        return {
-          placeholder: 'Search products',
-        };
-
-      case type === 'customer':
-        return {
-          placeholder: 'Search customer',
-        };
-    }
+  const initialState: State = {
+    isModalOpen: false,
+    product: null,
+    selectedOptions: [],
+    inputValue: '',
+    options: [],
+    isLoading: false,
+    willLoadMoreResults: true,
+    visibleOptionIndex: paginationInterval,
   };
 
-  const [searchType, setSearchType] = useState(searchSettings(type));
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [options, setOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [willLoadMoreResults, setWillLoadMoreResults] = useState(true);
-  const [visibleOptionIndex, setVisibleOptionIndex] =
-    useState(paginationInterval);
+  function reducer(state: State, action: Action) {
+    switch (action.type) {
+      case 'setLoading':
+        return { ...state, isLoading: action.value };
+
+      case 'changeVisibleOptionIndex':
+        return { ...state, visibleOptionIndex: action.value };
+
+      case 'setLoadMoreResults':
+        return { ...state, willLoadMoreResults: action.value };
+
+      case 'setInputValue':
+        return { ...state, inputValue: action.value };
+
+      case 'setOptions':
+        return { ...state, options: action.value };
+
+      case 'setVariantModal':
+        return { ...state, isModalOpen: true, product: action.value };
+
+      case 'closeModal':
+        return { ...state, isModalOpen: false, product: null };
+
+      default:
+        return state;
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const fetch = useAuthenticatedFetch();
+  console.log(state);
 
   const handleLoadMoreResults = useCallback(() => {
-    if (willLoadMoreResults) {
-      setIsLoading(true);
+    if (state.willLoadMoreResults) {
+      dispatch({ type: 'setLoading', value: true });
 
       setTimeout(() => {
-        const remainingOptionCount = options.length - visibleOptionIndex;
+        const remainingOptionCount =
+          state.options.length - state.visibleOptionIndex;
         const nextVisibleOptionIndex =
           remainingOptionCount >= paginationInterval
-            ? visibleOptionIndex + paginationInterval
-            : visibleOptionIndex + remainingOptionCount;
+            ? state.visibleOptionIndex + paginationInterval
+            : state.visibleOptionIndex + remainingOptionCount;
 
-        setIsLoading(false);
-        setVisibleOptionIndex(nextVisibleOptionIndex);
+        dispatch({ type: 'setLoading', value: false });
+        dispatch({
+          type: 'changeVisibleOptionIndex',
+          value: nextVisibleOptionIndex,
+        });
 
         if (remainingOptionCount <= paginationInterval) {
-          setWillLoadMoreResults(false);
+          dispatch({ type: 'setLoadMoreResults', value: false });
         }
       }, 1000);
     }
-  }, [willLoadMoreResults, visibleOptionIndex, options.length]);
+  }, [
+    state.willLoadMoreResults,
+    state.visibleOptionIndex,
+    state.options.length,
+  ]);
 
   const updateText = useCallback(
     async (value: string) => {
-      setInputValue(value);
-      setIsLoading(true);
+      dispatch({ type: 'setInputValue', value });
+      dispatch({ type: 'setLoading', value: true });
 
       let results = [];
 
       if (type === 'products') {
-        const data = await fetch(`/api/products/get?input=${value}`);
+        const data = await fetch(`/api/products/find?input=${value}`);
         const products = await data.json();
 
         console.log(products);
@@ -104,25 +160,55 @@ export default function AutocompleteSearch({ type, setFunction }: Props) {
         }));
       }
 
-      setOptions(results);
-      setInputValue;
-      setIsLoading(false);
+      dispatch({ type: 'setOptions', value: results });
+      dispatch({ type: 'setLoading', value: false });
     },
-    [deselectedOptions, options],
+    [state.options],
   );
 
-  const textField = (
-    <Autocomplete.TextField
-      onChange={updateText}
-      label={''}
-      value={inputValue}
-      placeholder={searchType.placeholder}
-      autoComplete="off"
-    />
-  );
+  const handleSelect = async ([selected]: string[]) => {
+    if (type === 'products') {
+      dispatch({ type: 'setVariantModal', value: null });
 
-  const addSelectedResult = selected => {
-    console.log(selected);
+      const productId = selected.split('/').slice(-1)[0];
+
+      const data = await fetch(`/api/products/get?id=${productId}`);
+      const productWithVariants = await data.json();
+
+      dispatch({ type: 'setVariantModal', value: productWithVariants });
+    } else {
+      const customerId = selected;
+
+      const customerData = await fetch(
+        `/api/customers/get?customerId=${customerId}`,
+      );
+      const customer = await customerData.json();
+      console.log(customer);
+
+      setCustomer(customer);
+    }
+  };
+
+  const addItemToCart = async (variant: any) => {
+    variant.qty = 1;
+    const changedCart = { ...cart };
+
+    const hasItem = changedCart.items.findIndex(
+      (item: { variant_id: string }) => +item.variant_id === variant.id,
+    );
+
+    console.log(variant.id, changedCart.items);
+
+    if (hasItem !== -1) {
+      changedCart.items[hasItem].qty =
+        Number(changedCart.items[hasItem].qty) + 1;
+    } else {
+      variant.variant_id = variant.id;
+      changedCart.items = [...changedCart.items, variant];
+    }
+
+    setCart(changedCart);
+    dispatch({ type: 'closeModal' });
   };
 
   const createProductOption = (
@@ -136,7 +222,7 @@ export default function AutocompleteSearch({ type, setFunction }: Props) {
       <LegacyStack>
         <Thumbnail source={url} alt={title} size="small" />
 
-        <LegacyStack.Item fill>
+        <LegacyStack.Item>
           <AlphaStack gap="3">
             <Text variant="bodyMd" fontWeight="bold" as="h3">
               {title}
@@ -176,19 +262,44 @@ export default function AutocompleteSearch({ type, setFunction }: Props) {
     );
   };
 
-  const optionList = options.slice(0, visibleOptionIndex);
+  const optionList = state.options.slice(0, state.visibleOptionIndex);
+
+  const textField = (
+    <Autocomplete.TextField
+      onChange={updateText}
+      label={''}
+      value={state.inputValue}
+      placeholder={type === 'products' ? 'Search products' : 'Search customer'}
+      autoComplete="off"
+    />
+  );
 
   return (
     <LegacyStack vertical>
       <Autocomplete
         options={optionList}
-        selected={selectedOptions}
+        selected={state.selectedOptions}
         textField={textField}
-        onSelect={addSelectedResult}
-        loading={isLoading}
+        onSelect={selected => handleSelect(selected)}
+        loading={state.isLoading}
         onLoadMoreResults={handleLoadMoreResults}
-        willLoadMoreResults={willLoadMoreResults}
+        willLoadMoreResults={state.willLoadMoreResults}
       />
+      {state.isModalOpen && (
+        <Modal
+          open={state.isModalOpen}
+          title="Select variant"
+          loading={!state.product}
+          onClose={() => dispatch({ type: 'closeModal' })}
+        >
+          {state.product && (
+            <VariantsList
+              product={state.product}
+              addItemToCart={addItemToCart}
+            ></VariantsList>
+          )}
+        </Modal>
+      )}
     </LegacyStack>
   );
 }

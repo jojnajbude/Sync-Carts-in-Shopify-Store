@@ -3,17 +3,43 @@ import shopify from "../../utils/shopify.js";
 import { shopifySession } from "../../types/session.js";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Customer } from "./customer.entity.js";
-import { Repository } from "typeorm";
+import { Repository, In } from "typeorm";
+import { Cart } from "../carts/cart.entity.js";
+import { Item } from "../items/item.entity.js";
 
 @Injectable()
 export class CustomerService {
-  constructor(@InjectRepository(Customer) private customerRepository: Repository<Customer>) {}
+  constructor(
+    @InjectRepository(Customer) private customerRepository: Repository<Customer>,
+    @InjectRepository(Cart) private cartRepository: Repository<Cart>,
+    @InjectRepository(Item) private itemRepository: Repository<Item>,
+  ) {}
 
   async getCustomer(session: shopifySession, customerId: string) {
-    return await shopify.api.rest.Customer.find({
+    const customer = await shopify.api.rest.Customer.find({
       session,
       id: customerId
     });
+    
+    const customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
+    const customerCarts = await this.cartRepository.find({ where: {customer_id: customerData?.id }})
+    const customerCartsIds = customerCarts.map(cart => cart.id);
+    const customersAllItems = await this.itemRepository.find({ where: { cart_id: In(customerCartsIds)}})
+
+    const allCustomerItemsQty = customersAllItems.reduce((acc, cur) => acc + Number(cur.qty), 0);
+
+    const itemDropCount = customersAllItems
+    .filter(item => item.status === 'expired')
+    .reduce((acc, cur) => acc + Number(cur.qty), 0)
+
+    const itemDropRate = Math.round((itemDropCount / allCustomerItemsQty) * 100) || 0;
+    
+    customer.itemDropCount = itemDropCount;
+    customer.itemDropRate = itemDropRate;
+    customer.priority = customerData?.priority;
+    console.log(customer)
+
+    return customer;
   }
 
   async getCustomersByInput(inputText: string, client: any) {
