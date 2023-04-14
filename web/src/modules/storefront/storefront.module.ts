@@ -10,6 +10,7 @@ import { StorefrontService } from "./storefront.service.js";
 @Module({
   controllers: [StorefrontController],
   providers: [StorefrontService],
-  imports: [TypeOrmModule.forFeature([Shop, Customer, Cart, Item])]
+  imports: [TypeOrmModule.forFeature([Shop, Customer, Cart, Item])],
+  exports: [StorefrontService],
 })
 export class StorefrontModule {}

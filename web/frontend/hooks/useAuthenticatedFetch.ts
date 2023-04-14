@@ -28,7 +28,7 @@ export function useAuthenticatedFetch() {
 
 function checkHeadersForReauthorization(
   headers: Headers,
-  app: ClientApplication<AppBridgeState>
+  app: ClientApplication<AppBridgeState>,
 ) {
   if (headers.get('X-Shopify-API-Request-Failure-Reauthorize') === '1') {
     const authUrlHeader =
@@ -40,7 +40,7 @@ function checkHeadersForReauthorization(
       Redirect.Action.REMOTE,
       authUrlHeader.startsWith('/')
         ? `https://${window.location.host}${authUrlHeader}`
-        : authUrlHeader
+        : authUrlHeader,
     );
   }
 }

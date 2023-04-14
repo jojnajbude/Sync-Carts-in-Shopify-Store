@@ -37,7 +37,6 @@ export class CustomerService {
     customer.itemDropCount = itemDropCount;
     customer.itemDropRate = itemDropRate;
     customer.priority = customerData?.priority;
-    console.log(customer)
 
     return customer;
   }
@@ -57,17 +56,38 @@ export class CustomerService {
       }`
     })
 
+    const customersIds = [];
+
+    for (const customer of data.body.data.customers.edges) {
+      const id = customer.node.id.split('/').slice(-1)[0];
+      customersIds.push(id)
+    }
+
+    const customersData = await this.customerRepository.query(
+      `select customers.*, carts.id as cart_id 
+      from customers
+      left join carts
+      on customers.id = carts.customer_id
+      where customers.shopify_user_id In (${customersIds})`
+    )
+
+    for (const customer of data.body.data.customers.edges) {
+      const id = customer.node.id.split('/').slice(-1)[0];
+      const index = customersData.findIndex((user: { shopify_user_id: any; }) => id === user.shopify_user_id);
+      if (index !== -1) {
+        if (customersData[index].cart_id) {
+          customer.node.hasCart = true;
+          continue;
+        }
+      }
+
+      customer.node.hasCart = false;
+    }
+
     return data.body.data.customers.edges;
   }
 
   async updateCustomerPriority(id: string, priority: string) {
-    const query = `select *
-    from items
-    left join carts
-    on items.cart_id = carts.id
-    left join customers
-    on carts.customer_id = customers.id
-    where customer_id = ${id}`
     return await this.customerRepository.update({ shopify_user_id: Number(id) }, { priority: priority });
   }
 }

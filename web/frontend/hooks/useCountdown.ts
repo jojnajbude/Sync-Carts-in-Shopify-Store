@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const useCountdown = (expiredAt: string) => {
+const useCountdown = (expiredAt: Date) => {
   const endDate = new Date(expiredAt).getTime();
 
   const [countDown, setCountDown] = useState(endDate - new Date().getTime());

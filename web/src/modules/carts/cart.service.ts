@@ -7,6 +7,9 @@ import { Shop } from "../shops/shop.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Cart } from "./cart.entity.js";
 import shopify from "../../utils/shopify.js";
+import { CustomerService } from "../customers/customer.service.js";
+import { ShopService } from "../shops/shop.service.js";
+import { StorefrontService } from "../storefront/storefront.service.js";
 
 type TableRow = {
   id: any;
@@ -24,7 +27,10 @@ export class CartService {
     @InjectRepository(Shop) private shopsRepository: Repository<Shop>, 
     @InjectRepository(Customer) private customerRepository: Repository<Customer>, 
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
-    @InjectRepository(Item) private itemRepository: Repository<Item>
+    @InjectRepository(Item) private itemRepository: Repository<Item>,
+    private readonly customerService: CustomerService,
+    private readonly shopsService: ShopService,
+    private readonly storefrontService: StorefrontService,
   ) {}
 
   async getShopCarts(session: shopifySession) {
@@ -57,6 +63,57 @@ export class CartService {
     }
   }
 
+  async createNewCart(cart: any, customer: any, session: shopifySession) {
+    const [shop] = await this.shopsService.getShopData(session);
+    const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop.id });
+    const customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
+
+    const newCart = await this.cartRepository.save({ customer_id: customerData?.id, shop_id: shopData?.id });
+
+    const items = [];
+
+    for (const item of cart.items) {
+      let reservationTime = 0;
+
+        switch(true) {
+          case customerData?.priority === 'max':
+            reservationTime = 336;
+            break;
+          case customerData?.priority === 'high':
+            reservationTime = 72;
+            break;
+          case customerData?.priority === 'normal':
+            reservationTime = 24;
+            break;
+          case customerData?.priority === 'low':
+            reservationTime = 8;
+            break;
+          case customerData?.priority === 'min':
+            reservationTime = 1;
+            break;
+        }
+
+      const expireTime = this.storefrontService.countExpireDate(new Date(), reservationTime);
+      const newItem = {
+        variant_id: item.id,
+        product_id: item.product_id,
+        qty: item.qty,
+        expireAt: expireTime,
+        status: 'reserved',
+        cart_id: newCart.id,
+        price: item.price,
+        title: item.title,
+        image_link: item.image_link,
+      }
+
+      items.push(newItem);
+    }
+
+    const newItems = await this.itemRepository.save(items);
+
+    return newItems ? newCart : false;
+  }
+
   async getCart(cartId: string, session: shopifySession) {
     const cartItems = await this.itemRepository.query(
       `select items.*, customers.name, customers.id as customer_id, customers.shopify_user_id, customers.priority
@@ -68,26 +125,7 @@ export class CartService {
       where items.cart_id = ${cartId}`
     )
 
-    const customer = await shopify.api.rest.Customer.find({
-      session,
-      id: cartItems[0].shopify_user_id
-    });
-    
-    const customerCarts = await this.cartRepository.find({ where: {customer_id: cartItems[0].customer_id }})
-    const customerCartsIds = customerCarts.map(cart => cart.id);
-    const customersAllItems = await this.itemRepository.find({ where: { cart_id: In(customerCartsIds)}})
-    console.log(customersAllItems)
-
-    const allCustomerItemsQty = customersAllItems.reduce((acc, cur) => acc + Number(cur.qty), 0);
-
-    const itemDropCount = customersAllItems
-    .filter(item => item.status === 'expired')
-    .reduce((acc, cur) => acc + Number(cur.qty), 0)
-
-    const itemDropRate = Math.round((itemDropCount / allCustomerItemsQty) * 100);
-    
-    customer.itemDropCount = itemDropCount;
-    customer.itemDropRate = itemDropRate;
+    const customer = await this.customerService.getCustomer(session, cartItems[0].shopify_user_id)
 
     const shop = await shopify.api.rest.Shop.all({
       session,

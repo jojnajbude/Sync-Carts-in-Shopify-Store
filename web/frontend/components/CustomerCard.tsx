@@ -11,12 +11,15 @@ import { CancelMajor } from '@shopify/polaris-icons';
 
 import AutocompleteSearch from './AutocompleteSearch';
 
+import { Cart } from '../types/cart';
+import { Customer } from '../types/customer';
+
 type Props = {
   isEditing: boolean;
-  cart: any;
-  customer: any;
-  setCart: (value: any) => void;
-  setCustomer: (value: any) => void;
+  cart: Cart;
+  customer: Customer;
+  setCart: (value: Cart) => void;
+  setCustomer: (value: Customer) => void;
 };
 
 export default function CustomerCard({
@@ -34,13 +37,13 @@ export default function CustomerCard({
     { label: 'Max', value: 'max' },
   ];
 
-  console.log(customer);
+  const handlePriorityChange = (
+    value: 'max' | 'high' | 'normal' | 'low' | 'min',
+  ) => {
+    const updatedCustomer = { ...customer };
+    updatedCustomer.priority = value;
 
-  const handlePriorityChange = (value: string) => {
-    const updatedCart = { ...cart };
-    updatedCart.priority = value;
-
-    setCart(updatedCart);
+    setCustomer(updatedCustomer);
   };
 
   const removeUser = () => {
@@ -51,6 +54,9 @@ export default function CustomerCard({
     return (
       <LegacyCard
         title="Customer"
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        /*
+        // @ts-ignore */
         actions={
           isEditing
             ? [

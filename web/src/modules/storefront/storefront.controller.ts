@@ -8,7 +8,7 @@ export class StorefrontController {
 
   @Get('update')
   async updateData(@Query() query: { cart_id: string, customer: string }, @Res() res: Response) {
-    const cartItems = await this.storefrontService.getData(query.cart_id, query.customer);
+    const cartItems = await this.storefrontService.updateData(query.cart_id, query.customer);
 
     cartItems ? res.status(200).send(cartItems) : res.status(500).send('Server error');
   }
@@ -23,7 +23,6 @@ export class StorefrontController {
   @Post('cart/create')
   async createCart(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
-    console.log(req.body)
 
     if (shopDomain) {
       const cart = await this.storefrontService.createCart(shopDomain, req.body);

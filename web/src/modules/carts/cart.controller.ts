@@ -1,10 +1,19 @@
-import { Body, Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import { Response } from "express";
 import { CartService } from "./cart.service.js";
 
 @Controller('/api/carts')
 export class CartController {
   constructor (private cartService: CartService) {}
+
+  @Post('create')
+  async createNewCart(@Body() body: any, @Res() res: Response) {
+    const { cart, customer } = body;
+    const session = res.locals.shopify.session;
+    const newCart = await this.cartService.createNewCart(cart, customer, session);
+
+    newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
+  }
 
   @Get('all')
   async getShopCarts(@Res() res: Response) {
@@ -58,7 +67,6 @@ export class CartController {
 
   @Post('remove')
   async removeItems(@Body() body: number[], @Res() res: Response) {
-    console.log(body)
     const removedItems = await this.cartService.removeItems(body)
 
     removedItems ? res.status(200).send(removedItems) : res.status(500).send('Server error')

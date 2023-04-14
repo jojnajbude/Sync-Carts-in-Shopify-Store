@@ -3,11 +3,11 @@ import {
   QueryClientProvider,
   QueryCache,
   MutationCache,
-} from 'react-query'
+} from 'react-query';
 
 type Props = {
-  children: React.ReactElement | React.ReactElement[]
-}
+  children: React.ReactElement | React.ReactElement[];
+};
 
 /**
  * Sets up the QueryClientProvider from react-query.
@@ -17,7 +17,7 @@ export function QueryProvider({ children }: Props) {
   const client = new QueryClient({
     queryCache: new QueryCache(),
     mutationCache: new MutationCache(),
-  })
+  });
 
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }

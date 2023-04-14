@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import {
   LegacyCard,
   ResourceList,
@@ -17,15 +16,13 @@ import Counter from './Counter';
 import AutocompleteSearch from './AutocompleteSearch';
 import { formatter } from '../services/formatter';
 
-import { Cart } from '../types/cart';
-import { setCustomer } from '@shopify/app-bridge/actions/Cart';
-import { update } from '@shopify/app-bridge/actions/MarketingExternalActivityTopBar';
+import { Cart, Item } from '../types/cart';
 
 type Props = {
   openModal: (value: 'remove' | 'unreserve' | 'expand' | 'update') => void;
   currency: string;
   cart: Cart;
-  setCart: (value: any) => void;
+  setCart: (value: Cart) => void;
   isEditing: boolean;
 };
 
@@ -36,7 +33,7 @@ export default function ProductsList({
   setCart,
   isEditing,
 }: Props) {
-  const handleChange = (newValue: string, item: any) => {
+  const handleChange = (newValue: string, item: Item) => {
     const updatedCart = { ...cart };
     const index = updatedCart.items.findIndex(
       cartItem => cartItem.id === item.id,
@@ -44,10 +41,23 @@ export default function ProductsList({
 
     updatedCart.items[index].qty = newValue;
 
+    const total = updatedCart.items.reduce(
+      (acc: number, cur: Item) => acc + Number(cur.qty) * Number(cur.price),
+      0,
+    );
+
+    const qty = updatedCart.items.reduce(
+      (acc: number, cur: Item) => acc + Number(cur.qty),
+      0,
+    );
+
+    updatedCart.total = total;
+    updatedCart.qty = qty;
+
     setCart(updatedCart);
   };
 
-  const removeItem = (item: any) => {
+  const removeItem = (item: Item) => {
     const updatedCart = { ...cart };
     const updatedItems = updatedCart.items.filter(
       cartItem => cartItem.id !== item.id,
@@ -57,7 +67,7 @@ export default function ProductsList({
     setCart(updatedCart);
   };
 
-  const setEditableTable = (items: any[]) => {
+  const setEditableTable = (items: Item[]) => {
     return items.map(item => {
       const product = (
         <LegacyStack>
@@ -73,7 +83,8 @@ export default function ProductsList({
         <TextField
           label=""
           type="number"
-          value={item.qty}
+          min={1}
+          value={String(item.qty)}
           onChange={newValue => handleChange(newValue, item)}
           autoComplete="off"
         ></TextField>
@@ -88,7 +99,12 @@ export default function ProductsList({
         ></Button>
       );
 
-      return [product, qty, formatter(item.price * item.qty, currency), close];
+      return [
+        product,
+        qty,
+        formatter(Number(item.price) * Number(item.qty), currency),
+        close,
+      ];
     });
   };
 
@@ -110,7 +126,7 @@ export default function ProductsList({
       {!isEditing ? (
         <ResourceList
           resourceName={{ singular: 'product', plural: 'products' }}
-          items={cart.items}
+          items={cart ? cart.items : []}
           renderItem={item => {
             const {
               id,
@@ -125,7 +141,7 @@ export default function ProductsList({
 
             return (
               <ResourceList.Item
-                id={id}
+                id={String(id)}
                 url={`https://${cart.shop_domain}/admin/products/${product_id}`}
                 accessibilityLabel={`View details for ${title}`}
               >
@@ -169,16 +185,17 @@ export default function ProductsList({
               type={'products'}
               cart={cart}
               setCart={setCart}
-              setCustomer={setCustomer}
             ></AutocompleteSearch>
           </LegacyCard.Section>
 
-          <DataTable
-            columnContentTypes={['text', 'text', 'text', 'text']}
-            headings={['Product', 'Quantity', 'Total', '']}
-            rows={setEditableTable(cart.items)}
-            hoverable={false}
-          ></DataTable>
+          {cart.items.length ? (
+            <DataTable
+              columnContentTypes={['text', 'text', 'text', 'text']}
+              headings={['Product', 'Quantity', 'Total', '']}
+              rows={setEditableTable(cart.items)}
+              hoverable={false}
+            ></DataTable>
+          ) : null}
         </>
       )}
     </LegacyCard>

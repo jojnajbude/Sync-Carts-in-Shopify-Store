@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Provider } from '@shopify/app-bridge-react'
-import { Banner, Layout, Page } from '@shopify/polaris'
+import { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Provider } from '@shopify/app-bridge-react';
+import { Banner, Layout, Page } from '@shopify/polaris';
 
 /**
  * A component to configure App Bridge.
@@ -13,21 +13,21 @@ import { Banner, Layout, Page } from '@shopify/polaris'
  * See: https://shopify.dev/apps/tools/app-bridge/react-components
  */
 export function AppBridgeProvider({ children }: any) {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const location = useLocation();
+  const navigate = useNavigate();
   const history = useMemo(
     () => ({
       replace: (path: any) => {
-        navigate(path, { replace: true })
+        navigate(path, { replace: true });
       },
     }),
-    [navigate]
-  )
+    [navigate],
+  );
 
   const routerConfig = useMemo(
     () => ({ history, location }),
-    [history, location]
-  )
+    [history, location],
+  );
 
   // The host may be present initially, but later removed by navigation.
   // By caching this in state, we ensure that the host is never lost.
@@ -37,16 +37,16 @@ export function AppBridgeProvider({ children }: any) {
   const [appBridgeConfig] = useState(() => {
     const host =
       new URLSearchParams(location.search).get('host') ||
-      window.__SHOPIFY_DEV_HOST
+      window.__SHOPIFY_DEV_HOST;
 
-    window.__SHOPIFY_DEV_HOST = host
+    window.__SHOPIFY_DEV_HOST = host;
 
     return {
       host,
       apiKey: process.env.SHOPIFY_API_KEY,
       forceRedirect: true,
-    }
-  })
+    };
+  });
 
   if (!process.env.SHOPIFY_API_KEY || !appBridgeConfig.host) {
     const bannerProps = !process.env.SHOPIFY_API_KEY
@@ -69,7 +69,7 @@ export function AppBridgeProvider({ children }: any) {
               Partners Dashboard <b>Test your app</b> feature
             </>
           ),
-        }
+        };
 
     return (
       <Page narrowWidth>
@@ -81,12 +81,12 @@ export function AppBridgeProvider({ children }: any) {
           </Layout.Section>
         </Layout>
       </Page>
-    )
+    );
   }
 
   return (
     <Provider config={appBridgeConfig} router={routerConfig}>
       {children}
     </Provider>
-  )
+  );
 }

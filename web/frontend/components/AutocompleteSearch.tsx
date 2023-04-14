@@ -5,26 +5,31 @@ import {
   Thumbnail,
   AlphaStack,
   Modal,
+  Icon,
 } from '@shopify/polaris';
+import { SearchMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
 import { useCallback, useReducer } from 'react';
 
-import { formatter } from '../services/formatter';
 import VariantsList from './VariantsList';
+import { formatter } from '../services/formatter';
+
+import { Cart, Item } from '../types/cart';
+import { Customer } from '../types/customer';
 
 type Props = {
   type: string;
-  cart?: any;
-  setCart?: (value: any) => void;
-  setCustomer?: (value: any) => void;
+  cart?: Cart;
+  setCart?: (value: Cart) => void;
+  setCustomer?: (value: Customer) => void;
 };
 
 type State = {
   isModalOpen: boolean;
   product: object | null;
-  selectedOptions: any[];
+  selectedOptions: string[];
   inputValue: string;
-  options: any[];
+  options: string[];
   isLoading: boolean;
   willLoadMoreResults: boolean;
   visibleOptionIndex: number;
@@ -40,7 +45,29 @@ type Action = {
     | 'closeModal'
     | 'setOptions';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
+};
+
+type GraphQlProduct = {
+  node: {
+    title: string;
+    image: { url: string };
+    totalInventory: string;
+    priceRangeV2: {
+      minVariantPrice: { amount: string; currencyCode: string };
+    };
+    id: string;
+  };
+};
+
+type GraphQlCustomer = {
+  node: {
+    id: string;
+    displayName: string;
+    email: string;
+    hasCart: boolean;
+  };
 };
 
 export default function AutocompleteSearch({
@@ -93,7 +120,6 @@ export default function AutocompleteSearch({
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const fetch = useAuthenticatedFetch();
-  console.log(state);
 
   const handleLoadMoreResults = useCallback(() => {
     if (state.willLoadMoreResults) {
@@ -135,9 +161,7 @@ export default function AutocompleteSearch({
         const data = await fetch(`/api/products/find?input=${value}`);
         const products = await data.json();
 
-        console.log(products);
-
-        results = products.map((product: any) => ({
+        results = products.map((product: GraphQlProduct) => ({
           label: createProductOption(
             product.node.title,
             product.node.image.url,
@@ -151,11 +175,13 @@ export default function AutocompleteSearch({
         const data = await fetch(`/api/customers/get/all?input=${value}`);
         const customers = await data.json();
 
-        results = customers.map((customer: any) => ({
+        results = customers.map((customer: GraphQlCustomer) => ({
           label: createCustomerOption(
             customer.node.displayName,
             customer.node.email,
+            customer.node.hasCart,
           ),
+          disabled: customer.node.hasCart,
           value: customer.node.id.split('/').slice(-1),
         }));
       }
@@ -178,26 +204,22 @@ export default function AutocompleteSearch({
       dispatch({ type: 'setVariantModal', value: productWithVariants });
     } else {
       const customerId = selected;
-
       const customerData = await fetch(
         `/api/customers/get?customerId=${customerId}`,
       );
       const customer = await customerData.json();
-      console.log(customer);
 
       setCustomer(customer);
     }
   };
 
-  const addItemToCart = async (variant: any) => {
+  const addItemToCart = async (variant: Item) => {
     variant.qty = 1;
     const changedCart = { ...cart };
 
     const hasItem = changedCart.items.findIndex(
-      (item: { variant_id: string }) => +item.variant_id === variant.id,
+      (item: Item) => +item.variant_id === variant.id,
     );
-
-    console.log(variant.id, changedCart.items);
 
     if (hasItem !== -1) {
       changedCart.items[hasItem].qty =
@@ -245,17 +267,26 @@ export default function AutocompleteSearch({
     );
   };
 
-  const createCustomerOption = (name: string, email: string) => {
+  const createCustomerOption = (
+    name: string,
+    email: string,
+    hasCart: boolean,
+  ) => {
     return (
       <LegacyStack>
         <LegacyStack.Item fill>
           <AlphaStack gap="3">
-            <Text variant="bodyMd" as="p">
+            <Text variant="bodySm" as="span">
               {name}
             </Text>
-            <Text variant="bodyMd" as="p" color="subdued">
+            <Text variant="bodySm" as="span" color="subdued">
               {email}
             </Text>
+            {hasCart && (
+              <Text variant="bodySm" as="span" color="success">
+                This customer already has а cart
+              </Text>
+            )}
           </AlphaStack>
         </LegacyStack.Item>
       </LegacyStack>
@@ -266,6 +297,7 @@ export default function AutocompleteSearch({
 
   const textField = (
     <Autocomplete.TextField
+      prefix={<Icon source={SearchMinor} color="base" />}
       onChange={updateText}
       label={''}
       value={state.inputValue}

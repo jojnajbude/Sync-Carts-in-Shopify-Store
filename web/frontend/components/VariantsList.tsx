@@ -6,16 +6,17 @@ import {
   LegacyStack,
   Thumbnail,
 } from '@shopify/polaris';
+import { Product, Variant } from '../types/product';
 
 import { formatter } from '../services/formatter';
+import { Item } from '../types/cart';
 
 type Props = {
-  product: any;
-  addItemToCart: (value: any) => void;
+  product: Product;
+  addItemToCart: (value: Item | Variant) => void;
 };
 
 export default function VariantsList({ product, addItemToCart }: Props) {
-  console.log(product);
   return (
     <LegacyCard>
       <ResourceList
@@ -28,12 +29,12 @@ export default function VariantsList({ product, addItemToCart }: Props) {
           } else {
             variant.image_link = product.images.find(
               (image: { id: number }) => image.id === image_id,
-            );
+            ).src;
           }
 
           return (
             <ResourceItem
-              id={id}
+              id={String(id)}
               onClick={() => addItemToCart(variant)}
               media={
                 <Thumbnail

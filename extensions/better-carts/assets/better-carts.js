@@ -6,9 +6,7 @@ const APP_URL = 'https://better-carts.dev-test.pro';
     swapAddToCartBtn();
     const cookie = getCartCookie();
     
-    if (cookie) {
-      updateData(window.customer.id, window.customer.shop, cookie);
-    }
+    updateData(window.customer.id, cookie);
   }
 })()
 
@@ -38,8 +36,25 @@ function getCartCookie() {
   return cookie;
 }
 
-async function updateData(id, shop, cart_id) {
+async function updateData(id, cart_id) {
   const data = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}`);
+
+  // const query = `
+  //   mutation cartCreate {
+  //     cartCreate {
+  //       cart {
+
+  //       }
+  //     }
+  //   }
+  // `
+
+  // await fetch(`https://${store_name}/api/2023-04/graphql.json`, {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify( { query })
+  // })
+
   // ---------------------------------------
   console.log(data)
   // ---------------------------------------

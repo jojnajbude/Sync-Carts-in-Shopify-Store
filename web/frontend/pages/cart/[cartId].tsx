@@ -10,38 +10,33 @@ import {
   Text,
   Toast,
   Frame,
-  Link,
-  Select,
-  Button,
-  Icon,
   SkeletonPage,
   SkeletonBodyText,
 } from '@shopify/polaris';
-import { CancelMajor } from '@shopify/polaris-icons';
 
 import CartBadge from '../../components/CartBadge';
 import PopupModal from '../../components/PopupModal';
 import ProductsList from '../../components/ProductsList';
+import CustomerCard from '../../components/CustomerCard';
 
 import { formatter } from '../../services/formatter';
-import CustomerCard from '../../components/CustomerCard';
+import { Cart } from '../../types/cart';
 
 type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
 
-export default function Cart() {
+export default function CartPage() {
   const [initialCart, setInitialCart] = useState(null);
   const [initialCustomer, setInitialCustomer] = useState(null);
   const [cart, setCart] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [priority, setPriority] = useState('');
   const [currency, setCurrency] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<Modal>('remove');
   const [activeToast, setActiveToast] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isCartUpdating, setIsCartUpdating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { cartId } = useParams();
   const navigate = useNavigate();
@@ -56,13 +51,11 @@ export default function Cart() {
 
         if (cartData.ok) {
           const [[cart], customer, [shop]] = await cartData.json();
-
           if (!ignore) {
             setInitialCart(cart);
             setInitialCustomer(customer);
             setCurrency(shop.currency);
             setCustomer(customer);
-            setPriority(cart.priority);
             setCart(cart);
             setIsLoading(false);
           }
@@ -70,6 +63,25 @@ export default function Cart() {
       };
 
       getCartData();
+    } else if (isLoading && cartId === 'create') {
+      const createCart = async () => {
+        const newCart: Cart = {
+          items: [],
+        };
+
+        const shopData = await fetch('/api/shop');
+        const [shop] = await shopData.json();
+
+        setIsEditing(true);
+        setInitialCart(newCart);
+        setInitialCustomer(null);
+        setCurrency(shop.currency);
+        setCustomer(null);
+        setCart(newCart);
+        setIsLoading(false);
+      };
+
+      createCart();
     }
 
     return () => {
@@ -77,7 +89,7 @@ export default function Cart() {
     };
   }, [isLoading]);
 
-  console.log(cart, customer);
+  console.log(cart)
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -157,23 +169,25 @@ export default function Cart() {
     }
   };
 
-  const updateCart = async (priority: string) => {
-    setIsEditing(false);
-    setIsCartUpdating(true);
+  const saveCart = async () => {
+    setIsSaving(true);
 
-    const customerUpdate = await fetch(
-      `/api/customers/update?customerId=${customer.id}&priority=${priority}`,
-    );
+    if (cartId === 'create') {
+      const newCartData = await fetch('/api/carts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: await JSON.stringify({ cart, customer }),
+      });
+      const newCart = await newCartData.json();
 
-    if (customerUpdate.ok) {
-      setIsError(false);
+      if (newCartData.ok) {
+        navigate(`/cart/${newCart.id}`);
+      }
     } else {
-      setIsError(true);
+      console.log('here');
     }
-
-    setModalType('update');
-    toggleActiveToast();
-    setIsCartUpdating(false);
   };
 
   const cancelChanges = () => {
@@ -187,9 +201,11 @@ export default function Cart() {
       <Frame>
         <Page
           breadcrumbs={[{ onAction: () => navigate('/summary') }]}
-          title={`Cart #${cartId}`}
+          title={cartId !== 'create' ? `Cart #${cartId}` : 'Create cart'}
           titleMetadata={
-            <CartBadge indicator={cart.reserved_indicator}></CartBadge>
+            cartId !== 'create' && cart ? (
+              <CartBadge indicator={cart.reserved_indicator}></CartBadge>
+            ) : null
           }
           compactTitle
           secondaryActions={
@@ -233,13 +249,17 @@ export default function Cart() {
 
                   <LegacyStack.Item fill>
                     <Text variant="bodyMd" as="h4">
-                      {`${cart.qty} items`}
+                      {`${cart.items.length ? cart.qty : 0} items`}
                     </Text>
                   </LegacyStack.Item>
 
                   <LegacyStack.Item>
                     <Text variant="bodyMd" as="p" alignment="end">
-                      {`${formatter(cart.total, currency)}`}
+                      {`${
+                        cart.items.length
+                          ? formatter(cart.total, currency)
+                          : formatter(0, currency)
+                      }`}
                     </Text>
                   </LegacyStack.Item>
                 </LegacyStack>
@@ -258,14 +278,14 @@ export default function Cart() {
               <PageActions
                 primaryAction={{
                   content: 'Save',
-                  loading: isCartUpdating,
                   disabled: !isEditing,
-                  onAction: () => updateCart(priority),
+                  loading: isSaving,
+                  onAction: () => saveCart(),
                 }}
                 secondaryActions={[
                   {
                     content: 'Discard',
-                    disabled: !isEditing,
+                    disabled: !isEditing && isSaving,
                     onAction: () => cancelChanges(),
                   },
                 ]}

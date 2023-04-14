@@ -10,6 +10,6 @@ import { CustomerService } from "./customer.service.js";
   controllers: [CustomersController],
   providers: [CustomerService],
   imports: [TypeOrmModule.forFeature([Customer, Cart, Item])],
-  exports: [TypeOrmModule]
+  exports: [CustomerService, TypeOrmModule]
 })
 export class CustomerModule {}
