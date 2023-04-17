@@ -17,29 +17,33 @@ export class StorefrontService {
   ) {}
 
   async updateData(cart_id: string, customer_id: string) {
-    if (customer_id !== 'undefined') {
-      const user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
+    const user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
 
-      if (cart_id === 'undefined') {
-        const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
+    if (cart_id === 'undefined') {
+      const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
 
-        if (newCart) {
-          const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
+      if (newCart) {
+        const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
 
-          return [newCart, newItems];
-        }
+        return {
+          type: 'New cart',
+          data: {
+            cart: newCart, 
+            items: newItems
+          }
+        };
       }
+
+      return true;
+    } else {
       const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
 
       if(cart?.customer_id !== user?.id) {
         await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
       }
-    }
 
-    // const cartItems = await this.itemRepository.createQueryBuilder('items')
-    //   .leftJoin('items.cart', 'carts')
-    //   .where('carts.cart_token = :token', { token: cart_id })
-    //   .getMany();
+      const items = await this.itemRepository.findBy({ cart_id: cart?.id });
+    }
 
     return true;
   }

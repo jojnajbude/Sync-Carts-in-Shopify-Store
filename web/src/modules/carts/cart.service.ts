@@ -35,14 +35,6 @@ export class CartService {
 
   async getShopCarts(session: shopifySession) {
     try {
-      // const carts = await this.itemRepository.createQueryBuilder('items')
-      //   .select(['items.*', 'customers.name'])
-      //   .leftJoin('items.cart', 'carts')
-      //   .leftJoin('carts.customer', 'customers')
-      //   .leftJoin('carts.shop', 'shops')
-      //   .where('shops.domain = :domain', { domain: session.shop })
-      //   .getMany();
-
       const carts = await this.itemRepository.query(
         `select items.*, customers.name, customers.shopify_user_id
         from items
@@ -134,6 +126,16 @@ export class CartService {
     const cart = await this.handleData(cartItems, session.shop);
 
     return cart && customer && shop ? [cart, customer, shop] : false
+  }
+
+  async updateCartItems(cart: any) {
+    const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
+
+    // for (const item of cart.items) {
+      
+    // }
+
+    return true
   }
 
   async getSortedCarts(session: shopifySession, direction: 'ascending' | 'descending', index: string,) {

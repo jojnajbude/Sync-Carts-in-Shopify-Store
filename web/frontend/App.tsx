@@ -7,6 +7,7 @@ import {
   QueryProvider,
   PolarisProvider,
 } from './components/providers';
+import { PolarisVizProvider } from '@shopify/polaris-viz';
 
 export default function App() {
   // Any .tsx or .jsx files in /pages will become a route
@@ -18,23 +19,25 @@ export default function App() {
       <BrowserRouter>
         <AppBridgeProvider>
           <QueryProvider>
-            <NavigationMenu
-              navigationLinks={[
-                {
-                  label: 'Carts summary',
-                  destination: '/summary',
-                },
-                {
-                  label: 'Analytics',
-                  destination: '/analytics',
-                },
-                {
-                  label: 'Settings',
-                  destination: '/settings',
-                },
-              ]}
-            />
-            <Routes pages={pages} />
+            <PolarisVizProvider>
+              <NavigationMenu
+                navigationLinks={[
+                  {
+                    label: 'Carts summary',
+                    destination: '/summary',
+                  },
+                  {
+                    label: 'Analytics',
+                    destination: '/analytics',
+                  },
+                  {
+                    label: 'Settings',
+                    destination: '/settings',
+                  },
+                ]}
+              />
+              <Routes pages={pages} />
+            </PolarisVizProvider>
           </QueryProvider>
         </AppBridgeProvider>
       </BrowserRouter>

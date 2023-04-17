@@ -26,7 +26,6 @@ export default function CustomerCard({
   isEditing,
   cart,
   customer,
-  setCart,
   setCustomer,
 }: Props) {
   const priorityLevels = [

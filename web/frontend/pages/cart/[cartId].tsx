@@ -89,7 +89,8 @@ export default function CartPage() {
     };
   }, [isLoading]);
 
-  console.log(cart)
+  console.log(cart);
+  console.log(customer);
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -186,7 +187,43 @@ export default function CartPage() {
         navigate(`/cart/${newCart.id}`);
       }
     } else {
-      console.log('here');
+      // customer changed
+
+      // customer priority changed
+      if (customer.priority !== initialCustomer.priority) {
+        const newPriority = await fetch(
+          `/api/customers/update?customerId=${customer.id}&priority=${customer.priority}`,
+        );
+      }
+
+      // cart items changed
+      const totalInitialQty = initialCart.items.reduce(
+        (acc: number, cur: { qty: number | string }) => acc + Number(cur.qty),
+        0,
+      );
+
+      const totalQty = cart.items.reduce(
+        (acc: number, cur: { qty: number | string }) => acc + Number(cur.qty),
+        0,
+      );
+
+      if (
+        cart.items.length !== initialCart.items.length ||
+        totalInitialQty !== totalQty
+      ) {
+        const updateCart = await fetch('/api/carts/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: await JSON.stringify(cart),
+        });
+        const newCart = await updateCart.json();
+        console.log(newCart);
+      }
+
+      setIsSaving(false);
+      setIsEditing(false);
     }
   };
 
@@ -217,7 +254,7 @@ export default function CartPage() {
                     onAction: () => console.log('works'),
                   },
                   {
-                    content: 'Edit card',
+                    content: 'Edit cart',
                     onAction: () => setIsEditing(true),
                   },
                   {

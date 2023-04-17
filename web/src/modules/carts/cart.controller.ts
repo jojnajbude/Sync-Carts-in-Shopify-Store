@@ -15,6 +15,15 @@ export class CartController {
     newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
   }
 
+  @Post('update')
+  async updateCartItems(@Body() body: any, @Res() res: Response) {
+    const cart = body;
+
+    const newCart = await this.cartService.updateCartItems(cart);
+
+    newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
+  }
+
   @Get('all')
   async getShopCarts(@Res() res: Response) {
     const session = res.locals.shopify.session;

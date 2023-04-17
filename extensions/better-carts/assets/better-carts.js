@@ -37,26 +37,33 @@ function getCartCookie() {
 }
 
 async function updateData(id, cart_id) {
-  const data = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}`);
+  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}`);
+  const response = await checkUpdates.json();
 
-  // const query = `
-  //   mutation cartCreate {
-  //     cartCreate {
-  //       cart {
+  if (response.type === 'New cart') {
+    const newItems = [];
 
-  //       }
-  //     }
-  //   }
-  // `
+    for (const item of response.data.items) {
+      newItems.push({
+        'id': Number(item.variant_id),
+        'quantity': Number(item.qty)
+      })
+    }
 
-  // await fetch(`https://${store_name}/api/2023-04/graphql.json`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify( { query })
-  // })
+    const formData = {
+      'items': newItems
+    }
+
+    const newCartData = await fetch(window.Shopify.routes.root + 'cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const newCart = newCartData.json();
+    console.log(newCart)
+  }
 
   // ---------------------------------------
-  console.log(data)
   // ---------------------------------------
 }
 
