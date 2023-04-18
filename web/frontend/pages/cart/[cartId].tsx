@@ -18,6 +18,7 @@ import CartBadge from '../../components/CartBadge';
 import PopupModal from '../../components/PopupModal';
 import ProductsList from '../../components/ProductsList';
 import CustomerCard from '../../components/CustomerCard';
+import InfoBanner from '../../components/Banner';
 
 import { formatter } from '../../services/formatter';
 import { Cart } from '../../types/cart';
@@ -37,6 +38,7 @@ export default function CartPage() {
   const [isError, setIsError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUnvalidInputs, setIsUnvalidInputs] = useState('none');
 
   const { cartId } = useParams();
   const navigate = useNavigate();
@@ -88,9 +90,6 @@ export default function CartPage() {
       ignore = true;
     };
   }, [isLoading]);
-
-  console.log(cart);
-  console.log(customer);
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -171,6 +170,19 @@ export default function CartPage() {
   };
 
   const saveCart = async () => {
+    if (cart.items.find((item: { qty: any }) => Number(item.qty) <= 0)) {
+      setIsUnvalidInputs('qty');
+      return;
+    } else if (!cart.items.length) {
+      setIsUnvalidInputs('empty');
+      return;
+    } else if (!customer) {
+      setIsUnvalidInputs('user');
+      return;
+    } else {
+      setIsUnvalidInputs('none');
+    }
+
     setIsSaving(true);
 
     if (cartId === 'create') {
@@ -181,10 +193,9 @@ export default function CartPage() {
         },
         body: await JSON.stringify({ cart, customer }),
       });
-      const newCart = await newCartData.json();
 
       if (newCartData.ok) {
-        navigate(`/cart/${newCart.id}`);
+        navigate(`/summary`);
       }
     } else {
       // customer changed
@@ -195,41 +206,31 @@ export default function CartPage() {
           `/api/customers/update?customerId=${customer.id}&priority=${customer.priority}`,
         );
       }
-
-      // cart items changed
-      const totalInitialQty = initialCart.items.reduce(
-        (acc: number, cur: { qty: number | string }) => acc + Number(cur.qty),
-        0,
-      );
-
-      const totalQty = cart.items.reduce(
-        (acc: number, cur: { qty: number | string }) => acc + Number(cur.qty),
-        0,
-      );
-
       if (
-        cart.items.length !== initialCart.items.length ||
-        totalInitialQty !== totalQty
+        initialCart.qty !== cart.qty ||
+        initialCart.total !== cart.total ||
+        initialCart.items.length !== cart.items.length
       ) {
         const updateCart = await fetch('/api/carts/update', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: await JSON.stringify(cart),
+          body: await JSON.stringify([cart, customer]),
         });
         const newCart = await updateCart.json();
-        console.log(newCart);
       }
 
       setIsSaving(false);
       setIsEditing(false);
+      setIsLoading(true);
     }
   };
 
   const cancelChanges = () => {
     setCart(initialCart);
     setCustomer(initialCustomer);
+    setIsLoading(true);
     setIsEditing(false);
   };
 
@@ -267,6 +268,10 @@ export default function CartPage() {
           }
         >
           <Layout>
+            {isUnvalidInputs !== 'none' && (
+              <InfoBanner type={isUnvalidInputs}></InfoBanner>
+            )}
+
             <Layout.Section>
               <ProductsList
                 openModal={openModal}
@@ -274,6 +279,7 @@ export default function CartPage() {
                 cart={cart}
                 setCart={setCart}
                 isEditing={isEditing}
+                setIsUnvalidInputs={setIsUnvalidInputs}
               ></ProductsList>
 
               <LegacyCard title="Payment" sectioned>
@@ -310,19 +316,20 @@ export default function CartPage() {
                 setCart={setCart}
                 customer={customer}
                 setCustomer={setCustomer}
+                setIsUnvalidInputs={setIsUnvalidInputs}
               ></CustomerCard>
 
               <PageActions
                 primaryAction={{
                   content: 'Save',
-                  disabled: !isEditing,
+                  disabled: !isEditing || isUnvalidInputs !== 'none',
                   loading: isSaving,
                   onAction: () => saveCart(),
                 }}
                 secondaryActions={[
                   {
                     content: 'Discard',
-                    disabled: !isEditing && isSaving,
+                    disabled: !isEditing,
                     onAction: () => cancelChanges(),
                   },
                 ]}

@@ -45,7 +45,7 @@ export default function CartsTable() {
           const shop = await fetch('api/shop');
           const [shopData] = await shop.json();
 
-          const result = await fetch('/api/carts/all');
+          const result = await fetch(`/api/carts/sort?dir=ascending&index=0`);
           const cartData = await result.json();
 
           if (!ignore) {

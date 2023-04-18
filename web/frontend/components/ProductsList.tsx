@@ -24,6 +24,7 @@ type Props = {
   cart: Cart;
   setCart: (value: Cart) => void;
   isEditing: boolean;
+  setIsUnvalidInputs: (value: string) => void;
 };
 
 export default function ProductsList({
@@ -32,14 +33,22 @@ export default function ProductsList({
   cart,
   setCart,
   isEditing,
+  setIsUnvalidInputs,
 }: Props) {
   const handleChange = (newValue: string, item: Item) => {
+    if (Number(newValue) > 10000) {
+      return;
+    }
+
+    setIsUnvalidInputs('none');
+
     const updatedCart = { ...cart };
     const index = updatedCart.items.findIndex(
       cartItem => cartItem.id === item.id,
     );
 
     updatedCart.items[index].qty = newValue;
+    updatedCart.items[index].reserved_indicator = 'unsynced';
 
     const total = updatedCart.items.reduce(
       (acc: number, cur: Item) => acc + Number(cur.qty) * Number(cur.price),
@@ -64,6 +73,19 @@ export default function ProductsList({
     );
     updatedCart.items = updatedItems;
 
+    const total = updatedCart.items.reduce(
+      (acc: number, cur: Item) => acc + Number(cur.qty) * Number(cur.price),
+      0,
+    );
+
+    const qty = updatedCart.items.reduce(
+      (acc: number, cur: Item) => acc + Number(cur.qty),
+      0,
+    );
+
+    updatedCart.total = total;
+    updatedCart.qty = qty;
+
     setCart(updatedCart);
   };
 
@@ -84,6 +106,7 @@ export default function ProductsList({
           label=""
           type="number"
           min={1}
+          max={10000}
           value={String(item.qty)}
           onChange={newValue => handleChange(newValue, item)}
           autoComplete="off"
@@ -184,7 +207,9 @@ export default function ProductsList({
             <AutocompleteSearch
               type={'products'}
               cart={cart}
+              currency={currency}
               setCart={setCart}
+              setIsUnvalidInputs={setIsUnvalidInputs}
             ></AutocompleteSearch>
           </LegacyCard.Section>
 

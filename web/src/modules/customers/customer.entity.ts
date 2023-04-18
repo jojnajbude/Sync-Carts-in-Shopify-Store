@@ -6,7 +6,7 @@ export class Customer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   shop_id: number;
 
   @ManyToOne((type) => Shop)

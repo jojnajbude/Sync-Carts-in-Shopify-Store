@@ -6,6 +6,7 @@ import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
 import shopify from "../../utils/shopify.js";
 import { Item } from "../items/item.entity.js";
+import { ShopService } from "../shops/shop.service.js";
 
 @Injectable()
 export class StorefrontService {
@@ -13,17 +14,40 @@ export class StorefrontService {
     @InjectRepository(Shop) private shopsRepository: Repository<Shop>, 
     @InjectRepository(Customer) private customerRepository: Repository<Customer>, 
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
-    @InjectRepository(Item) private itemRepository: Repository<Item>
+    @InjectRepository(Item) private itemRepository: Repository<Item>,
   ) {}
 
-  async updateData(cart_id: string, customer_id: string) {
-    const user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
+  async updateData(cart_id: string, customer_id: string, shop_id: string) {
+    let user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
+
+    if (!user) {
+      const shopData = await this.shopsRepository.findOneBy({ shopify_id: Number(shop_id) });
+
+      if (shopData && shopData.session) {
+        const session = JSON.parse(shopData?.session);
+
+        const shopifyCustomer = await shopify.api.rest.Customer.find({
+          session: session,
+          id: customer_id
+        });
+  
+        user = await this.customerRepository.save({ 
+          name: `${shopifyCustomer.first_name} ${shopifyCustomer.last_name}`, 
+          shopify_user_id: shopifyCustomer.id, 
+          shop_id: shopData?.id,
+          priority: 'normal'
+        })
+      }  
+    }
 
     if (cart_id === 'undefined') {
       const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
 
       if (newCart) {
         const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
+
+        await this.itemRepository.remove(newItems);
+        await this.cartRepository.remove(newCart);
 
         return {
           type: 'New cart',
@@ -34,6 +58,7 @@ export class StorefrontService {
         };
       }
 
+
       return true;
     } else {
       const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
@@ -43,9 +68,21 @@ export class StorefrontService {
       }
 
       const items = await this.itemRepository.findBy({ cart_id: cart?.id });
+      const unsyncedItems = items.filter(item => item.status === 'unsynced');
+
+      if (unsyncedItems) {
+        await this.itemRepository.remove(unsyncedItems);
+
+        return {
+          type: 'Update',
+          data: {
+            items: unsyncedItems
+          }
+        }
+      }
     }
 
-    return true;
+    return { type: 'Ok' };
   }
 
   async handleAdding(shop: number, variant: number, qty: number) {
@@ -120,51 +157,33 @@ export class StorefrontService {
       } else if (!item) {
         const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
 
-        let reservationTime = 0;
-
-        switch(true) {
-          case customer?.priority === 'max':
-            reservationTime = 336;
-            break;
-          case customer?.priority === 'high':
-            reservationTime = 72;
-            break;
-          case customer?.priority === 'normal':
-            reservationTime = 24;
-            break;
-          case customer?.priority === 'low':
-            reservationTime = 8;
-            break;
-          case customer?.priority === 'min':
-            reservationTime = 1;
-            break;
+        if (customer) {
+          const product = await shopify.api.rest.Product.find({
+            session,
+            id: line_item.product_id,
+          })
+  
+          const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
+  
+          const imgSrc = await shopify.api.rest.Image.find({
+            session,
+            product_id: product.id,
+            id: variant.image_id,
+          })
+  
+          const expireTime = this.countExpireDate(new Date(), customer?.priority);
+  
+          updatedItems.push(await this.itemRepository.save({ 
+            variant_id: line_item.variant_id, 
+            qty: line_item.quantity, 
+            cart_id: cart?.id, 
+            price: line_item.price, 
+            title: product.title, 
+            image_link: imgSrc.src, 
+            product_id: variant.product_id,
+            expireAt: expireTime,
+          }))
         }
-
-        const product = await shopify.api.rest.Product.find({
-          session,
-          id: line_item.product_id,
-        })
-
-        const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
-
-        const imgSrc = await shopify.api.rest.Image.find({
-          session,
-          product_id: product.id,
-          id: variant.image_id,
-        })
-
-        const expireTime = this.countExpireDate(new Date(), reservationTime);
-
-        updatedItems.push(await this.itemRepository.save({ 
-          variant_id: line_item.variant_id, 
-          qty: line_item.quantity, 
-          cart_id: cart?.id, 
-          price: line_item.price, 
-          title: product.title, 
-          image_link: imgSrc.src, 
-          product_id: variant.product_id,
-          expireAt: expireTime,
-        }))
       }
     }
 
@@ -194,8 +213,28 @@ export class StorefrontService {
     return cartItem?.status === 'reserved' ? cartItem : false;
   }
 
-  countExpireDate(startDate: Date, time: number) {
-    const expandTime = 3600000 * time;
+  countExpireDate(startDate: Date, priority: string) {
+    let reservationTime = 0;
+
+    switch(true) {
+      case priority === 'max':
+        reservationTime = 336;
+        break;
+      case priority === 'high':
+        reservationTime = 72;
+        break;
+      case priority === 'normal':
+        reservationTime = 24;
+        break;
+      case priority === 'low':
+        reservationTime = 8;
+        break;
+      case priority === 'min':
+        reservationTime = 1;
+        break;
+    }
+    
+    const expandTime = 3600000 * reservationTime;
 
     return new Date(startDate.getTime() + expandTime);
   }

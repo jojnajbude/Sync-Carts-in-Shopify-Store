@@ -6,7 +6,7 @@ const APP_URL = 'https://better-carts.dev-test.pro';
     swapAddToCartBtn();
     const cookie = getCartCookie();
     
-    updateData(window.customer.id, cookie);
+    updateData(window.customer.id, cookie, window.customer.shop);
   }
 })()
 
@@ -36,8 +36,8 @@ function getCartCookie() {
   return cookie;
 }
 
-async function updateData(id, cart_id) {
-  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}`);
+async function updateData(id, cart_id, shop_id) {
+  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}`);
   const response = await checkUpdates.json();
 
   if (response.type === 'New cart') {
@@ -59,8 +59,18 @@ async function updateData(id, cart_id) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
-    const newCart = newCartData.json();
-    console.log(newCart)
+  } else if (response.type === 'Update') {
+    const updatedItems = {};
+
+    for (const item of response.data.items) {
+      updatedItems[item.variant_id] = ite.qty;
+    }
+
+    const newCartData = await fetch(window.Shopify.routes.root + 'cart/update.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedItems)
+    });
   }
 
   // ---------------------------------------

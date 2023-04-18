@@ -14,9 +14,14 @@ import { Item } from '../types/cart';
 type Props = {
   product: Product;
   addItemToCart: (value: Item | Variant) => void;
+  currency: string;
 };
 
-export default function VariantsList({ product, addItemToCart }: Props) {
+export default function VariantsList({
+  product,
+  addItemToCart,
+  currency,
+}: Props) {
   return (
     <LegacyCard>
       <ResourceList
@@ -52,7 +57,7 @@ export default function VariantsList({ product, addItemToCart }: Props) {
                   {`${inventory_quantity} available`}
                 </Text>
                 <Text variant="bodyMd" as="h3" alignment="end">
-                  {formatter(price)}
+                  {formatter(price, currency)}
                 </Text>
               </LegacyStack>
             </ResourceItem>

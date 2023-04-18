@@ -11,32 +11,6 @@ type Props = {
 };
 
 export default function EmptyStateMarkup({ rows }: Props) {
-  const markupRow = (
-    <IndexTable.Row id={'1'} position={1}>
-      <IndexTable.Cell>
-        <SkeletonThumbnail size="extraSmall" />
-      </IndexTable.Cell>
-      <IndexTable.Cell>
-        <SkeletonBodyText lines={1} />
-      </IndexTable.Cell>
-      <IndexTable.Cell>
-        <SkeletonBodyText lines={1} />
-      </IndexTable.Cell>
-      <IndexTable.Cell>
-        <SkeletonBodyText lines={1} />
-      </IndexTable.Cell>
-      <IndexTable.Cell>
-        <SkeletonBodyText lines={1} />
-      </IndexTable.Cell>
-      <IndexTable.Cell>
-        <SkeletonBodyText lines={1} />
-      </IndexTable.Cell>
-      <IndexTable.Cell>
-        <SkeletonBodyText lines={1} />
-      </IndexTable.Cell>
-    </IndexTable.Row>
-  );
-
   return (
     <Layout>
       <Layout.Section>
@@ -54,7 +28,31 @@ export default function EmptyStateMarkup({ rows }: Props) {
             itemCount={rows}
             selectable={false}
           >
-            {Array(rows).fill(markupRow)}
+            {Array.from(Array(rows), (_, index) => (
+              <IndexTable.Row id={String(index)} key={index} position={1}>
+                <IndexTable.Cell>
+                  <SkeletonThumbnail size="extraSmall" />
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <SkeletonBodyText lines={1} />
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <SkeletonBodyText lines={1} />
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <SkeletonBodyText lines={1} />
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <SkeletonBodyText lines={1} />
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <SkeletonBodyText lines={1} />
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <SkeletonBodyText lines={1} />
+                </IndexTable.Cell>
+              </IndexTable.Row>
+            ))}
           </IndexTable>
         </LegacyCard>
       </Layout.Section>

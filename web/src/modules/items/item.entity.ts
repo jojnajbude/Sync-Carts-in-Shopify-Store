@@ -13,7 +13,7 @@ export class Item {
   @Column({ type: 'bigint' })
   qty: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'bigint', nullable: true })
   cart_id: number;
 
   @ManyToOne((type) => Cart)

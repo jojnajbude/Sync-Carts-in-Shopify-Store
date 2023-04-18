@@ -7,14 +7,14 @@ export class Cart {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true})
+  @Column({ type: 'bigint', nullable: true})
   customer_id: number;
 
   @ManyToOne((type) => Customer)
   @JoinColumn({ name: 'customer_id', referencedColumnName: 'id'})
   customer: Customer;
 
-  @Column()
+  @Column({ type: 'bigint' })
   shop_id: number;
 
   @ManyToOne((type) => Shop)

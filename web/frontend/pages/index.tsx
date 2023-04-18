@@ -1,4 +1,4 @@
-import { Page, Layout } from '@shopify/polaris';
+import { Page, Layout, FooterHelp } from '@shopify/polaris';
 import { TitleBar } from '@shopify/app-bridge-react';
 
 import { ProductsCard } from '../components';
@@ -13,6 +13,7 @@ export default function HomePage() {
           <ProductsCard />
         </Layout.Section>
       </Layout>
+      <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
     </Page>
   );
 }

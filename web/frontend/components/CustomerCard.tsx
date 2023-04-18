@@ -20,6 +20,7 @@ type Props = {
   customer: Customer;
   setCart: (value: Cart) => void;
   setCustomer: (value: Customer) => void;
+  setIsUnvalidInputs: (value: string) => void;
 };
 
 export default function CustomerCard({
@@ -27,6 +28,7 @@ export default function CustomerCard({
   cart,
   customer,
   setCustomer,
+  setIsUnvalidInputs,
 }: Props) {
   const priorityLevels = [
     { label: 'Minimal', value: 'min' },
@@ -144,7 +146,7 @@ export default function CustomerCard({
                 labelInline
                 options={priorityLevels}
                 onChange={handlePriorityChange}
-                value={customer.priority}
+                value={customer.priority || 'normal'}
               />
             ) : (
               <Text color="subdued" as="span">
@@ -161,6 +163,7 @@ export default function CustomerCard({
         <AutocompleteSearch
           type={'customer'}
           setCustomer={setCustomer}
+          setIsUnvalidInputs={setIsUnvalidInputs}
         ></AutocompleteSearch>
       </LegacyCard>
     );

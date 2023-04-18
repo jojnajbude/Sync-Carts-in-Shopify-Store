@@ -58,40 +58,29 @@ export class CartService {
   async createNewCart(cart: any, customer: any, session: shopifySession) {
     const [shop] = await this.shopsService.getShopData(session);
     const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop.id });
-    const customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
+    let customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
+
+    if (!customerData) {
+      customerData = await this.customerRepository.save({ 
+        name: `${customer.first_name} ${customer.last_name}`, 
+        shopify_user_id: customer.id, 
+        shop_id: shopData?.id,
+        priority: customer.priority || 'normal'
+      })
+    }
 
     const newCart = await this.cartRepository.save({ customer_id: customerData?.id, shop_id: shopData?.id });
 
     const items = [];
 
     for (const item of cart.items) {
-      let reservationTime = 0;
-
-        switch(true) {
-          case customerData?.priority === 'max':
-            reservationTime = 336;
-            break;
-          case customerData?.priority === 'high':
-            reservationTime = 72;
-            break;
-          case customerData?.priority === 'normal':
-            reservationTime = 24;
-            break;
-          case customerData?.priority === 'low':
-            reservationTime = 8;
-            break;
-          case customerData?.priority === 'min':
-            reservationTime = 1;
-            break;
-        }
-
-      const expireTime = this.storefrontService.countExpireDate(new Date(), reservationTime);
+      const expireTime = this.storefrontService.countExpireDate(new Date(), customerData.priority);
       const newItem = {
         variant_id: item.id,
         product_id: item.product_id,
         qty: item.qty,
         expireAt: expireTime,
-        status: 'reserved',
+        status: item.reserved_indicator,
         cart_id: newCart.id,
         price: item.price,
         title: item.title,
@@ -128,12 +117,39 @@ export class CartService {
     return cart && customer && shop ? [cart, customer, shop] : false
   }
 
-  async updateCartItems(cart: any) {
+  async updateCartItems(cart: any, customer: any) {
     const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
 
-    // for (const item of cart.items) {
-      
-    // }
+    if (oldItems.length > cart.items.length) {
+      for (const oldItem of oldItems) {
+        if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
+          await this.itemRepository.delete({ id: oldItem.id })
+        }
+      }
+    }
+
+    for (const item of cart.items) {
+      const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);
+
+      if (existItemIndex !== -1) {
+        if (oldItems[existItemIndex].qty !== item.qty) {
+          await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced' })
+        }
+      } else {
+        const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority)
+        await this.itemRepository.save({ 
+          cart_id: cart.id, 
+          variant_id: item.variant_id, 
+          qty: item.qty, 
+          status: item.reserved_indicator, 
+          price: item.price, 
+          title: item.title, 
+          image_link: item.image_link, 
+          product_id: item.product_id,
+          expireAt: expireTime,
+        })
+      }
+    }
 
     return true
   }
@@ -222,6 +238,8 @@ export class CartService {
     for (const cart of table) {
       if (cart.items.every(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'all';
+      } else if (cart.items.find(item => item.status === 'unsynced')) {
+        cart.reserved_indicator = 'unsynced'; 
       } else if (cart.items.find(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'part';
       } else {

@@ -17,7 +17,7 @@ export default function cartsSummary() {
     >
       <Frame>
         <CartsTable></CartsTable>
-        <FooterHelp>Blake Rogers. All rights reserved.</FooterHelp>
+        <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
       </Frame>
     </Page>
   );

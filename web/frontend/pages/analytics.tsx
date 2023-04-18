@@ -53,7 +53,7 @@ export default function EmptyStateExample() {
           <TopChart type={'abandoned'}></TopChart>
         </Layout.Section>
       </Layout>
-      <FooterHelp>Blake Rogers. All rights reserved.</FooterHelp>
+      <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
     </Page>
   );
 }

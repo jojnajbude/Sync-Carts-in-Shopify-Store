@@ -17,9 +17,9 @@ export class CartController {
 
   @Post('update')
   async updateCartItems(@Body() body: any, @Res() res: Response) {
-    const cart = body;
+    const [cart, customer] = body;
 
-    const newCart = await this.cartService.updateCartItems(cart);
+    const newCart = await this.cartService.updateCartItems(cart, customer);
 
     newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
   }

@@ -24,4 +24,5 @@ export interface Item {
   product_id: string | number;
   title: string;
   image_link: string;
+  reserved_indicator: string;
 }

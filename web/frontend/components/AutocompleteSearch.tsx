@@ -9,7 +9,7 @@ import {
 } from '@shopify/polaris';
 import { SearchMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
-import { useCallback, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 
 import VariantsList from './VariantsList';
 import { formatter } from '../services/formatter';
@@ -20,8 +20,10 @@ import { Customer } from '../types/customer';
 type Props = {
   type: string;
   cart?: Cart;
+  currency?: string;
   setCart?: (value: Cart) => void;
   setCustomer?: (value: Customer) => void;
+  setIsUnvalidInputs: (value: string) => void;
 };
 
 type State = {
@@ -73,8 +75,10 @@ type GraphQlCustomer = {
 export default function AutocompleteSearch({
   type,
   cart,
+  currency,
   setCart,
   setCustomer,
+  setIsUnvalidInputs,
 }: Props) {
   const paginationInterval = 25;
 
@@ -152,6 +156,7 @@ export default function AutocompleteSearch({
 
   const updateText = useCallback(
     async (value: string) => {
+      setIsUnvalidInputs('none');
       dispatch({ type: 'setInputValue', value });
       dispatch({ type: 'setLoading', value: true });
 
@@ -193,6 +198,7 @@ export default function AutocompleteSearch({
   );
 
   const handleSelect = async ([selected]: string[]) => {
+    setIsUnvalidInputs('none');
     if (type === 'products') {
       dispatch({ type: 'setVariantModal', value: null });
 
@@ -224,14 +230,37 @@ export default function AutocompleteSearch({
     if (hasItem !== -1) {
       changedCart.items[hasItem].qty =
         Number(changedCart.items[hasItem].qty) + 1;
+
+      changedCart.items[hasItem].reserved_indicator = 'unsynced';
     } else {
       variant.variant_id = variant.id;
+      variant.reserved_indicator = 'unsynced';
       changedCart.items = [...changedCart.items, variant];
+    }
+
+    if (!changedCart.total) {
+      changedCart.qty = 1;
+      changedCart.total = Number(variant.price);
+    } else {
+      const total = changedCart.items.reduce(
+        (acc: number, cur: Item) => acc + Number(cur.qty) * Number(cur.price),
+        0,
+      );
+
+      const qty = changedCart.items.reduce(
+        (acc: number, cur: Item) => acc + Number(cur.qty),
+        0,
+      );
+
+      changedCart.total = total;
+      changedCart.qty = qty;
     }
 
     setCart(changedCart);
     dispatch({ type: 'closeModal' });
   };
+
+  console.log(cart);
 
   const createProductOption = (
     title: string,
@@ -327,6 +356,7 @@ export default function AutocompleteSearch({
           {state.product && (
             <VariantsList
               product={state.product}
+              currency={currency}
               addItemToCart={addItemToCart}
             ></VariantsList>
           )}
