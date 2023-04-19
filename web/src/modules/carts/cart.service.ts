@@ -123,7 +123,7 @@ export class CartService {
     if (oldItems.length > cart.items.length) {
       for (const oldItem of oldItems) {
         if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
-          await this.itemRepository.delete({ id: oldItem.id })
+          await this.itemRepository.save({ id: oldItem.id, status: 'removed' })
         }
       }
     }
@@ -238,7 +238,7 @@ export class CartService {
     for (const cart of table) {
       if (cart.items.every(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'all';
-      } else if (cart.items.find(item => item.status === 'unsynced')) {
+      } else if (cart.items.find(item => item.status === 'unsynced' || item.status === 'removed' || item.status === 'added')) {
         cart.reserved_indicator = 'unsynced'; 
       } else if (cart.items.find(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'part';

@@ -12,36 +12,6 @@ export default function TopChart({ type }: Props) {
       <Link
         removeUnderline
         url="https://www.example.com"
-        key="emerald-silk-gown"
-      >
-        Putin's head
-      </Link>,
-      940,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="mauve-cashmere-scarf"
-      >
-        Mauve Cashmere Scarf
-      </Link>,
-      887,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Wool Blazer
-      </Link>,
-      743,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
         key="navy-merino-wool"
       >
         Ninja sword
@@ -54,7 +24,7 @@ export default function TopChart({ type }: Props) {
         url="https://www.example.com"
         key="navy-merino-wool"
       >
-        John Wick helmet
+        John Wick jacket
       </Link>,
       443,
     ],
@@ -84,7 +54,7 @@ export default function TopChart({ type }: Props) {
         url="https://www.example.com"
         key="navy-merino-wool"
       >
-        Playstation 5
+        PlayStation 5
       </Link>,
       267,
     ],
@@ -107,6 +77,36 @@ export default function TopChart({ type }: Props) {
         Emerald Silk Crown
       </Link>,
       78,
+    ],
+    [
+      <Link
+        removeUnderline
+        url="https://www.example.com"
+        key="emerald-silk-gown"
+      >
+        Iron man suit
+      </Link>,
+      56,
+    ],
+    [
+      <Link
+        removeUnderline
+        url="https://www.example.com"
+        key="mauve-cashmere-scarf"
+      >
+        Mauve Cashmere Scarf
+      </Link>,
+      52,
+    ],
+    [
+      <Link
+        removeUnderline
+        url="https://www.example.com"
+        key="navy-merino-wool"
+      >
+        Wool Blazer
+      </Link>,
+      14,
     ],
   ];
 

@@ -6,7 +6,6 @@ import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
 import shopify from "../../utils/shopify.js";
 import { Item } from "../items/item.entity.js";
-import { ShopService } from "../shops/shop.service.js";
 
 @Injectable()
 export class StorefrontService {
@@ -42,6 +41,12 @@ export class StorefrontService {
 
     if (cart_id === 'undefined') {
       const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
+      console.log(newCart);
+
+      if (newCart?.cart_token) {
+        console.log('here');
+        return { type: 'Ok' };
+      }
 
       if (newCart) {
         const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
@@ -68,17 +73,40 @@ export class StorefrontService {
       }
 
       const items = await this.itemRepository.findBy({ cart_id: cart?.id });
+      const addedItems = items.filter(item => item.status === 'added');
       const unsyncedItems = items.filter(item => item.status === 'unsynced');
+      const removedItems = items.filter(item => item.status === 'removed');
 
-      if (unsyncedItems) {
+      const response: any = {
+        data: {}
+      };
+
+      if (addedItems.length) {
+        await this.itemRepository.remove(addedItems);
+
+        response.type = 'Update';
+        response.data.addedItems = addedItems;
+      }
+
+      if (unsyncedItems.length) {
         await this.itemRepository.remove(unsyncedItems);
 
-        return {
-          type: 'Update',
-          data: {
-            items: unsyncedItems
-          }
-        }
+        response.type = 'Update';
+        response.data.updatedItems = unsyncedItems;
+      }
+
+      if (removedItems.length) {
+        await this.itemRepository.remove(removedItems);
+
+        response.type = 'Update';
+        response.data.removedItems = removedItems;
+      }
+
+      console.log(response.type)
+
+      if (response.type) {
+        console.log('here')
+        return response;
       }
     }
 
@@ -103,7 +131,7 @@ export class StorefrontService {
         AND status = 'reserved'`
       );
 
-      if (Number(variantsReserved.sum) + Number(qty) >= variantRes.inventory_quantity) {
+      if (Number(variantsReserved.sum) + Number(qty) > variantRes.inventory_quantity) {
         return 'All items reserved';
       }
 
@@ -129,7 +157,7 @@ export class StorefrontService {
     let cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
 
     if (!cart) {
-       cart = await this.createCart(shop, cartData)
+      cart = await this.createCart(shop, cartData)
     }
 
     const items = await this.itemRepository.createQueryBuilder('items')
@@ -156,6 +184,7 @@ export class StorefrontService {
         updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
       } else if (!item) {
         const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
+        console.log(customer)
 
         if (customer) {
           const product = await shopify.api.rest.Product.find({
@@ -190,12 +219,12 @@ export class StorefrontService {
     return updatedItems;
   }
 
-  async createUser(shop: string, user: any) {
-    const shopData = await this.shopsRepository.findOneBy({ domain: shop });
-    const customer = await this.customerRepository.save({ shopify_user_id: user.id, shop_id: shopData?.id, name: `${user.first_name} ${user.last_name}` });
+  // async createUser(shop: string, user: any) {
+  //   const shopData = await this.shopsRepository.findOneBy({ domain: shop });
+  //   const customer = await this.customerRepository.save({ shopify_user_id: user.id, shop_id: shopData?.id, name: `${user.first_name} ${user.last_name}` });
 
-    return customer;
-  }
+  //   return customer;
+  // }
 
   async updateUser(user: any) {
     const customer = await this.customerRepository.findOneBy({ shopify_user_id: user.id });
@@ -231,6 +260,9 @@ export class StorefrontService {
         break;
       case priority === 'min':
         reservationTime = 1;
+        break;
+      default:
+        reservationTime = 24;
         break;
     }
     

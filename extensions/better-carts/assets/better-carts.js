@@ -1,11 +1,11 @@
 const APP_URL = 'https://better-carts.dev-test.pro';
 
 (function initializeBetterCarts() {
+  initializeObserver();
+  swapAddToCartBtn();
+
   if (window.customer) {
-    initializeObserver();
-    swapAddToCartBtn();
-    const cookie = getCartCookie();
-    
+    const cookie = getCartCookie();  
     updateData(window.customer.id, cookie, window.customer.shop);
   }
 })()
@@ -60,13 +60,31 @@ async function updateData(id, cart_id, shop_id) {
       body: JSON.stringify(formData)
     });
   } else if (response.type === 'Update') {
-    const updatedItems = {};
+    const updatedItems = {
+      updates: {}
+    };
 
-    for (const item of response.data.items) {
-      updatedItems[item.variant_id] = ite.qty;
+    if (response.data.hasOwnProperty('addedItems')) {
+      for (const item of response.data.addedItems) {
+        updatedItems.updates[item.variant_id] = item.qty;
+      }
     }
 
-    const newCartData = await fetch(window.Shopify.routes.root + 'cart/update.js', {
+    if (response.data.hasOwnProperty('updatedItems')) {
+      for (const item of response.data.updatedItems) {
+        updatedItems.updates[item.variant_id] = item.qty;
+      }
+    }
+    
+    if (response.data.hasOwnProperty('removedItems')) {
+      for (const item of response.data.removedItems) {
+        updatedItems.updates[item.variant_id] = 0;
+      }
+    }
+
+    console.log(updatedItems)
+
+    const updateItems = await fetch(window.Shopify.routes.root + 'cart/update.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedItems)
@@ -98,8 +116,12 @@ function swapAddToCartBtn() {
 
 async function addToCart() {
   const variantId = document.querySelector('input[name="id"]').value;
-  const qty = document.querySelector('input[name="quantity"]').value;
-  const cart = getCartCookie();
+  const qtyInput = document.querySelector('input[name="quantity"]');
+  let qty= 1;
+
+  if (qtyInput) {
+    qty = document.querySelector('input[name="quantity"]').value;
+  }
 
   const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.customer.shop}&variant=${variantId}&qty=${qty}`)
   const resText = await addCart.text();

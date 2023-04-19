@@ -39,15 +39,15 @@ export class createWebhooks implements NestMiddleware {
       })
     }
 
-    if (!customerCreate) {
-      const customerCreateWebhook = new shopify.api.rest.Webhook({session});
-      customerCreateWebhook.address = 'https://better-carts.dev-test.pro/storefront/customer/create';
-      customerCreateWebhook.topic = 'customers/create';
-      customerCreateWebhook.format = 'json';
-      await customerCreateWebhook.save({
-        update: true
-      })
-    }
+    // if (!customerCreate) {
+    //   const customerCreateWebhook = new shopify.api.rest.Webhook({session});
+    //   customerCreateWebhook.address = 'https://better-carts.dev-test.pro/storefront/customer/create';
+    //   customerCreateWebhook.topic = 'customers/create';
+    //   customerCreateWebhook.format = 'json';
+    //   await customerCreateWebhook.save({
+    //     update: true
+    //   })
+    // }
 
     if (!customerUpdate) {
       const customerUpdateWebhook = new shopify.api.rest.Webhook({session});

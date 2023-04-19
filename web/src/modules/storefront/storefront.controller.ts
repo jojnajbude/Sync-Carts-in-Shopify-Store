@@ -47,14 +47,15 @@ export class StorefrontController {
 
   @Post('customer/create')
   async createCustomer(@Req() req: Request, @Res() res: Response) {
-    const shopDomain = req.get('x-shopify-shop-domain');
+    // const shopDomain = req.get('x-shopify-shop-domain');
 
-    if (shopDomain) {
-      const user = await this.storefrontService.createUser(shopDomain, req.body);
-      user ? res.status(200).send(user) : res.status(500).send('Server error');
-    } else {
-      res.status(404).send('Unable to identify the store');
-    }
+    // if (shopDomain) {
+    //   const user = await this.storefrontService.createUser(shopDomain, req.body);
+    //   user ? res.status(200).send(user) : res.status(500).send('Server error');
+    // } else {
+    //   res.status(404).send('Unable to identify the store');
+    // }
+    return true;
   }
 
   @Post('customer/update')

@@ -234,7 +234,7 @@ export default function AutocompleteSearch({
       changedCart.items[hasItem].reserved_indicator = 'unsynced';
     } else {
       variant.variant_id = variant.id;
-      variant.reserved_indicator = 'unsynced';
+      variant.reserved_indicator = 'added';
       changedCart.items = [...changedCart.items, variant];
     }
 

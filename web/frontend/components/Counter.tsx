@@ -9,7 +9,13 @@ type Props = {
 export default function Counter({ expireAt, status }: Props) {
   const [days, hours, minutes, seconds] = useCountdown(expireAt);
 
-  if (days + hours + minutes + seconds <= 0 || status === 'expired') {
+  if (status === 'removed') {
+    return (
+      <Text as="p" color="subdued">
+        {`Waiting for remove`}
+      </Text>
+    );
+  } else if (days + hours + minutes + seconds <= 0 || status === 'expired') {
     return (
       <Text as="p" color="critical">
         {`Reservation time expired!`}
