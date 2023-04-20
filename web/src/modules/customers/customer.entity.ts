@@ -21,4 +21,7 @@ export class Customer {
 
   @Column({ default: 'normal' })
   priority: string;
+
+  @Column({ nullable: true })
+  location: string;
 }

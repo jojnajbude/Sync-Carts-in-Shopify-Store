@@ -60,8 +60,9 @@ export class StorefrontController {
 
   @Post('customer/update')
   async updateCustomer(@Req() req: Request, @Res() res: Response) {
-      const user = await this.storefrontService.updateUser( req.body);
-      user ? res.status(200).send(user) : res.status(500).send('Server error');
+    const user = await this.storefrontService.updateUser( req.body);
+
+    user ? res.status(200).send(user) : res.status(500).send('Server error');
   }
 
   @Get('time')
@@ -69,5 +70,17 @@ export class StorefrontController {
     const time = await this.storefrontService.getReserveTime(query.item, query.cart, query.user, query.shop)
 
     time ? res.status(200).send(time) : res.status(404).send(false);
+  }
+
+  @Post('order/paid')
+  async handleOrderPaid(@Req() req: Request, @Res() res: Response) {
+    console.log(req.body);
+    const cart_token = req.body.cart_token;
+    const totalPrice = Number(req.body.current_total_price);
+    console.log(cart_token, totalPrice)
+
+    const paidCart = await this.storefrontService.handleOrderPaid(cart_token, totalPrice);
+
+    paidCart ? res.status(200).send(paidCart) : res.status(500).send('Server error'); 
   }
 }

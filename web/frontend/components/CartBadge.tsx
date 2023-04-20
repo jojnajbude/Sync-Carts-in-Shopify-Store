@@ -1,11 +1,18 @@
 import { Badge } from '@shopify/polaris';
 
 type Props = {
-  indicator: 'all' | 'part' | 'no' | 'unsynced';
+  indicator: 'all' | 'part' | 'no' | 'unsynced' | 'paid';
 };
 
 export default function CartBadge({ indicator }: Props) {
   switch (true) {
+    case indicator === 'paid':
+      return (
+        <Badge progress="complete" status="info">
+          Paid
+        </Badge>
+      );
+
     case indicator === 'unsynced':
       return <Badge progress="complete">Unsynced</Badge>;
 

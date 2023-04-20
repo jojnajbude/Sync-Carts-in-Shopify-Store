@@ -23,4 +23,13 @@ export class Cart {
 
   @Column({ nullable: true })
   cart_token: string;
+
+  @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", nullable: true })
+  created_at: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  closed_at: Date;
+
+  @Column({ type: 'numeric', nullable: true })
+  final_price: number;
 }

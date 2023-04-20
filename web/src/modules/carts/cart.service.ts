@@ -65,7 +65,8 @@ export class CartService {
         name: `${customer.first_name} ${customer.last_name}`, 
         shopify_user_id: customer.id, 
         shop_id: shopData?.id,
-        priority: customer.priority || 'normal'
+        priority: customer.priority || 'normal',
+        location: customer.default_address.country_name
       })
     }
 
@@ -236,7 +237,9 @@ export class CartService {
     }
 
     for (const cart of table) {
-      if (cart.items.every(item => item.status === 'reserved')) {
+      if (cart.items.every(item => item.status === 'paid')) {
+        cart.reserved_indicator = 'paid';
+      } else if (cart.items.every(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'all';
       } else if (cart.items.find(item => item.status === 'unsynced' || item.status === 'removed' || item.status === 'added')) {
         cart.reserved_indicator = 'unsynced'; 

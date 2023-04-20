@@ -1,5 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Customer } from "../customers/customer.entity.js";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('shops')
 export class Shop {

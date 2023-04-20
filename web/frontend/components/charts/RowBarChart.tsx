@@ -1,45 +1,19 @@
 import { LegacyCard } from '@shopify/polaris';
 import { SimpleBarChart } from '@shopify/polaris-viz';
 
-export default function RowBarChart() {
-  const data = [
-    {
-      name: 'Country',
-      data: [
-        {
-          key: 'USA',
-          value: 512,
-        },
-        {
-          key: 'England',
-          value: 413,
-        },
-        {
-          key: 'Italy',
-          value: 383,
-        },
-        {
-          key: 'Ukraine',
-          value: 289,
-        },
-        {
-          key: 'Germany',
-          value: 176,
-        },
-        {
-          key: 'Poland',
-          value: 98,
-        },
-      ],
-    },
-  ];
+type Props = {
+  status: 'Loading' | 'Error' | 'Success';
+  data: any;
+};
 
+export default function RowBarChart({ status, data }: Props) {
   return (
     <LegacyCard title="Carts by location" sectioned>
       <SimpleBarChart
         showLegend={false}
         data={data}
         theme="Light"
+        state={status}
       ></SimpleBarChart>
     </LegacyCard>
   );

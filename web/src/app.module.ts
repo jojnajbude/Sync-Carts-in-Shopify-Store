@@ -28,6 +28,8 @@ import { injectSnippet } from "./middlewares/injectSnippet.middleware.js";
 import { createWebhooks } from "./middlewares/createWebhooks.middleware.js";
 import { CustomerModule } from "./modules/customers/customer.module.js";
 import { ItemsModule } from "./modules/items/item.module.js";
+import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
+import { Analytics } from "./modules/analytics/analytics.entity.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -43,7 +45,7 @@ const STATIC_PATH =
       username: 'dmitrijromanenko',
       password: '1191994',
       database: 'better_carts',
-      entities: [Shop, Item, Customer, Cart],
+      entities: [Shop, Item, Customer, Cart, Analytics],
       synchronize: true,
     }),
     MongooseModule.forRoot(
@@ -58,6 +60,7 @@ const STATIC_PATH =
     CartModule,
     ItemsModule,
     StorefrontModule,
+    AnalyticsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -116,7 +119,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(injectSnippet)
       .exclude(
-        { path: "/api/(.*)", method: RequestMethod.ALL },
+        // { path: "/api/(.*)", method: RequestMethod.ALL },
         { path: "/storefront/(.*)", method: RequestMethod.ALL }
       )
       .forRoutes({ path: "/*", method: RequestMethod.ALL })

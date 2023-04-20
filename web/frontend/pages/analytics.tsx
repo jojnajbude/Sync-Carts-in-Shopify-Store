@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Layout, Page, FooterHelp } from '@shopify/polaris';
@@ -10,9 +11,36 @@ import ConversionChart from '../components/charts/ConversionChart';
 import TopChart from '../components/charts/TopChart';
 
 import '@shopify/polaris-viz/build/esm/styles.css';
+import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
+
+type Status = 'Loading' | 'Error' | 'Success';
 
 export default function EmptyStateExample() {
+  const [analytics, setAnalytics] = useState(null);
+  const [status, setStatus] = useState<Status>('Loading');
+  const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (status === 'Loading') {
+      const fetchData = async () => {
+        const analyticsData = await fetch('/api/analytics');
+
+        if (analyticsData.ok) {
+          const analytics = await analyticsData.json();
+
+          setAnalytics(analytics);
+          setStatus('Success');
+        } else {
+          setStatus('Error');
+        }
+      };
+
+      fetchData();
+    }
+  }, [status]);
+
+  console.log(analytics);
 
   return (
     <Page
@@ -22,7 +50,10 @@ export default function EmptyStateExample() {
     >
       <Layout>
         <Layout.Section oneHalf>
-          <LinearChart></LinearChart>
+          <LinearChart
+            status={status}
+            data={analytics ? analytics.total_sales : []}
+          ></LinearChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
@@ -38,7 +69,10 @@ export default function EmptyStateExample() {
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <RowBarChart></RowBarChart>
+          <RowBarChart
+            status={status}
+            data={analytics ? analytics.locations : []}
+          ></RowBarChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>

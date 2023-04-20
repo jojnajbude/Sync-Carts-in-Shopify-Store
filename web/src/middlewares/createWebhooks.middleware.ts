@@ -16,8 +16,9 @@ export class createWebhooks implements NestMiddleware {
 
     const cartCreate = webhooks.find(webhook => webhook.address.includes('/cart/create'));
     const cartUpdate = webhooks.find(webhook => webhook.address.includes('/cart/update'));
-    const customerCreate = webhooks.find(webhook => webhook.address.includes('/customer/create'));
+    // const customerCreate = webhooks.find(webhook => webhook.address.includes('/customer/create'));
     const customerUpdate = webhooks.find(webhook => webhook.address.includes('/customer/update'));
+    const orderPaid = webhooks.find(webhook => webhook.address.includes('/order/paid'));
 
     if (!cartCreate) {
       const cartCreateWebhook = new shopify.api.rest.Webhook({session});
@@ -53,6 +54,16 @@ export class createWebhooks implements NestMiddleware {
       const customerUpdateWebhook = new shopify.api.rest.Webhook({session});
       customerUpdateWebhook.address = 'https://better-carts.dev-test.pro/storefront/customer/update';
       customerUpdateWebhook.topic = 'customers/update';
+      customerUpdateWebhook.format = 'json';
+      await customerUpdateWebhook.save({
+        update: true
+      })
+    }
+
+    if (!orderPaid) {
+      const customerUpdateWebhook = new shopify.api.rest.Webhook({session});
+      customerUpdateWebhook.address = 'https://better-carts.dev-test.pro/storefront/order/paid';
+      customerUpdateWebhook.topic = 'orders/paid';
       customerUpdateWebhook.format = 'json';
       await customerUpdateWebhook.save({
         update: true

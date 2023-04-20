@@ -34,7 +34,8 @@ export class StorefrontService {
           name: `${shopifyCustomer.first_name} ${shopifyCustomer.last_name}`, 
           shopify_user_id: shopifyCustomer.id, 
           shop_id: shopData?.id,
-          priority: 'normal'
+          priority: 'normal',
+          location: shopifyCustomer.default_address.country_name
         })
       }  
     }
@@ -219,13 +220,6 @@ export class StorefrontService {
     return updatedItems;
   }
 
-  // async createUser(shop: string, user: any) {
-  //   const shopData = await this.shopsRepository.findOneBy({ domain: shop });
-  //   const customer = await this.customerRepository.save({ shopify_user_id: user.id, shop_id: shopData?.id, name: `${user.first_name} ${user.last_name}` });
-
-  //   return customer;
-  // }
-
   async updateUser(user: any) {
     const customer = await this.customerRepository.findOneBy({ shopify_user_id: user.id });
 
@@ -269,5 +263,20 @@ export class StorefrontService {
     const expandTime = 3600000 * reservationTime;
 
     return new Date(startDate.getTime() + expandTime);
+  }
+
+  async handleOrderPaid(cart_token: string, totalPrice: number) {
+    const cart = await this.cartRepository.findOneBy({ cart_token })
+    const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
+    const paidItems = await this.itemRepository.createQueryBuilder()
+      .update()
+      .set({ status: 'paid' })
+      .where({ cart_id: cart?.id })
+      .execute();
+
+    console.log(paidCart);
+    console.log(paidItems);
+
+    return [paidCart, paidItems]
   }
 }
