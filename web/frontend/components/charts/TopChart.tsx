@@ -1,128 +1,55 @@
-import { LegacyCard, DataTable, Link } from '@shopify/polaris';
+import {
+  LegacyCard,
+  DataTable,
+  Link,
+  SkeletonBodyText,
+} from '@shopify/polaris';
+import { Key, ReactElement, JSXElementConstructor, ReactFragment } from 'react';
 
 type Props = {
-  type: 'abandoned' | 'sold';
+  title: string;
+  status: 'Loading' | 'Error' | 'Success';
+  data: any;
 };
 
-export default function TopChart({ type }: Props) {
-  // const [sortedRows, setSortedRows] = useState(null);
+export default function TopChart({ title, status, data }: Props) {
+  console.log(data);
+  let rows = [];
 
-  const initiallySortedRows = [
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Ninja sword
-      </Link>,
-      643,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        John Wick jacket
-      </Link>,
-      443,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Terraforming gun
-      </Link>,
-      413,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Batman mask
-      </Link>,
-      287,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        PlayStation 5
-      </Link>,
-      267,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Spiderman webshooters
-      </Link>,
-      199,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Emerald Silk Crown
-      </Link>,
-      78,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="emerald-silk-gown"
-      >
-        Iron man suit
-      </Link>,
-      56,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="mauve-cashmere-scarf"
-      >
-        Mauve Cashmere Scarf
-      </Link>,
-      52,
-    ],
-    [
-      <Link
-        removeUnderline
-        url="https://www.example.com"
-        key="navy-merino-wool"
-      >
-        Wool Blazer
-      </Link>,
-      14,
-    ],
-  ];
+  if (status !== 'Loading') {
+    rows = data.map(
+      (product: {
+        domain: string;
+        product_id: string;
+        title: string;
+        sold: string;
+      }) => [
+        <Link
+          removeUnderline
+          url={`https://${product.domain}/admin/products/${product.product_id}`}
+          key={product.title}
+        >
+          {product.title}
+        </Link>,
+        Number(product.sold),
+      ],
+    );
+  }
+
+  console.log(rows);
 
   return (
-    <LegacyCard
-      title={
-        type === 'abandoned' ? 'Top Abandoned products' : 'Top Sold Products'
-      }
-      sectioned
-    >
-      <DataTable
-        columnContentTypes={['text', 'text']}
-        headings={[]}
-        rows={initiallySortedRows}
-        increasedTableDensity
-      />
+    <LegacyCard title={title} sectioned>
+      {status === 'Loading' ? (
+        <SkeletonBodyText lines={10} />
+      ) : (
+        <DataTable
+          columnContentTypes={['text', 'text']}
+          headings={[]}
+          rows={rows}
+          increasedTableDensity
+        />
+      )}
     </LegacyCard>
   );
 }

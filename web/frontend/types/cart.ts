@@ -5,10 +5,11 @@ export interface Cart {
   priority: 'max' | 'high' | 'normal' | 'low' | 'min';
   shop_domain: string;
   total: number;
-  reserved_indicator: string;
+  reserved_indicator: 'all' | 'part' | 'no' | 'unsynced' | 'paid';
   reservation_time: string;
   qty: number;
   items: Item[];
+  last_action: string;
 }
 
 export interface Item {

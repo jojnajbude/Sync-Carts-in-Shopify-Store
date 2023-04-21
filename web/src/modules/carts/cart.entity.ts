@@ -27,6 +27,9 @@ export class Cart {
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", nullable: true })
   created_at: Date;
 
+  @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", nullable: true })
+  last_action: Date;
+
   @Column({ type: 'timestamp', nullable: true })
   closed_at: Date;
 

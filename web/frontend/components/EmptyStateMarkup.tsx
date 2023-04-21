@@ -18,12 +18,12 @@ export default function EmptyStateMarkup({ rows }: Props) {
           <IndexTable
             headings={[
               { title: '' },
-              { title: 'Cart ID' },
-              { title: 'Customer' },
-              { title: 'Cart Total' },
-              { title: 'Reserved Indicator' },
-              { title: 'Shortest expire time for items' },
-              { title: 'Items Quantity' },
+              { title: '' },
+              { title: '' },
+              { title: '' },
+              { title: '' },
+              { title: '' },
+              { title: '' },
             ]}
             itemCount={rows}
             selectable={false}

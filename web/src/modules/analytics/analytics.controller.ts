@@ -14,21 +14,4 @@ export class AnalyticsController {
 
     analytics ? res.status(200).send(analytics) : res.status(500).send('Server error');
   }
-
-
-  // @Get('locations')
-  // async getCartLocations(@Res() res: Response) {
-  //   const domain = res.locals.shopify.session.shop;
-    
-  //   const locations = await this.analyticsService.getLocationsStatistic(domain);
-
-  //   locations ? res.status(200).send(locations) : res.status(500).send('Server error');
-  // }
-
-  // @Get('sales')
-  // async getTotalSales(@Res() res: Response) {
-  //   const domain = res.locals.shopify.session.shop;
-  //   const sales = await this.analyticsService.getTotalSales(domain)
-
-  // }
 }

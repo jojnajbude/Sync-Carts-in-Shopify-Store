@@ -24,11 +24,11 @@ export class CartController {
     newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
   }
 
-  @Get('all')
-  async getShopCarts(@Res() res: Response) {
+  @Get('last')
+  async getLastActivityCarts(@Res() res: Response) {
     const session = res.locals.shopify.session;
 
-    const carts = await this.cartService.getShopCarts(session)
+    const carts = await this.cartService.getLastActivityCarts(session)
 
     carts ? res.status(200).send(carts) : res.status(404).send('Not found')
   }

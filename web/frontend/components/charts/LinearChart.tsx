@@ -13,7 +13,7 @@ export default function LinearChart({ status, data }: Props) {
         showLegend={false}
         data={data}
         theme="Light"
-        status={status}
+        state={status}
       ></LineChart>
     </LegacyCard>
   );

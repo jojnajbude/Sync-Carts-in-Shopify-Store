@@ -3,7 +3,7 @@ import {
   ResourceList,
   LegacyStack,
   Thumbnail,
-  AlphaStack,
+  VerticalStack,
   Text,
   DataTable,
   TextField,
@@ -172,7 +172,7 @@ export default function ProductsList({
                   <Thumbnail source={image_link} alt={title} size="large" />
 
                   <LegacyStack.Item fill>
-                    <AlphaStack gap="3">
+                    <VerticalStack gap="3">
                       <Text variant="bodyMd" fontWeight="bold" as="h3">
                         {title}
                       </Text>
@@ -182,7 +182,7 @@ export default function ProductsList({
                       <Text variant="bodyMd" as="h3">
                         {`Amount: ${qty}`}
                       </Text>
-                    </AlphaStack>
+                    </VerticalStack>
                   </LegacyStack.Item>
 
                   <LegacyStack.Item>

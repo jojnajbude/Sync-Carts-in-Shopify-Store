@@ -2,99 +2,19 @@ import { LegacyCard } from '@shopify/polaris';
 import { StackedAreaChart } from '@shopify/polaris-viz';
 
 type Props = {
-  type: 'time' | 'paid';
+  title: string;
+  status: 'Loading' | 'Error' | 'Success';
+  data: any;
 };
 
-export default function AreaChart({ type }: Props) {
-  let data = [];
-
-  if (type == 'time') {
-    data = [
-      {
-        name: 'Days',
-        data: [
-          {
-            key: 'January',
-            value: 12,
-          },
-          {
-            key: 'February',
-            value: 4,
-          },
-          {
-            key: 'March',
-            value: 7,
-          },
-          {
-            key: 'April',
-            value: 1,
-          },
-          {
-            key: 'May',
-            value: 7,
-          },
-          {
-            key: 'June',
-            value: 9,
-          },
-          {
-            key: 'July',
-            value: 14,
-          },
-        ],
-      },
-    ];
-  } else if (type === 'paid') {
-    data = [
-      {
-        name: 'Price',
-        data: [
-          {
-            key: 'January',
-            value: 383,
-          },
-          {
-            key: 'February',
-            value: 417,
-          },
-          {
-            key: 'March',
-            value: 683,
-          },
-          {
-            key: 'April',
-            value: 1100,
-          },
-          {
-            key: 'May',
-            value: 412,
-          },
-          {
-            key: 'June',
-            value: 132,
-          },
-          {
-            key: 'July',
-            value: 86,
-          },
-        ],
-      },
-    ];
-  }
-
+export default function AreaChart({ title, status, data }: Props) {
   return (
-    <LegacyCard
-      title={
-        type === 'time'
-          ? 'Average cart open time (in days)'
-          : 'Average paid carts price (in shop currency)'
-      }
-      sectioned
-    >
+    <LegacyCard title={title} sectioned>
       <StackedAreaChart
         showLegend={false}
         data={data}
         theme="Light"
+        state={status}
       ></StackedAreaChart>
     </LegacyCard>
   );

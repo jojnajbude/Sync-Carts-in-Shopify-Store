@@ -19,6 +19,10 @@ type TableRow = {
   reservation_time: string;
   qty: number;
   items: any[];
+  customer_shopify_id: string;
+  shop_domain: string;
+  priority: string | undefined;
+  last_action: string;
 }
 
 @Injectable()
@@ -36,7 +40,7 @@ export class CartService {
   async getShopCarts(session: shopifySession) {
     try {
       const carts = await this.itemRepository.query(
-        `select items.*, customers.name, customers.shopify_user_id
+        `select items.*, customers.name, customers.priority, customers.shopify_user_id, carts.last_action
         from items
         left join carts
         on items.cart_id = carts.id
@@ -53,6 +57,21 @@ export class CartService {
     } catch (err) {
       console.log(err)
     }
+  }
+
+  async getLastActivityCarts(session: shopifySession) {
+    const carts = await this.getShopCarts(session);
+
+    if (carts) {
+      let lastCarts = this.sortCarts(carts, 10, 'descending');
+      if (lastCarts.length > 10) {
+        lastCarts = lastCarts.slice(0, 9);
+      }
+
+      return lastCarts
+    }
+  
+    return false;
   }
 
   async createNewCart(cart: any, customer: any, session: shopifySession) {
@@ -152,6 +171,8 @@ export class CartService {
       }
     }
 
+    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+
     return true
   }
 
@@ -198,17 +219,20 @@ export class CartService {
     }
 
     const newTimers = await this.itemRepository.save(items);
+    await this.cartRepository.update({ id: In(ids) }, { last_action: new Date() })
     return newTimers
   }
 
   async unreserveItems(ids: number[]) {
     const updateItems = await this.itemRepository.update({ cart_id: In(ids) }, { status: 'unreserved' })
+    await this.cartRepository.update({ id: In(ids) }, { last_action: new Date() })
 
     return updateItems
   }
 
   async removeItems(ids: number[]) {
     const removedItems = await this.itemRepository.delete({ cart_id: In(ids)})
+    await this.cartRepository.update({ id: In(ids) }, { last_action: new Date() })
 
     return removedItems
   }
@@ -232,6 +256,7 @@ export class CartService {
           customer_shopify_id: item.shopify_user_id,
           shop_domain: shop,
           priority: item.priority,
+          last_action: new Date(item.last_action).toLocaleString()
         });
       }
     }

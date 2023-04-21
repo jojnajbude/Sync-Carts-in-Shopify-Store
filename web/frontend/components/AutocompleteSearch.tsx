@@ -3,13 +3,13 @@ import {
   LegacyStack,
   Text,
   Thumbnail,
-  AlphaStack,
   Modal,
   Icon,
+  VerticalStack,
 } from '@shopify/polaris';
 import { SearchMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useReducer } from 'react';
 
 import VariantsList from './VariantsList';
 import { formatter } from '../services/formatter';
@@ -274,11 +274,11 @@ export default function AutocompleteSearch({
         <Thumbnail source={url} alt={title} size="small" />
 
         <LegacyStack.Item>
-          <AlphaStack gap="3">
+          <VerticalStack gap="3">
             <Text variant="bodyMd" fontWeight="bold" as="h3">
               {title}
             </Text>
-          </AlphaStack>
+          </VerticalStack>
         </LegacyStack.Item>
 
         <LegacyStack.Item>
@@ -304,7 +304,7 @@ export default function AutocompleteSearch({
     return (
       <LegacyStack>
         <LegacyStack.Item fill>
-          <AlphaStack gap="3">
+          <VerticalStack gap="3">
             <Text variant="bodySm" as="span">
               {name}
             </Text>
@@ -316,7 +316,7 @@ export default function AutocompleteSearch({
                 This customer already has а cart
               </Text>
             )}
-          </AlphaStack>
+          </VerticalStack>
         </LegacyStack.Item>
       </LegacyStack>
     );

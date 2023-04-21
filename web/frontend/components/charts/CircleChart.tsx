@@ -1,45 +1,16 @@
 import { LegacyCard } from '@shopify/polaris';
 import { DonutChart } from '@shopify/polaris-viz';
 
-export default function CircleChart() {
-  const data = [
-    {
-      data: [
-        {
-          key: 'iOS',
-          value: 53,
-        },
-      ],
-      name: 'iOS',
-    },
-    {
-      data: [
-        {
-          key: 'Android',
-          value: 46,
-        },
-      ],
-      name: 'Android',
-    },
-    {
-      data: [
-        {
-          key: 'Windows',
-          value: 40,
-        },
-      ],
-      name: 'Windows',
-    },
-    {
-      data: [
-        {
-          key: 'Other',
-          value: 10,
-        },
-      ],
-      name: 'Other',
-    },
-  ];
+type Props = {
+  status: 'Loading' | 'Error' | 'Success';
+  data: any;
+};
+
+export default function CircleChart({ status, data }: Props) {
+  data.forEach(
+    (os: { data: { value: any }[] }) =>
+      (os.data[0].value = Number(os.data[0].value)),
+  );
 
   return (
     <LegacyCard title="Carts opened by device" sectioned>
@@ -48,6 +19,7 @@ export default function CircleChart() {
         legendFullWidth
         legendPosition="left"
         theme="Light"
+        state={status}
       />
     </LegacyCard>
   );

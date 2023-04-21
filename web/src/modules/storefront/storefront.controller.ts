@@ -7,8 +7,8 @@ export class StorefrontController {
   constructor (private storefrontService: StorefrontService) {}
 
   @Get('update')
-  async updateData(@Query() query: { cart_id: string, customer: string, shop_id: string }, @Res() res: Response) {
-    const cartItems = await this.storefrontService.updateData(query.cart_id, query.customer, query.shop_id);
+  async updateData(@Query() query: { cart_id: string, customer: string, shop_id: string, os: string }, @Res() res: Response) {
+    const cartItems = await this.storefrontService.updateData(query.cart_id, query.customer, query.shop_id, query.os);
 
     cartItems ? res.status(200).send(cartItems) : res.status(500).send('Server error');
   }

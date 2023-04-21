@@ -57,15 +57,26 @@ export default function EmptyStateExample() {
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <AreaChart type={'time'}></AreaChart>
+          <AreaChart
+            title={'Average cart open time (in minutes)'}
+            status={status}
+            data={analytics ? analytics.average_open_time : []}
+          ></AreaChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <AreaChart type={'paid'}></AreaChart>
+          <AreaChart
+            title={'Average paid carts price (in shop currency)'}
+            status={status}
+            data={analytics ? analytics.average_price : []}
+          ></AreaChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <ConversionChart></ConversionChart>
+          <ConversionChart
+            status={status}
+            data={analytics ? analytics.conversion_rates : []}
+          ></ConversionChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
@@ -76,15 +87,26 @@ export default function EmptyStateExample() {
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <CircleChart></CircleChart>
+          <CircleChart
+            status={status}
+            data={analytics ? analytics.device_statistic : []}
+          ></CircleChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <TopChart type={'sold'}></TopChart>
+          <TopChart
+            title="Top Sold Products"
+            status={status}
+            data={analytics ? analytics.top_sold : []}
+          ></TopChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
-          <TopChart type={'abandoned'}></TopChart>
+          <TopChart
+            title="Top Abandoned Products"
+            status={status}
+            data={analytics ? analytics.top_abandoned : []}
+          ></TopChart>
         </Layout.Section>
       </Layout>
       <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>

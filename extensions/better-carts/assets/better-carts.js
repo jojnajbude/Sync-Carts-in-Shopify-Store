@@ -6,9 +6,27 @@ const APP_URL = 'https://better-carts.dev-test.pro';
 
   if (window.customer) {
     const cookie = getCartCookie();  
-    updateData(window.customer.id, cookie, window.customer.shop);
+    const os = getOS()
+    updateData(window.customer.id, cookie, window.customer.shop, os);
   }
 })()
+
+function getOS() {
+  let userAgent = navigator.userAgent;
+  let os = "";
+
+  if (userAgent.search('Windows') !== -1){
+    os = "Windows";
+  } else if (userAgent.search('Mac') !== -1){
+    os = "MacOS";
+  } else if (userAgent.search('Linux') !== -1){
+    os = "Linux";
+  } else {
+    os = 'Other';
+  }
+  
+  return os;
+}
 
 function initializeObserver() {
   const target = document.body;
@@ -36,8 +54,8 @@ function getCartCookie() {
   return cookie;
 }
 
-async function updateData(id, cart_id, shop_id) {
-  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}`);
+async function updateData(id, cart_id, shop_id, os) {
+  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}&os=${os}`);
   const response = await checkUpdates.json();
 
   if (response.type === 'New cart') {

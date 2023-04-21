@@ -60,7 +60,6 @@ export default function CartsTable() {
     };
 
     getCarts();
-    // getCurrentTableData();
 
     return () => {
       ignore = true;

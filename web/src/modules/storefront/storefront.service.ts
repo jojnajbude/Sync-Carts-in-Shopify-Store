@@ -16,8 +16,12 @@ export class StorefrontService {
     @InjectRepository(Item) private itemRepository: Repository<Item>,
   ) {}
 
-  async updateData(cart_id: string, customer_id: string, shop_id: string) {
+  async updateData(cart_id: string, customer_id: string, shop_id: string, os: string) {
     let user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
+
+    if (!user?.os) {
+      await this.customerRepository.update({ id: user?.id }, { os: os });
+    }
 
     if (!user) {
       const shopData = await this.shopsRepository.findOneBy({ shopify_id: Number(shop_id) });
@@ -35,7 +39,8 @@ export class StorefrontService {
           shopify_user_id: shopifyCustomer.id, 
           shop_id: shopData?.id,
           priority: 'normal',
-          location: shopifyCustomer.default_address.country_name
+          location: shopifyCustomer.default_address.country_name,
+          os: os,
         })
       }  
     }
@@ -173,6 +178,7 @@ export class StorefrontService {
 
       if (deletedItem) {
         const removeItem = await this.itemRepository.remove(deletedItem)
+        await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
         return removeItem
       }
@@ -216,6 +222,7 @@ export class StorefrontService {
         }
       }
     }
+    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
     return updatedItems;
   }
@@ -274,8 +281,7 @@ export class StorefrontService {
       .where({ cart_id: cart?.id })
       .execute();
 
-    console.log(paidCart);
-    console.log(paidItems);
+      await this.cartRepository.update({ id: cart?.id }, { last_action: new Date() })
 
     return [paidCart, paidItems]
   }
