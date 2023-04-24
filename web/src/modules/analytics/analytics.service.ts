@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
@@ -14,7 +15,7 @@ export class AnalyticsService {
     @InjectRepository(Customer) private customerRepository: Repository<Customer>, 
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
     @InjectRepository(Item) private itemRepository: Repository<Item>,
-    @InjectRepository(Analytics) private analyticsRepository: Repository<Analytics>
+    @InjectRepository(Analytics) private analyticsRepository: Repository<Analytics>,
   ) {}
 
   async getAnalytics(domain: string) {
@@ -34,6 +35,10 @@ export class AnalyticsService {
     analytics.top_abandoned = JSON.parse(analytics.top_abandoned);
 
     return analytics ? analytics : false;
+  }
+
+  @Cron(CronExpression.EVERY_SECOND)
+  async updateAnalytics() {
   }
 
   async getLocationsStatistic(domain: string) {

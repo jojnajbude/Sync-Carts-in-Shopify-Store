@@ -19,17 +19,18 @@ import { ShopModule } from "./modules/shops/shop.module.js";
 import { CartModule } from "./modules/carts/cart.module.js";
 import { StorefrontModule } from "./modules/storefront/storefront.module.js";
 import { ProductModule } from "./product/product.module.js";
-import { getShopDataMiddleware } from "./middlewares/getShopData.middleware.js";
+import { getShopDataMiddleware } from "./middlewares/get-shop-data.middleware.js";
 import { Shop } from "./modules/shops/shop.entity.js";
 import { Item } from "./modules/items/item.entity.js";
 import { Customer } from "./modules/customers/customer.entity.js";
 import { Cart } from "./modules/carts/cart.entity.js";
-import { injectSnippet } from "./middlewares/injectSnippet.middleware.js";
-import { createWebhooks } from "./middlewares/createWebhooks.middleware.js";
+import { injectSnippet } from "./middlewares/inject-snippet.middleware.js";
+import { createWebhooks } from "./middlewares/create-webhooks.middleware.js";
 import { CustomerModule } from "./modules/customers/customer.module.js";
 import { ItemsModule } from "./modules/items/item.module.js";
 import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { Analytics } from "./modules/analytics/analytics.entity.js";
+import { LogModule } from "./modules/log/logs.module.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -50,9 +51,7 @@ const STATIC_PATH =
     }),
     MongooseModule.forRoot(
       'mongodb+srv://romanenkodmytriy:1191994spiri@bettercarts.zp3jd1t.mongodb.net/better-carts?retryWrites=true&w=majority',
-      {
-        connectionName: 'logs',
-      }),
+    ),
     ScheduleModule.forRoot(),
     ShopModule,
     CustomerModule,
@@ -61,6 +60,7 @@ const STATIC_PATH =
     ItemsModule,
     StorefrontModule,
     AnalyticsModule,
+    LogModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

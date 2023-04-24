@@ -23,6 +23,7 @@ export default function HomePage() {
   const [analytics, setAnalytics] = useState(null);
   const [status, setStatus] = useState<Status>('Loading');
   const [carts, setCarts] = useState(null);
+  const [logs, setLogs] = useState([]);
 
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
@@ -32,13 +33,16 @@ export default function HomePage() {
       const fetchData = async () => {
         const analyticsData = await fetch('/api/analytics');
         const lastCartsData = await fetch('/api/carts/last');
+        const handleLogs = await fetch('/api/logs');
 
-        if (analyticsData.ok && lastCartsData.ok) {
+        if (analyticsData.ok && lastCartsData.ok && handleLogs.ok) {
           const analytics = await analyticsData.json();
           const lastCarts = await lastCartsData.json();
+          const logs = await handleLogs.json();
 
           setAnalytics(analytics);
           setCarts(lastCarts);
+          setLogs(logs);
           setStatus('Success');
           setIsLoading(false);
         } else {
@@ -141,8 +145,8 @@ export default function HomePage() {
         </Layout.Section>
 
         <Layout.Section secondary>
-          <LegacyCard sectioned title="Log activity">
-            <LogActivity></LogActivity>
+          <LegacyCard sectioned title="Recent activity">
+            <LogActivity logs={logs} isLoading={isLoading}></LogActivity>
           </LegacyCard>
         </Layout.Section>
       </Layout>

@@ -6,6 +6,7 @@ import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
 import shopify from "../../utils/shopify.js";
 import { Item } from "../items/item.entity.js";
+import { LogsService } from "../log/logs.service.js";
 
 @Injectable()
 export class StorefrontService {
@@ -14,6 +15,7 @@ export class StorefrontService {
     @InjectRepository(Customer) private customerRepository: Repository<Customer>, 
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
     @InjectRepository(Item) private itemRepository: Repository<Item>,
+    private logService: LogsService
   ) {}
 
   async updateData(cart_id: string, customer_id: string, shop_id: string, os: string) {
@@ -166,6 +168,8 @@ export class StorefrontService {
       cart = await this.createCart(shop, cartData)
     }
 
+    const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
+
     const items = await this.itemRepository.createQueryBuilder('items')
       .leftJoin('items.cart', 'carts')
       .where('carts.cart_token = :token', { token: cartData.token })
@@ -180,6 +184,17 @@ export class StorefrontService {
         const removeItem = await this.itemRepository.remove(deletedItem)
         await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
+        const log = {
+          type: 'delete',
+          domain: shop,
+          date: new Date(),
+          customer_name: customer?.name,
+          product_name: deletedItem.title,
+          link_id: `${deletedItem.product_id}`,
+        }
+    
+        const newLog = await this.logService.createLog(log);
+
         return removeItem
       }
     }
@@ -190,9 +205,6 @@ export class StorefrontService {
       if (item && Number(item.qty) !== line_item.quantity) {
         updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
       } else if (!item) {
-        const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
-        console.log(customer)
-
         if (customer) {
           const product = await shopify.api.rest.Product.find({
             session,
@@ -219,6 +231,17 @@ export class StorefrontService {
             product_id: variant.product_id,
             expireAt: expireTime,
           }))
+
+          const log = {
+            type: 'add',
+            domain: shop,
+            date: new Date(),
+            customer_name: customer?.name,
+            product_name: product.title,
+            link_id: `${variant.product_id}`,
+          }
+      
+          const newLog = await this.logService.createLog(log);
         }
       }
     }
@@ -273,7 +296,13 @@ export class StorefrontService {
   }
 
   async handleOrderPaid(cart_token: string, totalPrice: number) {
-    const cart = await this.cartRepository.findOneBy({ cart_token })
+    // const cart = await this.cartRepository.findOneBy({ cart_token })
+    const cart = await this.cartRepository.query(
+      `select * from carts
+      left join customers on customers.id = carts.customer_id
+      left join shops on shops.id = carts.shop_id
+      where carts.cart_token = ${cart_token}`
+    )
     const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
     const paidItems = await this.itemRepository.createQueryBuilder()
       .update()
@@ -281,7 +310,16 @@ export class StorefrontService {
       .where({ cart_id: cart?.id })
       .execute();
 
-      await this.cartRepository.update({ id: cart?.id }, { last_action: new Date() })
+    await this.cartRepository.update({ id: cart?.id }, { last_action: new Date() })
+
+    const log = {
+      type: 'paid',
+      domain: cart.domain,
+      date: new Date(),
+      customer_name: cart.customer_name,
+    }
+
+    const newLog = await this.logService.createLog(log);
 
     return [paidCart, paidItems]
   }

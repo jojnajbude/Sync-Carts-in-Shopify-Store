@@ -23,7 +23,7 @@ export class Item {
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp' })
   expireAt: Date;
 
   @Column({ default: 'reserved' })
