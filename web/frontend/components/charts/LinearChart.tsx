@@ -2,7 +2,7 @@ import { LegacyCard } from '@shopify/polaris';
 import { LineChart } from '@shopify/polaris-viz';
 
 type Props = {
-  status: 'Loading' | 'Error' | 'Success';
+  status: string;
   data: any;
 };
 

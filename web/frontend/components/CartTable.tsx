@@ -8,6 +8,7 @@ import {
   Toast,
   Divider,
   LegacyCard,
+  SkeletonBodyText,
 } from '@shopify/polaris';
 
 import { useAuthenticatedFetch } from '../hooks';
@@ -15,7 +16,6 @@ import { useAuthenticatedFetch } from '../hooks';
 import PopupModal from './PopupModal';
 import TablePagination from './Pagination';
 import IndexTableFilters from './IndexFilters';
-import EmptyStateMarkup from './EmptyStateMarkup';
 import CartBadge from './CartBadge';
 
 type Sort = 'ascending' | 'descending';
@@ -268,11 +268,13 @@ export default function CartsTable() {
               )}
             </IndexTable>
           ) : (
-            <EmptyStateMarkup rows={tableRowsPerPage} />
+            <LegacyCard.Section>
+              <SkeletonBodyText lines={25} />
+            </LegacyCard.Section>
           )}
           {showModal && createModal()}
           {activeToast && toastMarkup()}
-          <Divider borderStyle="dark" />
+          <Divider />
           <LegacyCard.Section>
             {carts.length > tableRowsPerPage && (
               <TablePagination

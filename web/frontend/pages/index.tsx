@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useAuthenticatedFetch, useNavigate } from '@shopify/app-bridge-react';
 import {
   Page,
@@ -6,30 +6,66 @@ import {
   FooterHelp,
   IndexTable,
   LegacyCard,
+  SkeletonBodyText,
 } from '@shopify/polaris';
 
-import EmptyStateMarkup from '../components/EmptyStateMarkup';
 import AreaChart from '../components/charts/AreaChart';
 import ConversionChart from '../components/charts/ConversionChart';
 import LinearChart from '../components/charts/LinearChart';
 import CartBadge from '../components/CartBadge';
 import LogActivity from '../components/LogActivity';
-import { Cart } from '../types/cart';
 
-type Status = 'Loading' | 'Error' | 'Success';
+import { Cart } from '../types/cart';
+import { Analytics } from '../types/analytics';
+import { Logs } from '../types/logs';
+
+type State = {
+  isLoading: boolean;
+  analytics: Analytics;
+  status: 'Loading' | 'Error' | 'Success';
+  carts: Cart[];
+  logs: Logs[];
+};
+
+type Action = {
+  type: 'Error' | 'setStates';
+  analytics?: Analytics;
+  lastCarts?: Cart[];
+  logs?: Logs[];
+};
 
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [analytics, setAnalytics] = useState(null);
-  const [status, setStatus] = useState<Status>('Loading');
-  const [carts, setCarts] = useState(null);
-  const [logs, setLogs] = useState([]);
+  const initialState: State = {
+    isLoading: true,
+    analytics: null,
+    status: 'Loading',
+    carts: null,
+    logs: [],
+  };
+
+  function reducer(state: State, action: Action) {
+    switch (action.type) {
+      case 'setStates':
+        return {
+          isLoading: false,
+          analytics: action.analytics,
+          status: 'Success',
+          carts: action.lastCarts,
+          logs: action.logs,
+        };
+
+      case 'Error':
+        return { ...state, status: 'Error', isLoading: false };
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoading) {
+    if (state.isLoading) {
       const fetchData = async () => {
         const analyticsData = await fetch('/api/analytics');
         const lastCartsData = await fetch('/api/carts/last');
@@ -40,19 +76,15 @@ export default function HomePage() {
           const lastCarts = await lastCartsData.json();
           const logs = await handleLogs.json();
 
-          setAnalytics(analytics);
-          setCarts(lastCarts);
-          setLogs(logs);
-          setStatus('Success');
-          setIsLoading(false);
+          dispatch({ type: 'setStates', analytics, lastCarts, logs });
         } else {
-          setStatus('Error');
+          dispatch({ type: 'Error' });
         }
       };
 
       fetchData();
     }
-  }, [isLoading]);
+  }, [state]);
 
   const resourceName = {
     singular: 'cart',
@@ -77,33 +109,37 @@ export default function HomePage() {
       <Layout>
         <Layout.Section fullWidth>
           <LinearChart
-            status={status}
-            data={analytics ? analytics.total_sales : []}
+            status={state.status}
+            data={state.analytics ? state.analytics.total_sales : []}
           ></LinearChart>
         </Layout.Section>
 
         <Layout.Section oneThird>
           <ConversionChart
-            status={status}
-            data={analytics ? analytics.conversion_rates : []}
+            status={state.status}
+            data={state.analytics ? state.analytics.conversion_rates : []}
           ></ConversionChart>
         </Layout.Section>
 
         <Layout.Section oneThird>
           <AreaChart
             title={'Average paid carts price'}
-            status={status}
-            data={analytics ? analytics.average_price : []}
+            status={state.status}
+            data={
+              state.analytics
+                ? state.analytics.average_price
+                : [{ name: 'Price', data: [] }]
+            }
           ></AreaChart>
         </Layout.Section>
 
         <Layout.Section>
           <LegacyCard title="Recently active carts" sectioned>
-            {!isLoading ? (
+            {!state.isLoading ? (
               <IndexTable
                 selectable={false}
                 resourceName={resourceName}
-                itemCount={carts.length}
+                itemCount={state.carts.length}
                 headings={[
                   { title: 'Customer' },
                   { title: 'Items Quantity' },
@@ -111,7 +147,7 @@ export default function HomePage() {
                   { title: 'Last action' },
                 ]}
               >
-                {carts.map(
+                {state.carts.map(
                   (
                     {
                       id,
@@ -139,14 +175,17 @@ export default function HomePage() {
                 )}
               </IndexTable>
             ) : (
-              <EmptyStateMarkup rows={10} />
+              <SkeletonBodyText lines={10} />
             )}
           </LegacyCard>
         </Layout.Section>
 
         <Layout.Section secondary>
           <LegacyCard sectioned title="Recent activity">
-            <LogActivity logs={logs} isLoading={isLoading}></LogActivity>
+            <LogActivity
+              logs={state.logs}
+              isLoading={state.isLoading}
+            ></LogActivity>
           </LegacyCard>
         </Layout.Section>
       </Layout>

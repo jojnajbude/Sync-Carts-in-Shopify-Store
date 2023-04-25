@@ -65,7 +65,7 @@ export class CartService {
     if (carts) {
       let lastCarts = this.sortCarts(carts, 10, 'descending');
       if (lastCarts.length > 10) {
-        lastCarts = lastCarts.slice(0, 9);
+        lastCarts = lastCarts.slice(0, 10);
       }
 
       return lastCarts
@@ -77,42 +77,45 @@ export class CartService {
   async createNewCart(cart: any, customer: any, session: shopifySession) {
     const [shop] = await this.shopsService.getShopData(session);
     const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop.id });
-    let customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
 
-    if (!customerData) {
-      customerData = await this.customerRepository.save({ 
-        name: `${customer.first_name} ${customer.last_name}`, 
-        shopify_user_id: customer.id, 
-        shop_id: shopData?.id,
-        priority: customer.priority || 'normal',
-        location: customer.default_address.country_name
-      })
-    }
+    if (shopData) {
+      let customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
 
-    const newCart = await this.cartRepository.save({ customer_id: customerData?.id, shop_id: shopData?.id });
-
-    const items = [];
-
-    for (const item of cart.items) {
-      const expireTime = this.storefrontService.countExpireDate(new Date(), customerData.priority);
-      const newItem = {
-        variant_id: item.id,
-        product_id: item.product_id,
-        qty: item.qty,
-        expireAt: expireTime,
-        status: item.reserved_indicator,
-        cart_id: newCart.id,
-        price: item.price,
-        title: item.title,
-        image_link: item.image_link,
+      if (!customerData) {
+        customerData = await this.customerRepository.save({ 
+          name: `${customer.first_name} ${customer.last_name}`, 
+          shopify_user_id: customer.id, 
+          shop_id: shopData?.id,
+          priority: customer.priority || 'normal',
+          location: customer.default_address.country_name
+        })
       }
 
-      items.push(newItem);
+      const newCart = await this.cartRepository.save({ customer_id: customerData?.id, shop_id: shopData?.id });
+
+      const items = [];
+
+      for (const item of cart.items) {
+        const expireTime = this.storefrontService.countExpireDate(new Date(), customerData.priority, JSON.parse(shopData.priorities));
+        const newItem = {
+          variant_id: item.id,
+          product_id: item.product_id,
+          qty: item.qty,
+          expireAt: await expireTime,
+          status: item.reserved_indicator,
+          cart_id: newCart.id,
+          price: item.price,
+          title: item.title,
+          image_link: item.image_link,
+        }
+
+        items.push(newItem);
+      }
+
+      const newItems = await this.itemRepository.save(items);
+
+      return newItems ? newCart : false;
     }
-
-    const newItems = await this.itemRepository.save(items);
-
-    return newItems ? newCart : false;
   }
 
   async getCart(cartId: string, session: shopifySession) {
@@ -138,7 +141,10 @@ export class CartService {
   }
 
   async updateCartItems(cart: any, customer: any) {
-    const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
+    const shop = await this.shopsRepository.findOneBy({ id: cart.shop_id });
+
+    if (shop) {
+      const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
 
     if (oldItems.length > cart.items.length) {
       for (const oldItem of oldItems) {
@@ -156,7 +162,7 @@ export class CartService {
           await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced' })
         }
       } else {
-        const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority)
+        const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
         await this.itemRepository.save({ 
           cart_id: cart.id, 
           variant_id: item.variant_id, 
@@ -166,7 +172,7 @@ export class CartService {
           title: item.title, 
           image_link: item.image_link, 
           product_id: item.product_id,
-          expireAt: expireTime,
+          expireAt: await expireTime,
         })
       }
     }
@@ -174,6 +180,7 @@ export class CartService {
     await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
     return true
+    }
   }
 
   async getSortedCarts(session: shopifySession, direction: 'ascending' | 'descending', index: string,) {

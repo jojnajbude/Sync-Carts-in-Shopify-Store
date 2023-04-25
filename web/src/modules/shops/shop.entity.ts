@@ -16,4 +16,10 @@ export class Shop {
 
   @Column({ nullable: true })
   currency: string;
+
+  @Column({ type: 'json', nullable: true })
+  priorities: string;
+
+  @Column({ type: 'json', nullable: true })
+  email_templates: string;
 }

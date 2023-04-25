@@ -13,7 +13,6 @@ type Props = {
 };
 
 export default function TopChart({ title, status, data }: Props) {
-  console.log(data);
   let rows = [];
 
   if (status !== 'Loading') {
@@ -35,8 +34,6 @@ export default function TopChart({ title, status, data }: Props) {
       ],
     );
   }
-
-  console.log(rows);
 
   return (
     <LegacyCard title={title} sectioned>

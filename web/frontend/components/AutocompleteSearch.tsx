@@ -260,8 +260,6 @@ export default function AutocompleteSearch({
     dispatch({ type: 'closeModal' });
   };
 
-  console.log(cart);
-
   const createProductOption = (
     title: string,
     url: string,

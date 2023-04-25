@@ -37,10 +37,6 @@ export class AnalyticsService {
     return analytics ? analytics : false;
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
-  async updateAnalytics() {
-  }
-
   async getLocationsStatistic(domain: string) {
     const shop = await this.shopsRepository.findOneBy({ domain });
     if (shop) {
@@ -88,8 +84,6 @@ export class AnalyticsService {
       group by day`
     )
 
-    console.log(sales);
-
     if (!sales.length) {
       return false;
     }
@@ -101,7 +95,6 @@ export class AnalyticsService {
 
     for (const point of sales) {
       const date = this.getDate(point.day);
-      console.log(date);
 
       result.data.push({
         key: date,
@@ -131,7 +124,8 @@ export class AnalyticsService {
       FROM carts
       LEFT JOIN shops ON shops.id = carts.shop_id
       WHERE shops.domain = '${domain}'
-        AND EXTRACT(YEAR FROM carts.created_at) = EXTRACT(YEAR FROM CURRENT_DATE)`
+        AND EXTRACT(YEAR FROM carts.created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND carts.closed_at IS NOT NULL`
     );
 
     if (!shopCarts) {
@@ -206,8 +200,6 @@ export class AnalyticsService {
       LEFT JOIN shops ON shops.id = carts.shop_id
       WHERE shops.domain = '${domain}'`
     )
-
-    console.log(cartsPrices)
 
     const currentDate = new Date();
     const startDate = new Date(cartsPrices[0].closed_at);

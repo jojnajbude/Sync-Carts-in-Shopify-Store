@@ -81,7 +81,6 @@ const GDPRWebhookHandlers: WebhookHandlersParam = {
       //   "shop_domain": "{shop}.myshopify.com"
       // }
 
-      console.log(payload);
       // Delete session
       const sessions = await shopify.config.sessionStorage.findSessionsByShop(
         payload.shop_domain

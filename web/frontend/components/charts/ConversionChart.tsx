@@ -2,7 +2,7 @@ import { LegacyCard } from '@shopify/polaris';
 import { FunnelChart } from '@shopify/polaris-viz';
 
 type Props = {
-  status: 'Loading' | 'Error' | 'Success';
+  status: string;
   data: any;
 };
 

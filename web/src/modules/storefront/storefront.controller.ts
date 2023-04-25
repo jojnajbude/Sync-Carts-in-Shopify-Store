@@ -74,10 +74,8 @@ export class StorefrontController {
 
   @Post('order/paid')
   async handleOrderPaid(@Req() req: Request, @Res() res: Response) {
-    console.log(req.body);
     const cart_token = req.body.cart_token;
     const totalPrice = Number(req.body.current_total_price);
-    console.log(cart_token, totalPrice)
 
     const paidCart = await this.storefrontService.handleOrderPaid(cart_token, totalPrice);
 

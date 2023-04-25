@@ -5,12 +5,13 @@ import {
   VerticalStack,
   Scrollable,
   Link,
+  Spinner,
 } from '@shopify/polaris';
 import formatTime from '../services/timeFormatter';
 
 type Props = {
   logs: {
-    id: string;
+    _id: string;
     type: string;
     domain: string;
     date: string;
@@ -24,7 +25,7 @@ type Props = {
 export default function LogActivity({ logs, isLoading }: Props) {
   const rowMarkup = logs.map(
     (
-      { id, type, domain, date, customer_name, product_name, link_id },
+      { _id, type, domain, date, customer_name, product_name, link_id },
       index,
     ) => {
       let textMarkup = null;
@@ -91,7 +92,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
       const time = currentDate.getTime() - new Date(date).getTime();
 
       return (
-        <IndexTable.Row id={id} key={id} position={index}>
+        <IndexTable.Row id={_id} key={_id} position={index}>
           <div style={{ padding: '12px 16px', width: '100%' }}>
             <VerticalStack gap="1">
               <Text as="span" variant="bodySm" color="subdued">
@@ -107,15 +108,19 @@ export default function LogActivity({ logs, isLoading }: Props) {
     },
   );
 
-  return (
-    <IndexTable
-      itemCount={logs.length}
-      condensed
-      headings={[{ title: 'Date' }, { title: 'Message' }]}
-    >
-      <Scrollable shadow style={{ height: '415px' }}>
-        {rowMarkup}
-      </Scrollable>
-    </IndexTable>
-  );
+  if (isLoading) {
+    return <Spinner></Spinner>;
+  } else {
+    return (
+      <IndexTable
+        itemCount={logs.length}
+        condensed
+        headings={[{ title: 'Date' }, { title: 'Message' }]}
+      >
+        <Scrollable shadow style={{ height: '415px' }}>
+          {rowMarkup}
+        </Scrollable>
+      </IndexTable>
+    );
+  }
 }

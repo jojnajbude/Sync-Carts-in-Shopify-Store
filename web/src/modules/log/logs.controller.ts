@@ -12,7 +12,6 @@ export class LogsController {
     const domain = res.locals.shopify.session.shop;
 
     const shopLogs = await this.logsService.findAllLogs(domain);
-    console.log(shopLogs)
 
     res.status(200).send(shopLogs);
   }

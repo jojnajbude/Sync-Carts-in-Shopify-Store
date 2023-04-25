@@ -40,8 +40,6 @@ export default function EmptyStateExample() {
     }
   }, [status]);
 
-  console.log(analytics);
-
   return (
     <Page
       fullWidth
@@ -60,7 +58,11 @@ export default function EmptyStateExample() {
           <AreaChart
             title={'Average cart open time (in minutes)'}
             status={status}
-            data={analytics ? analytics.average_open_time : []}
+            data={
+              analytics
+                ? analytics.average_open_time
+                : [{ name: 'Time', data: [] }]
+            }
           ></AreaChart>
         </Layout.Section>
 
@@ -68,7 +70,11 @@ export default function EmptyStateExample() {
           <AreaChart
             title={'Average paid carts price (in shop currency)'}
             status={status}
-            data={analytics ? analytics.average_price : []}
+            data={
+              analytics
+                ? analytics.average_price
+                : [{ name: 'Price', data: [] }]
+            }
           ></AreaChart>
         </Layout.Section>
 

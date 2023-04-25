@@ -49,10 +49,8 @@ export class StorefrontService {
 
     if (cart_id === 'undefined') {
       const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
-      console.log(newCart);
 
       if (newCart?.cart_token) {
-        console.log('here');
         return { type: 'Ok' };
       }
 
@@ -110,10 +108,7 @@ export class StorefrontService {
         response.data.removedItems = removedItems;
       }
 
-      console.log(response.type)
-
       if (response.type) {
-        console.log('here')
         return response;
       }
     }
@@ -156,98 +151,97 @@ export class StorefrontService {
 
   async updateCart(cartData: any, shop: string) {
     const store = await this.shopsRepository.findOneBy({ domain: shop });
-    let session = null
 
     if (store) {
-      session = JSON.parse(store?.session);
-    }
+      const session = JSON.parse(store.session);
 
-    let cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
+      let cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
 
-    if (!cart) {
-      cart = await this.createCart(shop, cartData)
-    }
-
-    const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
-
-    const items = await this.itemRepository.createQueryBuilder('items')
-      .leftJoin('items.cart', 'carts')
-      .where('carts.cart_token = :token', { token: cartData.token })
-      .getMany();
-
-    const updatedItems = [];
-
-    if (items.length > cartData.line_items.length) {
-      const deletedItem = items.find(item => !cartData.line_items.find((line_item: { id: number; }) => line_item.id === Number(item.variant_id)))
-
-      if (deletedItem) {
-        const removeItem = await this.itemRepository.remove(deletedItem)
-        await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
-
-        const log = {
-          type: 'delete',
-          domain: shop,
-          date: new Date(),
-          customer_name: customer?.name,
-          product_name: deletedItem.title,
-          link_id: `${deletedItem.product_id}`,
-        }
-    
-        const newLog = await this.logService.createLog(log);
-
-        return removeItem
+      if (!cart) {
+        cart = await this.createCart(shop, cartData)
       }
-    }
 
-    for (const line_item of cartData.line_items) {
-      const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
+      const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
 
-      if (item && Number(item.qty) !== line_item.quantity) {
-        updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
-      } else if (!item) {
-        if (customer) {
-          const product = await shopify.api.rest.Product.find({
-            session,
-            id: line_item.product_id,
-          })
-  
-          const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
-  
-          const imgSrc = await shopify.api.rest.Image.find({
-            session,
-            product_id: product.id,
-            id: variant.image_id,
-          })
-  
-          const expireTime = this.countExpireDate(new Date(), customer?.priority);
-  
-          updatedItems.push(await this.itemRepository.save({ 
-            variant_id: line_item.variant_id, 
-            qty: line_item.quantity, 
-            cart_id: cart?.id, 
-            price: line_item.price, 
-            title: product.title, 
-            image_link: imgSrc.src, 
-            product_id: variant.product_id,
-            expireAt: expireTime,
-          }))
+      const items = await this.itemRepository.createQueryBuilder('items')
+        .leftJoin('items.cart', 'carts')
+        .where('carts.cart_token = :token', { token: cartData.token })
+        .getMany();
+
+      const updatedItems = [];
+
+      if (items.length > cartData.line_items.length) {
+        const deletedItem = items.find(item => !cartData.line_items.find((line_item: { id: number; }) => line_item.id === Number(item.variant_id)))
+
+        if (deletedItem) {
+          const removeItem = await this.itemRepository.remove(deletedItem)
+          await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
           const log = {
-            type: 'add',
+            type: 'delete',
             domain: shop,
             date: new Date(),
             customer_name: customer?.name,
-            product_name: product.title,
-            link_id: `${variant.product_id}`,
+            product_name: deletedItem.title,
+            link_id: `${deletedItem.product_id}`,
           }
       
           const newLog = await this.logService.createLog(log);
+
+          return removeItem
         }
       }
-    }
-    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
-    return updatedItems;
+      for (const line_item of cartData.line_items) {
+        const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
+
+        if (item && Number(item.qty) !== line_item.quantity) {
+          updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
+        } else if (!item) {
+          if (customer) {
+            const product = await shopify.api.rest.Product.find({
+              session,
+              id: line_item.product_id,
+            })
+    
+            const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
+    
+            const imgSrc = await shopify.api.rest.Image.find({
+              session,
+              product_id: product.id,
+              id: variant.image_id,
+            })
+    
+            const expireTime = this.countExpireDate(new Date(), customer?.priority, JSON.parse(store.priorities));
+    
+            updatedItems.push(await this.itemRepository.save({ 
+              variant_id: line_item.variant_id, 
+              qty: line_item.quantity, 
+              cart_id: cart?.id, 
+              price: line_item.price, 
+              title: product.title, 
+              image_link: imgSrc.src, 
+              product_id: variant.product_id,
+              expireAt: await expireTime,
+            }))
+
+            const log = {
+              type: 'add',
+              domain: shop,
+              date: new Date(),
+              customer_name: customer?.name,
+              product_name: product.title,
+              link_id: `${variant.product_id}`,
+            }
+        
+            const newLog = await this.logService.createLog(log);
+          }
+        }
+      }
+      await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+
+      return updatedItems;
+    }
   }
 
   async updateUser(user: any) {
@@ -266,24 +260,24 @@ export class StorefrontService {
     return cartItem?.status === 'reserved' ? cartItem : false;
   }
 
-  countExpireDate(startDate: Date, priority: string) {
+  async countExpireDate(startDate: Date, priority: string, priorities: any) {
     let reservationTime = 0;
 
     switch(true) {
       case priority === 'max':
-        reservationTime = 336;
+        reservationTime = priorities.max_priority;
         break;
       case priority === 'high':
-        reservationTime = 72;
+        reservationTime = priorities.high_priority;
         break;
       case priority === 'normal':
-        reservationTime = 24;
+        reservationTime = priorities.normal_priority;
         break;
       case priority === 'low':
-        reservationTime = 8;
+        reservationTime = priorities.low_priority;
         break;
       case priority === 'min':
-        reservationTime = 1;
+        reservationTime = priorities.min_priority;
         break;
       default:
         reservationTime = 24;

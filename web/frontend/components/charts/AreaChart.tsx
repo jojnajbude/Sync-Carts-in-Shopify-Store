@@ -3,7 +3,7 @@ import { StackedAreaChart } from '@shopify/polaris-viz';
 
 type Props = {
   title: string;
-  status: 'Loading' | 'Error' | 'Success';
+  status: string;
   data: any;
 };
 

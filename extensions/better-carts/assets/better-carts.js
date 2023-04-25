@@ -100,8 +100,6 @@ async function updateData(id, cart_id, shop_id, os) {
       }
     }
 
-    console.log(updatedItems)
-
     const updateItems = await fetch(window.Shopify.routes.root + 'cart/update.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
