@@ -31,6 +31,7 @@ import { ItemsModule } from "./modules/items/item.module.js";
 import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { Analytics } from "./modules/analytics/analytics.entity.js";
 import { LogModule } from "./modules/log/logs.module.js";
+import { SubscribeModule } from "./modules/subscribe/subscribe.module.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -61,6 +62,7 @@ const STATIC_PATH =
     StorefrontModule,
     AnalyticsModule,
     LogModule,
+    SubscribeModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

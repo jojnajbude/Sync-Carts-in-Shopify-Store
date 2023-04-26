@@ -34,6 +34,10 @@ export default function App() {
                     label: 'Settings',
                     destination: '/settings',
                   },
+                  {
+                    label: 'Subscribe',
+                    destination: '/subscribe',
+                  },
                 ]}
               />
               <Routes pages={pages} />

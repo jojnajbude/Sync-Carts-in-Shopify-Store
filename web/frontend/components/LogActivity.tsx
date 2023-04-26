@@ -6,6 +6,7 @@ import {
   Scrollable,
   Link,
   Spinner,
+  SkeletonBodyText,
 } from '@shopify/polaris';
 import formatTime from '../services/timeFormatter';
 
@@ -109,7 +110,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
   );
 
   if (isLoading) {
-    return <Spinner></Spinner>;
+    return <SkeletonBodyText lines={10}></SkeletonBodyText>;
   } else {
     return (
       <IndexTable

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { LogsService } from "../log/logs.service.js";
 import { Item } from "./item.entity.js";
 
@@ -12,7 +12,7 @@ export class ItemsService {
     private logService: LogsService
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async checkTimes() {
     const reservedItems = await this.itemRepository.query(
       `select * from items
@@ -41,10 +41,6 @@ export class ItemsService {
       }
     }
 
-    await this.itemRepository.createQueryBuilder()
-      .update(Item)
-      .set({status: 'expired'})
-      .whereInIds(expiredItemsIds)
-      .execute()
+    const result = await this.itemRepository.update({ id: In(expiredItemsIds)}, { status: 'expired'})
   }
 }
