@@ -21,10 +21,10 @@ export class Item {
   cart: Cart;
 
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP" })
-  createdAt: Date;
+  created_at: Date;
 
   @Column({ type: 'timestamp' })
-  expireAt: Date;
+  expire_at: Date;
 
   @Column({ default: 'reserved' })
   status: string;

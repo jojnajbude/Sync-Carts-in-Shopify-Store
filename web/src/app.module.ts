@@ -32,6 +32,7 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { Analytics } from "./modules/analytics/analytics.entity.js";
 import { LogModule } from "./modules/log/logs.module.js";
 import { SubscribeModule } from "./modules/subscribe/subscribe.module.js";
+import { NotificationsModule } from "./modules/notifications/notifications.module.js";
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -63,6 +64,7 @@ const STATIC_PATH =
     AnalyticsModule,
     LogModule,
     SubscribeModule,
+    NotificationsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

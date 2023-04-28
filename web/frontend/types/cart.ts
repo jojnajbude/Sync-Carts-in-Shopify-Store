@@ -14,8 +14,8 @@ export interface Cart {
 
 export interface Item {
   cart_id: number;
-  createdAt: Date;
-  expireAt: Date;
+  created_at: Date;
+  expire_at: Date;
   id: number;
   price: string;
   name: string | null;

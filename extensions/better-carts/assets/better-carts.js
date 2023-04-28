@@ -139,7 +139,7 @@ async function addToCart() {
     qty = document.querySelector('input[name="quantity"]').value;
   }
 
-  const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.customer.shop}&variant=${variantId}&qty=${qty}`)
+  const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
   const resText = await addCart.text();
 
   if (resText === 'All items reserved') {
@@ -162,57 +162,59 @@ class BetterCartsTimer extends HTMLElement {
   }
 
   async initializeTimer() {
-    const variantId = Number(this.dataset.timerId);
-    const userId = window.customer.id;
-    const shopId = window.customer.shop;
-    const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
+    if (window.customer) {
+      const variantId = Number(this.dataset.timerId);
+      const userId = window.customer.id;
+      const shopId = window.customer.shop;
+      const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
 
-    const cartItem = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
+      const cartItem = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
 
-    const text = document.getElementById(`bc-countdown-${variantId}`);
-    
-    if (cartItem.ok) {
-      const cartItemData = await cartItem.json();
+      const text = document.getElementById(`bc-countdown-${variantId}`);
+      
+      if (cartItem.ok) {
+        const cartItemData = await cartItem.json();
 
-      if (cartItemData.status === 'unreserved') {
-        return;
-      } else if (cartItemData.status === 'expired') {
-        text.innerHTML = 'Reserve time expired!';
+        if (cartItemData.status === 'unreserved') {
+          return;
+        } else if (cartItemData.status === 'expired') {
+          text.innerHTML = 'Reserve time expired!';
 
-        return;
-      } else {
-        const endDate = new Date(cartItemData.expireAt);
+          return;
+        } else {
+          const endDate = new Date(cartItemData.expire_at);
 
-        let _second = 1000;
-        let _minute = _second * 60;
-        let _hour = _minute * 60;
-        let _day = _hour * 24;
-        let timer;
+          let _second = 1000;
+          let _minute = _second * 60;
+          let _hour = _minute * 60;
+          let _day = _hour * 24;
+          let timer;
 
-        function showRemaining(endDate) {
-          let now = new Date();
-          let distance = endDate - now;
+          function showRemaining(endDate) {
+            let now = new Date();
+            let distance = endDate - now;
 
-          if (distance < 0) {
-            clearInterval(timer);
-            text.innerHTML = 'Reserve time expired!';
+            if (distance < 0) {
+              clearInterval(timer);
+              text.innerHTML = 'Reserve time expired!';
 
-            return;
+              return;
+            }
+
+            let days = Math.floor(distance / _day);
+            let hours = Math.floor((distance % _day) / _hour);
+            let minutes = Math.floor((distance % _hour) / _minute);
+            let seconds = Math.floor((distance % _minute) / _second);
+
+            text.innerHTML = 'Reserve time: ';
+            text.innerHTML += days > 9 ? days + ':' : '0' + days + ':';
+            text.innerHTML += hours > 9 ? hours + ':' : '0' + hours + ':';
+            text.innerHTML += minutes > 9 ? minutes + ':' : '0' + minutes + ':';
+            text.innerHTML += seconds > 9 ? seconds : '0' + seconds;
           }
 
-          let days = Math.floor(distance / _day);
-          let hours = Math.floor((distance % _day) / _hour);
-          let minutes = Math.floor((distance % _hour) / _minute);
-          let seconds = Math.floor((distance % _minute) / _second);
-
-          text.innerHTML = 'Reserve time: ';
-          text.innerHTML += days > 9 ? days + ':' : '0' + days + ':';
-          text.innerHTML += hours > 9 ? hours + ':' : '0' + hours + ':';
-          text.innerHTML += minutes > 9 ? minutes + ':' : '0' + minutes + ':';
-          text.innerHTML += seconds > 9 ? seconds : '0' + seconds;
+          timer = setInterval(() => showRemaining(endDate), 1000);
         }
-
-        timer = setInterval(() => showRemaining(endDate), 1000);
       }
     }
   }

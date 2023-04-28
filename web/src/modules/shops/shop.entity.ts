@@ -17,6 +17,18 @@ export class Shop {
   @Column({ nullable: true })
   currency: string;
 
+  @Column({ default: 'free' })
+  plan: string;
+
+  @Column({ nullable: true, type: 'bigint' })
+  charge_id: number;
+
+  @Column({ default: 0 })
+  carts: number;
+
+  @Column({ nullable: true, default: 50 })
+  limit: number;
+
   @Column({ type: 'json', nullable: true })
   priorities: string;
 

@@ -18,6 +18,7 @@ type Props = {
   isEditing: boolean;
   cart: Cart;
   customer: Customer;
+  initialCustomer: Customer | null;
   setCart: (value: Cart) => void;
   setCustomer: (value: Customer) => void;
   setIsUnvalidInputs: (value: string) => void;
@@ -27,6 +28,7 @@ export default function CustomerCard({
   isEditing,
   cart,
   customer,
+  initialCustomer,
   setCustomer,
   setIsUnvalidInputs,
 }: Props) {
@@ -59,7 +61,7 @@ export default function CustomerCard({
         /*
         // @ts-ignore */
         actions={
-          isEditing
+          isEditing && !initialCustomer
             ? [
                 {
                   content: (

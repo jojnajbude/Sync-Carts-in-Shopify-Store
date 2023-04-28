@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Layout,
@@ -9,6 +9,7 @@ import {
   Divider,
   LegacyCard,
   SkeletonBodyText,
+  Banner,
 } from '@shopify/polaris';
 
 import { useAuthenticatedFetch } from '../hooks';
@@ -17,6 +18,7 @@ import PopupModal from './PopupModal';
 import TablePagination from './Pagination';
 import IndexTableFilters from './IndexFilters';
 import CartBadge from './CartBadge';
+import { SubscribtionContext } from '../context/SubscribtionContext';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
@@ -33,6 +35,7 @@ export default function CartsTable() {
   const [tableRowsPerPage, setTableRowsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const context = useContext(SubscribtionContext);
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
 
@@ -65,6 +68,8 @@ export default function CartsTable() {
       ignore = true;
     };
   }, [isLoading]);
+
+  console.log(context);
 
   const resourceName = {
     singular: 'cart',
@@ -196,7 +201,21 @@ export default function CartsTable() {
 
   return (
     <Layout>
-      <Layout.Section>
+      {context.plan && context.plan.carts >= context.plan.limit && (
+        <Layout.Section>
+          <Banner
+            title="Cart limit reached!"
+            action={{
+              content: 'Upgrade plan',
+              onAction: () => navigate('/subscribe'),
+            }}
+            status="warning"
+          >
+            <p>Upgrade plan to take control of all shopping carts!</p>
+          </Banner>
+        </Layout.Section>
+      )}
+      <Layout.Section fullWidth>
         <LegacyCard>
           <IndexTableFilters
             isLoading={isLoading}

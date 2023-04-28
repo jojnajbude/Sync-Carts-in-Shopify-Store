@@ -8,6 +8,7 @@ import {
   PolarisProvider,
 } from './components/providers';
 import { PolarisVizProvider } from '@shopify/polaris-viz';
+import { SubscribtionContextProvider } from './context/SubscribtionContext';
 
 export default function App() {
   // Any .tsx or .jsx files in /pages will become a route
@@ -40,7 +41,9 @@ export default function App() {
                   },
                 ]}
               />
-              <Routes pages={pages} />
+              <SubscribtionContextProvider>
+                <Routes pages={pages} />
+              </SubscribtionContextProvider>
             </PolarisVizProvider>
           </QueryProvider>
         </AppBridgeProvider>

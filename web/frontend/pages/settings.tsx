@@ -13,7 +13,9 @@ import {
   Toast,
   Frame,
 } from '@shopify/polaris';
-import { useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SubscribtionContext } from './../context/SubscribtionContext';
 
 type State = {
   max_priority: number;
@@ -51,79 +53,80 @@ type Action = {
   states?: State;
 };
 
+let initialState: State = {
+  max_priority: 336,
+  high_priority: 72,
+  normal_priority: 24,
+  low_priority: 8,
+  min_priority: 1,
+  add_email: '',
+  reminder_email: '',
+  expire_soon_email: '',
+  expired_email: '',
+  isEdit: false,
+  isLoading: true,
+  activeToast: false,
+};
+
+function reducer(state: State, action: Action) {
+  switch (action.type) {
+    case 'setStates':
+      return {
+        ...action.states,
+        isEdit: false,
+        isLoading: false,
+        activeToast: false,
+      };
+
+    case 'changeMax':
+      return { ...state, max_priority: action.value, isEdit: true };
+
+    case 'changeHigh':
+      return { ...state, high_priority: action.value, isEdit: true };
+
+    case 'changeNormal':
+      return { ...state, normal_priority: action.value, isEdit: true };
+
+    case 'changeLow':
+      return { ...state, low_priority: action.value, isEdit: true };
+
+    case 'changeMin':
+      return { ...state, min_priority: action.value, isEdit: true };
+
+    case 'changeAddEmail':
+      return { ...state, add_email: action.value, isEdit: true };
+
+    case 'changeReminderEmail':
+      return { ...state, reminder_email: action.value, isEdit: true };
+
+    case 'changeExpireSoonEmail':
+      return { ...state, expire_soon_email: action.value, isEdit: true };
+
+    case 'changeExpiredEmail':
+      return { ...state, expired_email: action.value, isEdit: true };
+
+    case 'setIsEdit':
+      return { ...state, isEdit: false };
+
+    case 'setToast':
+      return { ...state, activeToast: action.value };
+
+    case 'discardChanges':
+      return {
+        ...initialState,
+        isEdit: false,
+        isLoading: false,
+        activeToast: false,
+      };
+  }
+}
+
 export default function Settings() {
   const fetch = useAuthenticatedFetch();
-
-  let initialState: State = {
-    max_priority: 336,
-    high_priority: 72,
-    normal_priority: 24,
-    low_priority: 8,
-    min_priority: 1,
-    add_email: '',
-    reminder_email: '',
-    expire_soon_email: '',
-    expired_email: '',
-    isEdit: false,
-    isLoading: true,
-    activeToast: false,
-  };
-
-  function reducer(state: State, action: Action) {
-    switch (action.type) {
-      case 'setStates':
-        return {
-          ...action.states,
-          isEdit: false,
-          isLoading: false,
-          activeToast: false,
-        };
-
-      case 'changeMax':
-        return { ...state, max_priority: action.value, isEdit: true };
-
-      case 'changeHigh':
-        return { ...state, high_priority: action.value, isEdit: true };
-
-      case 'changeNormal':
-        return { ...state, normal_priority: action.value, isEdit: true };
-
-      case 'changeLow':
-        return { ...state, low_priority: action.value, isEdit: true };
-
-      case 'changeMin':
-        return { ...state, min_priority: action.value, isEdit: true };
-
-      case 'changeAddEmail':
-        return { ...state, add_email: action.value, isEdit: true };
-
-      case 'changeReminderEmail':
-        return { ...state, reminder_email: action.value, isEdit: true };
-
-      case 'changeExpireSoonEmail':
-        return { ...state, expire_soon_email: action.value, isEdit: true };
-
-      case 'changeExpiredEmail':
-        return { ...state, expired_email: action.value, isEdit: true };
-
-      case 'setIsEdit':
-        return { ...state, isEdit: false };
-
-      case 'setToast':
-        return { ...state, activeToast: action.value };
-
-      case 'discardChanges':
-        return {
-          ...initialState,
-          isEdit: false,
-          isLoading: false,
-          activeToast: false,
-        };
-    }
-  }
-
+  const navigate = useNavigate();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isLoading, setIsLoading] = useState(true);
+  const context = useContext(SubscribtionContext);
 
   useEffect(() => {
     if (isLoading) {
@@ -176,6 +179,7 @@ export default function Settings() {
             onAction: () => dispatch({ type: 'discardChanges' }),
           },
         ]}
+        backAction={{ onAction: () => navigate(-1) }}
       >
         <Layout>
           <Layout.Section oneThird>

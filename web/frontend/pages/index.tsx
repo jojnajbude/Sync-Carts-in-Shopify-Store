@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { useAuthenticatedFetch, useNavigate } from '@shopify/app-bridge-react';
 import {
   Page,
@@ -7,6 +7,7 @@ import {
   IndexTable,
   LegacyCard,
   SkeletonBodyText,
+  Banner,
 } from '@shopify/polaris';
 
 import AreaChart from '../components/charts/AreaChart';
@@ -18,6 +19,7 @@ import LogActivity from '../components/LogActivity';
 import { Cart } from '../types/cart';
 import { Analytics } from '../types/analytics';
 import { Logs } from '../types/logs';
+import { SubscribtionContext } from '../context/SubscribtionContext';
 
 type State = {
   isLoading: boolean;
@@ -25,6 +27,7 @@ type State = {
   status: 'Loading' | 'Error' | 'Success';
   carts: Cart[];
   logs: Logs[];
+  plan_banner: boolean;
 };
 
 type Action = {
@@ -34,32 +37,35 @@ type Action = {
   logs?: Logs[];
 };
 
-export default function HomePage() {
-  const initialState: State = {
-    isLoading: true,
-    analytics: null,
-    status: 'Loading',
-    carts: null,
-    logs: [],
-  };
+const initialState: State = {
+  isLoading: true,
+  analytics: null,
+  status: 'Loading',
+  carts: null,
+  logs: [],
+  plan_banner: false,
+};
 
-  function reducer(state: State, action: Action) {
-    switch (action.type) {
-      case 'setStates':
-        return {
-          isLoading: false,
-          analytics: action.analytics,
-          status: 'Success',
-          carts: action.lastCarts,
-          logs: action.logs,
-        };
+function reducer(state: State, action: Action) {
+  switch (action.type) {
+    case 'setStates':
+      return {
+        isLoading: false,
+        analytics: action.analytics,
+        status: 'Success',
+        carts: action.lastCarts,
+        logs: action.logs,
+        plan_banner: true,
+      };
 
-      case 'Error':
-        return { ...state, status: 'Error', isLoading: false };
-    }
+    case 'Error':
+      return { ...state, status: 'Error', isLoading: false };
   }
+}
 
+export default function HomePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const context = useContext(SubscribtionContext);
 
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
@@ -84,7 +90,9 @@ export default function HomePage() {
 
       fetchData();
     }
-  }, [state]);
+  }, [state, context.plan]);
+
+  console.log(context);
 
   const resourceName = {
     singular: 'cart',
@@ -98,6 +106,7 @@ export default function HomePage() {
       primaryAction={{
         content: 'Create new cart',
         onAction: () => navigate('/cart/create'),
+        disabled: !context.plan || context.plan.carts >= context.plan.limit,
       }}
       secondaryActions={[
         {
@@ -107,6 +116,21 @@ export default function HomePage() {
       ]}
     >
       <Layout>
+        {context.plan && context.plan.carts >= context.plan.limit && (
+          <Layout.Section>
+            <Banner
+              title="Cart limit reached!"
+              action={{
+                content: 'Upgrade plan',
+                onAction: () => navigate('/subscribe'),
+              }}
+              status="warning"
+            >
+              <p>Upgrade plan to take control of all shopping carts!</p>
+            </Banner>
+          </Layout.Section>
+        )}
+
         <Layout.Section fullWidth>
           <LinearChart
             status={state.status}

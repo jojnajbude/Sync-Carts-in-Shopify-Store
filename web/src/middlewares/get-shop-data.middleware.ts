@@ -15,15 +15,15 @@ export class getShopDataMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
-    const sessionJSON = await JSON.stringify(session);
 
     try {
       const [shopifyShopData] = await shopify.api.rest.Shop.all({ session });
 
       const shop = await this.shopsRepository.findOneBy({ shopify_id: shopifyShopData.id });
 
+      const sessionJSON = await JSON.stringify(session);
       if (shop) {
-        if (shop.session !== session) {
+        if (shop.session !== sessionJSON) {
           await this.shopsRepository.update({ shopify_id: shopifyShopData.id }, { session: sessionJSON });
         }
 

@@ -3,8 +3,8 @@ import {
   DataTable,
   Link,
   SkeletonBodyText,
+  Text,
 } from '@shopify/polaris';
-import { Key, ReactElement, JSXElementConstructor, ReactFragment } from 'react';
 
 type Props = {
   title: string;
@@ -32,6 +32,16 @@ export default function TopChart({ title, status, data }: Props) {
         </Link>,
         Number(product.sold),
       ],
+    );
+  }
+
+  if (status !== 'Loading' && !rows.length) {
+    return (
+      <LegacyCard title={title} sectioned>
+        <Text as="span" alignment="center" color="subdued">
+          No statistic yet
+        </Text>
+      </LegacyCard>
     );
   }
 

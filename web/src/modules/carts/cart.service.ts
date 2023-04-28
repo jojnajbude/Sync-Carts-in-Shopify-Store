@@ -101,7 +101,7 @@ export class CartService {
           variant_id: item.id,
           product_id: item.product_id,
           qty: item.qty,
-          expireAt: await expireTime,
+          expire_at: await expireTime,
           status: item.reserved_indicator,
           cart_id: newCart.id,
           price: item.price,
@@ -172,7 +172,7 @@ export class CartService {
           title: item.title, 
           image_link: item.image_link, 
           product_id: item.product_id,
-          expireAt: await expireTime,
+          expire_at: await expireTime,
         })
       }
     }
@@ -222,7 +222,7 @@ export class CartService {
     
     for (const item of items) {
       item.status = 'reserved';
-      item.expireAt = new Date(new Date().getTime() + Number(time));
+      item.expire_at = new Date(new Date().getTime() + Number(time));
     }
 
     const newTimers = await this.itemRepository.save(items);
@@ -293,11 +293,10 @@ export class CartService {
       );
 
       const shortestDate = cart.items.sort((a: Item, b: Item) => {
-        const dateA = new Date(a.expireAt);
-        const dateB = new Date(b.expireAt);
+        const dateA = new Date(a.expire_at);
+        const dateB = new Date(b.expire_at);
         return dateA.getTime() - dateB.getTime();
-      })[0].expireAt;
-
+      })[0].expire_at;
       cart.qty = qty;
       cart.total = total;
       cart.reservation_time = new Date(shortestDate).toLocaleString();

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import { useAuthenticatedFetch } from '../../hooks';
 import {
   Page,
@@ -12,6 +12,7 @@ import {
   Frame,
   SkeletonPage,
   SkeletonBodyText,
+  Banner,
 } from '@shopify/polaris';
 
 import CartBadge from '../../components/CartBadge';
@@ -22,6 +23,7 @@ import InfoBanner from '../../components/Banner';
 
 import { formatter } from '../../services/formatter';
 import { Cart } from '../../types/cart';
+import { SubscribtionContext } from '../../context/SubscribtionContext';
 
 type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
 
@@ -43,6 +45,7 @@ export default function CartPage() {
   const { cartId } = useParams();
   const navigate = useNavigate();
   const fetch = useAuthenticatedFetch();
+  const context = useContext(SubscribtionContext);
 
   useEffect(() => {
     let ignore = false;
@@ -90,6 +93,8 @@ export default function CartPage() {
       ignore = true;
     };
   }, [isLoading]);
+
+  console.log(context)
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -234,11 +239,32 @@ export default function CartPage() {
     setIsEditing(false);
   };
 
+  if (cartId === 'create' && context.plan.carts >= context.plan.limit) {
+    return (
+      <Page backAction={{ onAction: () => navigate(-1) }}>
+        <Layout>
+          <Layout.Section>
+            <Banner
+              title="Cart limit reached!"
+              action={{
+                content: 'Upgrade plan',
+                onAction: () => navigate('/subscribe'),
+              }}
+              status="warning"
+            >
+              <p>Upgrade plan to take control of all shopping carts!</p>
+            </Banner>
+          </Layout.Section>
+        </Layout>
+      </Page>
+    );
+  }
+
   if (!isLoading) {
     return (
       <Frame>
         <Page
-          breadcrumbs={[{ onAction: () => navigate('/summary') }]}
+          backAction={{ onAction: () => navigate(-1) }}
           title={cartId !== 'create' ? `Cart #${cartId}` : 'Create cart'}
           titleMetadata={
             cartId !== 'create' && cart ? (
@@ -315,6 +341,7 @@ export default function CartPage() {
                 cart={cart}
                 setCart={setCart}
                 customer={customer}
+                initialCustomer={initialCustomer}
                 setCustomer={setCustomer}
                 setIsUnvalidInputs={setIsUnvalidInputs}
               ></CustomerCard>

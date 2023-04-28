@@ -43,7 +43,7 @@ export default function EmptyStateExample() {
   return (
     <Page
       fullWidth
-      breadcrumbs={[{ onAction: () => navigate(-1) }]}
+      backAction={{ onAction: () => navigate(-1) }}
       title="Analytics"
     >
       <Layout>

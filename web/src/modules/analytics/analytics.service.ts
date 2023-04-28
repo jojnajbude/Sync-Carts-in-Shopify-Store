@@ -25,16 +25,20 @@ export class AnalyticsService {
       where shops.domain = '${domain}'`
     )
 
-    analytics.locations = JSON.parse(analytics.locations);
-    analytics.total_sales = JSON.parse(analytics.total_sales);
-    analytics.average_open_time = JSON.parse(analytics.average_open_time);
-    analytics.average_price = JSON.parse(analytics.average_price);
-    analytics.conversion_rates = JSON.parse(analytics.conversion_rates);
-    analytics.device_statistic = JSON.parse(analytics.device_statistic);
-    analytics.top_sold = JSON.parse(analytics.top_sold);
-    analytics.top_abandoned = JSON.parse(analytics.top_abandoned);
+    if (analytics) {
+      analytics.locations = JSON.parse(analytics.locations);
+      analytics.total_sales = JSON.parse(analytics.total_sales);
+      analytics.average_open_time = JSON.parse(analytics.average_open_time);
+      analytics.average_price = JSON.parse(analytics.average_price);
+      analytics.conversion_rates = JSON.parse(analytics.conversion_rates);
+      analytics.device_statistic = JSON.parse(analytics.device_statistic);
+      analytics.top_sold = JSON.parse(analytics.top_sold);
+      analytics.top_abandoned = JSON.parse(analytics.top_abandoned);
 
-    return analytics ? analytics : false;
+      return analytics;
+    }
+
+    return false;
   }
 
   async getLocationsStatistic(domain: string) {
@@ -83,10 +87,6 @@ export class AnalyticsService {
         AND date_trunc('month', carts.closed_at) = date_trunc('month', NOW())
       group by day`
     )
-
-    if (!sales.length) {
-      return false;
-    }
 
     const result: any = {
       name: 'Sales',
@@ -198,45 +198,56 @@ export class AnalyticsService {
     const cartsPrices = await this.cartRepository.query(
       `SELECT carts.closed_at, carts.final_price FROM carts
       LEFT JOIN shops ON shops.id = carts.shop_id
-      WHERE shops.domain = '${domain}'`
+      WHERE shops.domain = '${domain}' AND carts.closed_at IS NOT NULL`
     )
 
-    const currentDate = new Date();
-    const startDate = new Date(cartsPrices[0].closed_at);
-    const startYear = startDate.getFullYear();
-    const startMonth = startDate.getMonth();
-    const endYear = currentDate.getFullYear();
-    const endMonth = currentDate.getMonth();
-    const monthlyPrices: any = {};
-  
-    for (let year = startYear; year <= endYear; year++) {
-      const monthStart = year === startYear ? startMonth : 0;
-      const monthEnd = year === endYear ? endMonth : 11;
-  
-      for (let month = monthStart; month <= monthEnd; month++) {
-        const key = `${year}-${(month + 1).toString().padStart(2, '0')}`;
-        const pricesInMonth = cartsPrices.filter((item: { closed_at: string | number | Date; }) => {
-          const itemDate = new Date(item.closed_at);
-          return itemDate.getFullYear() === year && itemDate.getMonth() === month;
-        }).map((item: { final_price: string; }) => parseFloat(item.final_price));
-  
-        const averagePrice = pricesInMonth.length > 0 ? (pricesInMonth.reduce((sum: any, price: any) => sum + price, 0) / pricesInMonth.length).toFixed(2) : '0';
-  
-        monthlyPrices[key] = averagePrice;
+    if (cartsPrices.length) {
+      const currentDate = new Date();
+      const startDate = new Date(cartsPrices[0].closed_at);
+      const startYear = startDate.getFullYear();
+      const startMonth = startDate.getMonth();
+      const endYear = currentDate.getFullYear();
+      const endMonth = currentDate.getMonth();
+      const monthlyPrices: any = {};
+    
+      for (let year = startYear; year <= endYear; year++) {
+        const monthStart = year === startYear ? startMonth : 0;
+        const monthEnd = year === endYear ? endMonth : 11;
+    
+        for (let month = monthStart; month <= monthEnd; month++) {
+          const key = `${year}-${(month + 1).toString().padStart(2, '0')}`;
+          const pricesInMonth = cartsPrices.filter((item: { closed_at: string | number | Date; }) => {
+            const itemDate = new Date(item.closed_at);
+            return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+          }).map((item: { final_price: string; }) => parseFloat(item.final_price));
+    
+          const averagePrice = pricesInMonth.length > 0 ? (pricesInMonth.reduce((sum: any, price: any) => sum + price, 0) / pricesInMonth.length).toFixed(2) : '0';
+    
+          monthlyPrices[key] = averagePrice;
+        }
       }
+    
+      const data = Object.entries(monthlyPrices).map(([key, value]) => ({ key, value }));
+      const statistic = this.addMissingMonths(data)
+
+      const result = {
+        name: 'Time',
+        data: statistic
+      }
+
+      const shop = await this.shopsRepository.findOneBy({ domain });
+
+      const averageCartsPrice = await this.analyticsRepository.update({ shop_id: shop?.id }, { average_price: JSON.stringify([result])})
+    } else {
+      const result = {
+        name: 'Time',
+        data: []
+      }
+
+      const shop = await this.shopsRepository.findOneBy({ domain });
+
+      const averageCartsPrice = await this.analyticsRepository.update({ shop_id: shop?.id }, { average_price: JSON.stringify([result])})
     }
-  
-    const data = Object.entries(monthlyPrices).map(([key, value]) => ({ key, value }));
-    const statistic = this.addMissingMonths(data)
-
-    const result = {
-      name: 'Time',
-      data: statistic
-    }
-
-    const shop = await this.shopsRepository.findOneBy({ domain });
-
-    const averageCartsPrice = await this.analyticsRepository.update({ shop_id: shop?.id }, { average_price: JSON.stringify([result])})
   }
 
   async getConversionRates(domain: string) {
@@ -322,5 +333,21 @@ export class AnalyticsService {
     )
     const shop = await this.shopsRepository.findOneBy({ domain });
     const top_abandoned = await this.analyticsRepository.update({ shop_id: shop?.id }, { top_abandoned: JSON.stringify(topAbandonedProducts)});
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE) 
+  async updateAnalytics() {
+    const shops = await this.shopsRepository.query(`select * from shops`);
+
+    for (const shop of shops) {
+      await this.getLocationsStatistic(shop.domain);
+      await this.getTotalSales(shop.domain);
+      await this.getAverageOpenTime(shop.domain);
+      await this.getAverageCartPrice(shop.domain);
+      await this.getConversionRates(shop.domain);
+      await this.getDeviceStatistic(shop.domain);
+      await this.getTopSoldProducts(shop.domain);
+      await this.getTopAbandonedProducts(shop.domain);
+    }
   }
 }

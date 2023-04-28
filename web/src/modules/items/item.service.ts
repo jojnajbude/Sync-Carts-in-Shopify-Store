@@ -12,12 +12,14 @@ export class ItemsService {
     private logService: LogsService
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_MINUTE)
   async checkTimes() {
     const reservedItems = await this.itemRepository.query(
-      `select * from items
+      `select items.id, items.expire_at, shops.domain, customers.name, items.title, items.product_id 
+      from items
       left join carts on carts.id = items.cart_id
       left join customers on customers.id = carts.customer_id
+      left join shops on shops.id = carts.shop_id
       where items.status = 'reserved'`
     )
     const actualDate = new Date().getTime();
@@ -25,7 +27,7 @@ export class ItemsService {
     const expiredItemsIds: number[] = [];
 
     for (const item of reservedItems) {
-      if (item.expireAt === null || item.expireAt.getTime() - actualDate <= 0) {
+      if (item.expire_at === null || item.expire_at.getTime() - actualDate <= 0) {
         expiredItemsIds.push(item.id)
 
         const log = {
