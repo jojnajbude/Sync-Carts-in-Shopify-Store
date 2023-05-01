@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common";
 import shopify from "../../utils/shopify.js";
 import { shopifySession } from "../../types/session.js";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Shop } from "../shops/shop.entity.js";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class SubscribeService {
@@ -19,21 +20,21 @@ export class SubscribeService {
     let plan_config = null;
 
     switch (plan) {
-      case 'basic':
+      case 'Basic':
         plan_config = {
           name: 'Basic plan',
           price: 30.0,
         }
         break;
 
-      case 'premium':
+      case 'Premium':
         plan_config = {
           name: 'Premium plan',
           price: 60.0,
         }
         break;
 
-      case 'elite':
+      case 'Elite':
         plan_config = {
           name: 'Elite plan',
           price: 100.0,
@@ -94,12 +95,49 @@ export class SubscribeService {
       }
 
       if (plan_config) {
-        const activatePlan = await this.shopRepository.update({ domain: session.shop }, { plan: plan_config.name, limit: plan_config.limit, charge_id: Number(charge_id) })
+        const activatePlan = await this.shopRepository.update({ domain: session.shop }, { plan: plan_config.name, limit: plan_config.limit, charge_id: Number(charge_id), status: 'active' })
 
         return activatePlan ? activatePlan : false;
       }      
     }
 
     return false
+  }
+
+  async cancelPlan(session: shopifySession) {
+    try {
+      const shopData = await this.shopRepository.findOneBy({ domain: session.shop });
+      
+      if (shopData) {
+        const cancelSubscribe = await shopify.api.rest.RecurringApplicationCharge.delete({
+          session,
+          id: shopData.charge_id,
+        })
+
+        const updatedShopData = await this.shopRepository.update({ id: shopData.id }, { status: 'cancelled' })
+
+        return cancelSubscribe;
+      }
+    } catch(err) {
+      console.log(err);
+    }
+
+    return false;
+  }
+
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  async refreshSubscribes() {
+    try {
+      await this.shopRepository.update({}, { carts: 0 })
+      const shops = await this.shopRepository.findBy({ status: 'cancelled' });
+
+      if (shops.length) {
+        const ids = shops.map(shop => shop.id);
+
+        await this.shopRepository.update({ id: In(ids) }, { plan: 'Free', status: 'active' })
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

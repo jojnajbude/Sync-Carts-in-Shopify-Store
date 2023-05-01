@@ -1,4 +1,13 @@
+import { json } from "stream/consumers";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+
+const initialTimers = {
+  max_priority: 336,
+  high_prority: 72,
+  normal_priority: 24,
+  low_priority: 8,
+  min_priority: 1,
+}
 
 @Entity('shops')
 export class Shop {
@@ -26,11 +35,38 @@ export class Shop {
   @Column({ default: 0 })
   carts: number;
 
-  @Column({ nullable: true, default: 50 })
+  @Column({ default: 50 })
   limit: number;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ default: 'active' })
+  status: string;
+
+  @Column({ type: 'json', default: JSON.stringify(initialTimers), nullable: true })
   priorities: string;
+
+  @Column({ type: 'json', nullable: true })
+  cart_reminder_html: string;
+
+  @Column({ type: 'json', nullable: true })
+  cart_updated_html: string;
+
+  @Column({ type: 'json', nullable: true })
+  expiring_soon_html: string;
+
+  @Column({ type: 'json', nullable: true })
+  expired_items_html: string;
+
+  @Column({ type: 'json', nullable: true })
+  cart_reminder_json: string;
+
+  @Column({ type: 'json', nullable: true })
+  cart_updated_json: string;
+
+  @Column({ type: 'json', nullable: true })
+  expiring_soon_json: string;
+
+  @Column({ type: 'json', nullable: true })
+  expired_items_json: string;
 
   @Column({ type: 'json', nullable: true })
   email_templates: string;

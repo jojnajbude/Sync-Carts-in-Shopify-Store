@@ -16,6 +16,7 @@ import {
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SubscribtionContext } from './../context/SubscribtionContext';
+import NotificationsList from '../components/NotificationsList';
 
 type State = {
   max_priority: number;
@@ -295,50 +296,51 @@ export default function Settings() {
                   <SkeletonBodyText />
                 </FormLayout>
               ) : (
-                <FormLayout>
-                  <TextField
-                    label="Item added to cart"
-                    value={state.add_email}
-                    onChange={newValue =>
-                      dispatch({ type: 'changeAddEmail', value: newValue })
-                    }
-                    multiline={4}
-                    autoComplete="off"
-                  />
+                <NotificationsList></NotificationsList>
+                // <FormLayout>
+                //   <TextField
+                //     label="Item added to cart"
+                //     value={state.add_email}
+                //     onChange={newValue =>
+                //       dispatch({ type: 'changeAddEmail', value: newValue })
+                //     }
+                //     multiline={4}
+                //     autoComplete="off"
+                //   />
 
-                  <TextField
-                    label="Cart reminder"
-                    value={state.reminder_email}
-                    onChange={newValue =>
-                      dispatch({ type: 'changeReminderEmail', value: newValue })
-                    }
-                    multiline={4}
-                    autoComplete="off"
-                  />
+                //   <TextField
+                //     label="Cart reminder"
+                //     value={state.reminder_email}
+                //     onChange={newValue =>
+                //       dispatch({ type: 'changeReminderEmail', value: newValue })
+                //     }
+                //     multiline={4}
+                //     autoComplete="off"
+                //   />
 
-                  <TextField
-                    label="Item will expire soon"
-                    value={state.expire_soon_email}
-                    onChange={newValue =>
-                      dispatch({
-                        type: 'changeExpireSoonEmail',
-                        value: newValue,
-                      })
-                    }
-                    multiline={4}
-                    autoComplete="off"
-                  />
+                //   <TextField
+                //     label="Item will expire soon"
+                //     value={state.expire_soon_email}
+                //     onChange={newValue =>
+                //       dispatch({
+                //         type: 'changeExpireSoonEmail',
+                //         value: newValue,
+                //       })
+                //     }
+                //     multiline={4}
+                //     autoComplete="off"
+                //   />
 
-                  <TextField
-                    label="Item was expired"
-                    value={state.expired_email}
-                    onChange={newValue =>
-                      dispatch({ type: 'changeExpiredEmail', value: newValue })
-                    }
-                    multiline={4}
-                    autoComplete="off"
-                  />
-                </FormLayout>
+                //   <TextField
+                //     label="Item was expired"
+                //     value={state.expired_email}
+                //     onChange={newValue =>
+                //       dispatch({ type: 'changeExpiredEmail', value: newValue })
+                //     }
+                //     multiline={4}
+                //     autoComplete="off"
+                //   />
+                // </FormLayout>
               )}
             </LegacyCard>
           </Layout.Section>

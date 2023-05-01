@@ -36,7 +36,7 @@ export default function App() {
                     destination: '/settings',
                   },
                   {
-                    label: 'Subscribe',
+                    label: 'Subscription',
                     destination: '/subscribe',
                   },
                 ]}

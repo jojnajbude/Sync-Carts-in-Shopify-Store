@@ -16,6 +16,7 @@ type Props = {
   price: number;
   description: string;
   onClick: () => void;
+  selectedPlan: string;
   children?: any;
 };
 
@@ -27,6 +28,7 @@ export const BillingCard = ({
   price,
   description,
   onClick,
+  selectedPlan,
   children,
 }: Props) => {
   const context = useContext(SubscribtionContext);
@@ -71,7 +73,12 @@ export const BillingCard = ({
           <Button
             onClick={onClick}
             primary
-            disabled={currentPlan === title || context.plan.carts >= limit}
+            disabled={
+              currentPlan === title ||
+              context.plan.carts >= limit ||
+              (selectedPlan !== null && selectedPlan !== title)
+            }
+            loading={selectedPlan === title}
           >
             {description}
           </Button>

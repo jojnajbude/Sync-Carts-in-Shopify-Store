@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 // @ts-ignore
 import ElasticEmail from '@elasticemail/elasticemail-client'; 
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 const client = ElasticEmail.ApiClient.instance;
 const apikey = client.authentications['apikey'];
@@ -10,7 +9,6 @@ const emailsApi = new ElasticEmail.EmailsApi();
 
 @Injectable()
 export class NotificationsService {
-  @Cron(CronExpression.EVERY_10_SECONDS)
   async sendEmail() {
     const emailData = {
       Recipients: {
