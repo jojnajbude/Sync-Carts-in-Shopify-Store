@@ -52,8 +52,6 @@ export class SubscribeService {
         update: true,
       });
 
-      console.log(recurring_application_charge)
-
       return recurring_application_charge;
     }
 
@@ -61,8 +59,6 @@ export class SubscribeService {
   }
 
   async activatePlan(session: shopifySession, charge_id: string) {
-    console.log(session, charge_id)
-
     const plan = await shopify.api.rest.RecurringApplicationCharge.find({
       session,
       id: charge_id,

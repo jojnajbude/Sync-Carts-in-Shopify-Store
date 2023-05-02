@@ -1,62 +1,19 @@
 <div style='font-size:16px;font-family:"montserrat"'>
-		
-  <div style='max-width:560px;margin:0 auto;'>
- <table>
-   <tr>
-     <td>
-       <img src="{{ shop.logo }}" alt="logo" width="100%" />
-     </td>
-   </tr>
- </table>
-    </div>
-         
-<div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>
-​
-   <div style='font-weight: normal;font-size:1.2em;color:black;max-width:560px;margin:0 auto;padding:2em 0;'>
-     Items expiring soon
-   </div>
-         
- Your reservation is expiring soon! Be sure to checkout before it does, or they may be gone forever! Click below to checkout now, or to view your cart!
-     
- <br />
-      <div style="padding: 1em 0px; text-align: center;">
-         <a style="text-decoration: none; display: inline-block; border-radius: 4px; color: #ffffff; padding: 20.0px 100.0px; background: #687361;" href="{{ cart.url }}">
-             Pay now
-         </a>
+  <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>
+     <div style='font-weight: normal;font-size:1.2em;color:black;max-width:560px;margin:0 auto;padding:2em 0;'>
+        Items expiring soon
      </div>
-     
-     <div style="font-weight: normal; font-size: 1em; color: black; margin: 0px 0px 0.5em; text-align: center;"><span style="color: #339966;"><a style="color: #687361;" href="{{ cart.link }}">View cart</a></span></div>
- 
-</div>
- 
-<div style='border-top:1px solid rgb(229,229,229);padding:2em 0;'>
- <div style='max-width:560px;margin:0 auto;color:rgb(85,85,85);'>
-​
-   <div style='font-weight: normal;font-size:1.2em;color:black;margin: 0 0 0.5em 0;'>
-     Expring soon:
-   </div>
- 
-   <table style='color:rgb(85,85,85);width:100%;'>
-     {% for item in cart.items %}
-     
-       <tr>
-         <td style='font-weight:700;padding:1em 0.25em;'>
-           {{ item.photo }} {{ item.title }} x {{ item.quantity }}
-         </td>
-         <td style='text-align:right;;padding:1em 0.25em;'>
-           {{ item.price }} 
-         </td>
-       </tr>
-       
-     {% endfor %}
-   </table>
- </div>
-</div>
-
-<div style='border-top:1px solid rgb(229,229,229);padding:2em 0;'>
- <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>
-   If you have any questions, contact us at {{ shop.email }}.
- </div>
- <br />
-</div>
+     Your reservation is expiring soon! Be sure to checkout before it does, or they may be gone forever! Click below to checkout now, or to view your cart!     <br />
+     <div style="padding: 1em 0px; text-align: center;">
+        <a style="text-decoration: none; display: inline-block; border-radius: 4px; color: #ffffff; padding: 20.0px 100.0px; background: #687361;" href="{{link}}">
+        View cart
+        </a>
+     </div>
+  </div>
+  <div style='border-top:1px solid rgb(229,229,229);padding:2em 0;'>
+     <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>
+        If you have any questions, contact us at {{shop_email}}.
+     </div>
+     <br />
+  </div>
 </div>

@@ -8,6 +8,7 @@ import {
   LegacyCard,
   SkeletonBodyText,
   Banner,
+  EmptySearchResult,
 } from '@shopify/polaris';
 
 import AreaChart from '../components/charts/AreaChart';
@@ -20,6 +21,7 @@ import { Cart } from '../types/cart';
 import { Analytics } from '../types/analytics';
 import { Logs } from '../types/logs';
 import { SubscribtionContext } from '../context/SubscribtionContext';
+import MediaCardBanner from '../components/MediaCard';
 
 type State = {
   isLoading: boolean;
@@ -41,7 +43,7 @@ const initialState: State = {
   isLoading: true,
   analytics: null,
   status: 'Loading',
-  carts: null,
+  carts: [],
   logs: [],
   plan_banner: false,
 };
@@ -82,6 +84,11 @@ export default function HomePage() {
           const lastCarts = await lastCartsData.json();
           const logs = await handleLogs.json();
 
+          if (!lastCarts.length) {
+            dispatch({ type: 'Error' });
+            return;
+          }
+
           dispatch({ type: 'setStates', analytics, lastCarts, logs });
         } else {
           dispatch({ type: 'Error' });
@@ -92,7 +99,9 @@ export default function HomePage() {
     }
   }, [state, context.plan]);
 
-  console.log(context);
+  const emptyStateMarkup = (
+    <EmptySearchResult title={''} description={'No carts yet'} />
+  );
 
   const resourceName = {
     singular: 'cart',
@@ -116,6 +125,10 @@ export default function HomePage() {
       ]}
     >
       <Layout>
+        <Layout.Section>
+          <MediaCardBanner></MediaCardBanner>
+        </Layout.Section>
+
         {context.plan && context.plan.carts >= context.plan.limit && (
           <Layout.Section>
             <Banner
@@ -134,14 +147,22 @@ export default function HomePage() {
         <Layout.Section fullWidth>
           <LinearChart
             status={state.status}
-            data={state.analytics ? state.analytics.total_sales : []}
+            data={
+              state.analytics
+                ? state.analytics.total_sales
+                : [{ name: 'Sales', data: [] }]
+            }
           ></LinearChart>
         </Layout.Section>
 
         <Layout.Section oneThird>
           <ConversionChart
             status={state.status}
-            data={state.analytics ? state.analytics.conversion_rates : []}
+            data={
+              state.analytics
+                ? state.analytics.conversion_rates
+                : [{ name: 'Rates', data: [] }]
+            }
           ></ConversionChart>
         </Layout.Section>
 
@@ -161,6 +182,7 @@ export default function HomePage() {
           <LegacyCard title="Recently active carts" sectioned>
             {!state.isLoading ? (
               <IndexTable
+                emptyState={emptyStateMarkup}
                 selectable={false}
                 resourceName={resourceName}
                 itemCount={state.carts.length}

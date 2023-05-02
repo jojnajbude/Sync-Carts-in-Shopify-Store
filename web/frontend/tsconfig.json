@@ -31,7 +31,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "pages/editor"  ],
   "exclude": [
     "node_modules/**"
   ],

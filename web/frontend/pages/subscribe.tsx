@@ -11,7 +11,6 @@ import {
   SkeletonBodyText,
   Banner,
   Button,
-  TextContainer,
   Frame,
   Modal,
   Toast,
@@ -69,7 +68,6 @@ export default function Subscribe() {
 
   const cancelSubscribe = async () => {
     const cancelSubscribe = await fetch('/api/subscribe/cancel');
-    console.log(cancelSubscribe.ok);
 
     setIsModalOpen(false);
 

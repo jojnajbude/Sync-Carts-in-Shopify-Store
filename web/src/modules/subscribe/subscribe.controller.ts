@@ -35,7 +35,6 @@ export class SubscribeController {
   async cancelSubscribe(@Res() res: Response) {
     const session = res.locals.shopify.session;
     const canceledPlan = await this.subscribeService.cancelPlan(session);
-    console.log(canceledPlan);
 
     canceledPlan ? res.status(200).send(canceledPlan) : res.status(500).send('Server error');
   }

@@ -10,6 +10,7 @@ import shopify from "../../utils/shopify.js";
 import { CustomerService } from "../customers/customer.service.js";
 import { ShopService } from "../shops/shop.service.js";
 import { StorefrontService } from "../storefront/storefront.service.js";
+import { NotificationsService } from "../notifications/notifications.service.js";
 
 type TableRow = {
   id: any;
@@ -35,6 +36,7 @@ export class CartService {
     private readonly customerService: CustomerService,
     private readonly shopsService: ShopService,
     private readonly storefrontService: StorefrontService,
+    private readonly notificationsService: NotificationsService
   ) {}
 
   async getShopCarts(session: shopifySession) {
@@ -87,7 +89,8 @@ export class CartService {
           shopify_user_id: customer.id, 
           shop_id: shopData?.id,
           priority: customer.priority || 'normal',
-          location: customer.default_address.country_name
+          location: customer.default_address.country_name,
+          email: customer.email
         })
       }
 
@@ -141,45 +144,46 @@ export class CartService {
   }
 
   async updateCartItems(cart: any, customer: any) {
-    const shop = await this.shopsRepository.findOneBy({ id: cart.shop_id });
+    const shop = await this.shopsRepository.findOneBy({ domain: cart.shop_domain });
 
     if (shop) {
       const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
 
-    if (oldItems.length > cart.items.length) {
-      for (const oldItem of oldItems) {
-        if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
-          await this.itemRepository.save({ id: oldItem.id, status: 'removed' })
+      if (oldItems.length > cart.items.length) {
+        for (const oldItem of oldItems) {
+          if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
+            await this.itemRepository.save({ id: oldItem.id, status: 'removed' })
+          }
         }
       }
-    }
 
-    for (const item of cart.items) {
-      const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);
+      for (const item of cart.items) {
+        const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);
 
-      if (existItemIndex !== -1) {
-        if (oldItems[existItemIndex].qty !== item.qty) {
-          await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced' })
+        if (existItemIndex !== -1) {
+          if (oldItems[existItemIndex].qty !== item.qty) {
+            await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced' })
+          }
+        } else {
+          const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
+          await this.itemRepository.save({ 
+            cart_id: cart.id, 
+            variant_id: item.variant_id, 
+            qty: item.qty, 
+            status: item.reserved_indicator, 
+            price: item.price, 
+            title: item.title, 
+            image_link: item.image_link, 
+            product_id: item.product_id,
+            expire_at: await expireTime,
+          })
         }
-      } else {
-        const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
-        await this.itemRepository.save({ 
-          cart_id: cart.id, 
-          variant_id: item.variant_id, 
-          qty: item.qty, 
-          status: item.reserved_indicator, 
-          price: item.price, 
-          title: item.title, 
-          image_link: item.image_link, 
-          product_id: item.product_id,
-          expire_at: await expireTime,
-        })
       }
-    }
 
-    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+      await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+      await this.notificationsService.sendEmail('update', shop, cart, customer);
 
-    return true
+      return true
     }
   }
 

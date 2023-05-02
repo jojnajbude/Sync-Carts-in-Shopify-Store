@@ -1,13 +1,13 @@
 import { json } from "stream/consumers";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-const initialTimers = {
+const initialTimers = JSON.stringify({
   max_priority: 336,
-  high_prority: 72,
+  high_priority: 72,
   normal_priority: 24,
   low_priority: 8,
   min_priority: 1,
-}
+})
 
 @Entity('shops')
 export class Shop {
@@ -19,6 +19,9 @@ export class Shop {
 
   @Column({ type: 'bigint' })
   shopify_id: number;
+
+  @Column({ nullable: true })
+  email: string;
 
   @Column({ type: 'varchar', nullable: true })
   session: string;
@@ -41,7 +44,7 @@ export class Shop {
   @Column({ default: 'active' })
   status: string;
 
-  @Column({ type: 'json', default: JSON.stringify(initialTimers), nullable: true })
+  @Column({ type: 'json', default: initialTimers, nullable: true })
   priorities: string;
 
   @Column({ type: 'json', nullable: true })
@@ -67,7 +70,4 @@ export class Shop {
 
   @Column({ type: 'json', nullable: true })
   expired_items_json: string;
-
-  @Column({ type: 'json', nullable: true })
-  email_templates: string;
 }

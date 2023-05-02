@@ -7,6 +7,7 @@ import {
   Link,
   Spinner,
   SkeletonBodyText,
+  EmptySearchResult,
 } from '@shopify/polaris';
 import formatTime from '../services/timeFormatter';
 
@@ -24,6 +25,10 @@ type Props = {
 };
 
 export default function LogActivity({ logs, isLoading }: Props) {
+  const emptyStateMarkup = (
+    <EmptySearchResult title={''} description={'No logs yet'} />
+  );
+
   const rowMarkup = logs.map(
     (
       { _id, type, domain, date, customer_name, product_name, link_id },
@@ -116,6 +121,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
       <IndexTable
         itemCount={logs.length}
         condensed
+        emptyState={emptyStateMarkup}
         headings={[{ title: 'Date' }, { title: 'Message' }]}
       >
         <Scrollable shadow style={{ height: '415px' }}>

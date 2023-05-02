@@ -34,12 +34,17 @@ export class getShopDataMiddleware implements NestMiddleware {
         const newShop = await this.shopsRepository.insert({ 
           domain: shopifyShopData.domain, 
           shopify_id: shopifyShopData.id, 
+          email: shopifyShopData.email,
           session: sessionJSON, 
           currency: shopifyShopData.currency ,
-          cart_reminder_html: getTemplate('cart-reminder'),
-          cart_updated_html: getTemplate('cart-updated'),
-          expiring_soon_html: getTemplate('expiring-soon'),
-          expired_items_html: getTemplate('expired-items'),
+          cart_reminder_html: getTemplate('cart-reminder', 'html'),
+          cart_updated_html: getTemplate('cart-updated', 'html'),
+          expiring_soon_html: getTemplate('expiring-soon', 'html'),
+          expired_items_html: getTemplate('expired-items', 'html'),
+          cart_reminder_json: getTemplate('cart-reminder', 'json'),
+          cart_updated_json: getTemplate('cart-updated', 'json'),
+          expiring_soon_json: getTemplate('expiring-soon', 'json'),
+          expired_items_json: getTemplate('expired-items', 'json'),
         });
 
         await this.analyticsRepository.insert({ shop_id: newShop.identifiers[0].id })
@@ -52,7 +57,6 @@ export class getShopDataMiddleware implements NestMiddleware {
   }
 }
 
-
-function getTemplate(type: string) {
-  return JSON.stringify(fs.readFileSync(path.resolve(process.cwd(), `src/templates/${type}.html`), { encoding: 'utf8' }));
+function getTemplate(type: string, format: string) {
+  return JSON.stringify(fs.readFileSync(path.resolve(process.cwd(), `src/templates/${type}.${format}`), { encoding: 'utf8' }));
 }

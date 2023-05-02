@@ -297,50 +297,6 @@ export default function Settings() {
                 </FormLayout>
               ) : (
                 <NotificationsList></NotificationsList>
-                // <FormLayout>
-                //   <TextField
-                //     label="Item added to cart"
-                //     value={state.add_email}
-                //     onChange={newValue =>
-                //       dispatch({ type: 'changeAddEmail', value: newValue })
-                //     }
-                //     multiline={4}
-                //     autoComplete="off"
-                //   />
-
-                //   <TextField
-                //     label="Cart reminder"
-                //     value={state.reminder_email}
-                //     onChange={newValue =>
-                //       dispatch({ type: 'changeReminderEmail', value: newValue })
-                //     }
-                //     multiline={4}
-                //     autoComplete="off"
-                //   />
-
-                //   <TextField
-                //     label="Item will expire soon"
-                //     value={state.expire_soon_email}
-                //     onChange={newValue =>
-                //       dispatch({
-                //         type: 'changeExpireSoonEmail',
-                //         value: newValue,
-                //       })
-                //     }
-                //     multiline={4}
-                //     autoComplete="off"
-                //   />
-
-                //   <TextField
-                //     label="Item was expired"
-                //     value={state.expired_email}
-                //     onChange={newValue =>
-                //       dispatch({ type: 'changeExpiredEmail', value: newValue })
-                //     }
-                //     multiline={4}
-                //     autoComplete="off"
-                //   />
-                // </FormLayout>
               )}
             </LegacyCard>
           </Layout.Section>

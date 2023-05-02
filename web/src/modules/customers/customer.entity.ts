@@ -23,6 +23,9 @@ export class Customer {
   priority: string;
 
   @Column({ nullable: true })
+  email: string;
+
+  @Column({ nullable: true })
   location: string;
 
   @Column({ nullable: true })

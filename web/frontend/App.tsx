@@ -39,6 +39,10 @@ export default function App() {
                     label: 'Subscription',
                     destination: '/subscribe',
                   },
+                  {
+                    label: 'FAQ',
+                    destination: '/faq',
+                  },
                 ]}
               />
               <SubscribtionContextProvider>

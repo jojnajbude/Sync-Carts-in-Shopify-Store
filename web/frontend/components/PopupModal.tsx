@@ -10,7 +10,7 @@ import { useAuthenticatedFetch } from '../hooks';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
-  type: 'remove' | 'unreserve' | 'expand' | 'update';
+  type: 'remove' | 'unreserve' | 'expand' | 'update' | 'reminder';
   selectedRows: string[];
   setShowModal: (state: boolean) => void;
   setIsError: (state: boolean) => void;

@@ -69,8 +69,6 @@ export default function CartsTable() {
     };
   }, [isLoading]);
 
-  console.log(context);
-
   const resourceName = {
     singular: 'cart',
     plural: 'carts',
@@ -90,13 +88,13 @@ export default function CartsTable() {
     },
   ];
   const bulkActions = [
-    {
-      content: 'Send reminder',
-      onAction: () => {
-        setIsError(true);
-        setActiveToast(true);
-      },
-    },
+    // {
+    //   content: 'Send reminder',
+    //   onAction: () => {
+    //     setIsError(true);
+    //     setActiveToast(true);
+    //   },
+    // },
     {
       content: 'Remove all items',
       onAction: () => openModal('remove'),

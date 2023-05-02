@@ -41,6 +41,7 @@ export class StorefrontService {
           shopify_user_id: shopifyCustomer.id, 
           shop_id: shopData?.id,
           priority: 'normal',
+          email: shopifyCustomer.email,
           location: shopifyCustomer.default_address.country_name,
           os: os,
         }) 

@@ -10,7 +10,9 @@ export default function NotificationsList() {
         {
           term: (
             <Text as="span">
-              <Link onClick={() => navigate('/editor')}>Reminder template</Link>
+              <Link onClick={() => navigate('/editor/reminder')}>
+                Reminder template
+              </Link>
             </Text>
           ),
           description:
@@ -19,16 +21,20 @@ export default function NotificationsList() {
         {
           term: (
             <Text as="span">
-              <Link onClick={() => navigate('/editor')}>Cart item added</Link>
+              <Link onClick={() => navigate('/editor/update')}>
+                Cart updated
+              </Link>
             </Text>
           ),
           description:
-            'Sent automatically to the customer after you add some product to their cart.',
+            'Sent automatically to the customer after you update his cart.',
         },
         {
           term: (
             <Text as="span">
-              <Link onClick={() => navigate('/editor')}>Item expire soon</Link>
+              <Link onClick={() => navigate('/editor/soon')}>
+                Item expire soon
+              </Link>
             </Text>
           ),
           description:
@@ -37,7 +43,9 @@ export default function NotificationsList() {
         {
           term: (
             <Text as="span">
-              <Link onClick={() => navigate('/editor')}>Item expired</Link>
+              <Link onClick={() => navigate('/editor/expired')}>
+                Item expired
+              </Link>
             </Text>
           ),
           description:

@@ -25,7 +25,7 @@ import { formatter } from '../../services/formatter';
 import { Cart } from '../../types/cart';
 import { SubscribtionContext } from '../../context/SubscribtionContext';
 
-type Modal = 'remove' | 'unreserve' | 'expand' | 'update';
+type Modal = 'remove' | 'unreserve' | 'expand' | 'update' | 'reminder';
 
 export default function CartPage() {
   const [initialCart, setInitialCart] = useState(null);
@@ -72,6 +72,16 @@ export default function CartPage() {
       const createCart = async () => {
         const newCart: Cart = {
           items: [],
+          id: 0,
+          customer_name: '',
+          customer_shopify_id: '',
+          priority: 'max',
+          shop_domain: '',
+          total: 0,
+          reserved_indicator: 'all',
+          reservation_time: '',
+          qty: 0,
+          last_action: '',
         };
 
         const shopData = await fetch('/api/shop');
@@ -93,8 +103,6 @@ export default function CartPage() {
       ignore = true;
     };
   }, [isLoading]);
-
-  console.log(context)
 
   const openModal = (type: Modal) => {
     setModalType(type);
@@ -171,6 +179,13 @@ export default function CartPage() {
             onDismiss={toggleActiveToast}
           />
         );
+      case modalType === 'reminder':
+        return (
+          <Toast
+            content="Email reminder was sent."
+            onDismiss={toggleActiveToast}
+          />
+        );
     }
   };
 
@@ -203,9 +218,6 @@ export default function CartPage() {
         navigate(`/summary`);
       }
     } else {
-      // customer changed
-
-      // customer priority changed
       if (customer.priority !== initialCustomer.priority) {
         const newPriority = await fetch(
           `/api/customers/update?customerId=${customer.id}&priority=${customer.priority}`,
@@ -233,10 +245,24 @@ export default function CartPage() {
   };
 
   const cancelChanges = () => {
+    setIsUnvalidInputs('none');
     setCart(initialCart);
     setCustomer(initialCustomer);
     setIsLoading(true);
     setIsEditing(false);
+  };
+
+  const sendReminder = async (type: string, cart: any, customer: any) => {
+    fetch('/api/notifications/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: await JSON.stringify({ type, cart, customer }),
+    });
+
+    setModalType('reminder');
+    setActiveToast(true);
   };
 
   if (cartId === 'create' && context.plan.carts >= context.plan.limit) {
@@ -277,8 +303,7 @@ export default function CartPage() {
               ? [
                   {
                     content: 'Send notification',
-                    disabled: true,
-                    onAction: () => console.log('works'),
+                    onAction: () => sendReminder('reminder', cart, customer),
                   },
                   {
                     content: 'Edit cart',

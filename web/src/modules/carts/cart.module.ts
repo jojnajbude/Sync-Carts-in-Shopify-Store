@@ -9,11 +9,12 @@ import { Customer } from "../customers/customer.entity.js";
 import { CustomerModule } from "../customers/customer.module.js";
 import { ShopModule } from "../shops/shop.module.js";
 import { StorefrontModule } from "../storefront/storefront.module.js";
+import { NotificationsModule } from "../notifications/notifications.module.js";
 
 @Module({
   controllers: [CartController],
   providers: [CartService],
-  imports: [TypeOrmModule.forFeature([Cart, Shop, Item, Customer]), CustomerModule, ShopModule, StorefrontModule],
+  imports: [TypeOrmModule.forFeature([Cart, Shop, Item, Customer]), CustomerModule, ShopModule, StorefrontModule, NotificationsModule],
   exports: [TypeOrmModule]
 })
 export class CartModule {}
