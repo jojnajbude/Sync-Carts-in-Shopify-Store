@@ -51,11 +51,11 @@ export class ItemsService {
     }
 
     if (soonExpiredItemsIds.length) {
-      await this.notificationsService.sendMultipleEmails(soonExpiredItemsIds, 'items');
+      await this.notificationsService.sendMultipleEmails(soonExpiredItemsIds, 'items', 'soon');
     }
 
     if (expiredItemsIds.length) {
-      await this.notificationsService.sendMultipleEmails(expiredItemsIds, 'items');
+      await this.notificationsService.sendMultipleEmails(expiredItemsIds, 'items', 'expired');
     }
 
     const result = await this.itemRepository.update({ id: In(expiredItemsIds)}, { status: 'expired'})

@@ -154,7 +154,7 @@ export default function ProductsList({
             const {
               id,
               image_link,
-              expireAt,
+              expire_at,
               price,
               qty,
               title,
@@ -177,7 +177,7 @@ export default function ProductsList({
                         {title}
                       </Text>
 
-                      <Counter expireAt={expireAt} status={status}></Counter>
+                      <Counter expireAt={expire_at} status={status}></Counter>
 
                       <Text variant="bodyMd" as="h3">
                         {`Amount: ${qty}`}

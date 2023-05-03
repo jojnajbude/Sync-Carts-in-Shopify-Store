@@ -88,13 +88,6 @@ export default function CartsTable() {
     },
   ];
   const bulkActions = [
-    // {
-    //   content: 'Send reminder',
-    //   onAction: () => {
-    //     setIsError(true);
-    //     setActiveToast(true);
-    //   },
-    // },
     {
       content: 'Remove all items',
       onAction: () => openModal('remove'),

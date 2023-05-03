@@ -37,6 +37,6 @@ export class NotificationsController {
     const { type, cart, customer } = body;
     const shop = await this.shopRepository.findOneBy({ domain: session.shop })
 
-    await this.notificationService.sendEmail(type, shop, cart, customer);
+    await this.notificationService.sendEmail(type, shop, [customer.email]);
   }
 }

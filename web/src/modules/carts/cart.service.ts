@@ -181,7 +181,7 @@ export class CartService {
       }
 
       await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
-      await this.notificationsService.sendEmail('update', shop, cart, customer);
+      await this.notificationsService.sendEmail('update', shop, [customer.email]);
 
       return true
     }

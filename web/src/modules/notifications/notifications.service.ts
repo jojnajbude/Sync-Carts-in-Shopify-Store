@@ -4,6 +4,9 @@ import ElasticEmail from '@elasticemail/elasticemail-client';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Shop } from "../shops/shop.entity.js";
+import { Customer } from "../customers/customer.entity.js";
+import { Cart } from "../carts/cart.entity.js";
+import { Item } from "../items/item.entity.js";
 
 const client = ElasticEmail.ApiClient.instance;
 const apikey = client.authentications['apikey'];
@@ -12,7 +15,12 @@ const emailsApi = new ElasticEmail.EmailsApi();
 
 @Injectable()
 export class NotificationsService {
-  constructor(@InjectRepository(Shop) private shopRepository: Repository<Shop>) {}
+  constructor(
+    @InjectRepository(Shop) private shopRepository: Repository<Shop>,
+    @InjectRepository(Customer) private customerRepository: Repository<Customer>,
+    @InjectRepository(Cart) private cartRepository: Repository<Cart>,
+    @InjectRepository(Item) private itemRepository: Repository<Item>,
+    ) {}
 
   async getTemplate(domain: string, name: string) {
     try {
@@ -64,7 +72,7 @@ export class NotificationsService {
     }
   }
 
-  async sendEmail(type: string, shop: any, cart: any, customer: any) {
+  async sendEmail(type: string, shop: any, emails: string[]) {
     const content = this.handleContent(type, shop)
 
     const subject = ((type: string) => {
@@ -85,7 +93,7 @@ export class NotificationsService {
 
     const emailData = {
       Recipients: {
-        To: [customer.email]
+        To: emails
       },
       Content: {
         Body: [
@@ -112,8 +120,51 @@ export class NotificationsService {
     emailsApi.emailsTransactionalPost(emailData, callback);
   }
 
-  async sendMultipleEmails(ids: number[], type: 'carts' | 'items') {
+  async sendMultipleEmails(ids: number[], dataType: 'carts' | 'items', emailType: string) {
+    let emailsData = null;
 
+    switch (dataType) {
+      case 'items':
+        emailsData = await this.itemRepository.query(
+          `select customers.email as customer_email, shops.*
+          from items
+          left join carts on carts.id = items.cart_id
+          left join customers on customers.id = carts.customer_id
+          left join shops on shops.id = carts.shop_id
+          where items.id IN (${ids})`
+        )
+        break;
+
+      case 'carts':
+        emailsData = await this.itemRepository.query(
+          `select customers.email as customer_email, shops.*
+          from carts
+          left join customers on customers.id = carts.customer_id
+          left join shops on shops.id = carts.shop_id
+          where carts.id IN (${ids})`
+        )
+        break;
+    }
+
+    const sendedEmails: string[] = [];
+
+    for (const data of emailsData) {
+      if (!sendedEmails.includes(data.customer_email)) {
+        const shop = { 
+          cart_reminder_html: data.cart_reminder_html,
+          cart_updated_html: data.cart_updated_html,
+          expiring_soon_html: data.expiring_soon_html,
+          expired_items_html: data.expired_items_html,
+          domain: data.domain,
+          email: data.email,
+        }
+
+        const emails = [data.customer_email];
+
+        sendedEmails.push(data.customer_email);
+        this.sendEmail(emailType, shop, emails)
+      }
+    }
   }
 
   handleContent(type: string, shop: any) {

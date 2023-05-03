@@ -1,12 +1,15 @@
 import {
   Button,
+  Checkbox,
   Collapsible,
   FooterHelp,
   HorizontalStack,
+  Icon,
   Layout,
   LegacyCard,
   Page,
 } from '@shopify/polaris';
+import { CircleTickMajor } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
 
 export default function NotFound() {
@@ -14,12 +17,19 @@ export default function NotFound() {
 
   const handleToggle = useCallback(() => setOpen(open => !open), []);
 
+  const [checked, setChecked] = useState(false);
+  const handleChange = useCallback(
+    (newChecked: boolean) => setChecked(newChecked),
+    [],
+  );
+
   return (
     <Page title="FAQ">
       <Layout>
         <Layout.Section>
           <LegacyCard sectioned>
             <HorizontalStack>
+              {/* <Text as="h1">Setup guide</Text> */}
               <Button
                 onClick={handleToggle}
                 ariaExpanded={open}
@@ -36,11 +46,16 @@ export default function NotFound() {
                 }}
                 expandOnPrint
               >
-                <p>
-                  Your mailing list lets you contact customers or visitors who
-                  have shown an interest in your store. Reach out to them with
-                  exclusive offers or updates about your products.
-                </p>
+                <Checkbox
+                  label={
+                    <Icon
+                      color="primary"
+                      source={CircleTickMajor}
+                    />
+                  }
+                  checked={checked}
+                  onChange={handleChange}
+                />
               </Collapsible>
             </HorizontalStack>
           </LegacyCard>
