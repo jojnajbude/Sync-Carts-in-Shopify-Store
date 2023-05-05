@@ -31,12 +31,21 @@ export class getShopDataMiddleware implements NestMiddleware {
 
         next();
       } else {
+        const initialTimers = await JSON.stringify({
+          max_priority: 336,
+          high_priority: 72,
+          normal_priority: 24,
+          low_priority: 8,
+          min_priority: 1,
+        })
+
         const newShop = await this.shopsRepository.insert({ 
           domain: shopifyShopData.domain, 
           shopify_id: shopifyShopData.id, 
           email: shopifyShopData.email,
           session: sessionJSON, 
-          currency: shopifyShopData.currency ,
+          currency: shopifyShopData.currency,
+          priorities: initialTimers,
           cart_reminder_html: getTemplate('cart-reminder', 'html'),
           cart_updated_html: getTemplate('cart-updated', 'html'),
           expiring_soon_html: getTemplate('expiring-soon', 'html'),

@@ -22,6 +22,9 @@ export class Log {
 
   @Prop()
   link_id: string;
+
+  @Prop()
+  qty: string;
 }
 
 export const LogSchema = SchemaFactory.createForClass(Log);

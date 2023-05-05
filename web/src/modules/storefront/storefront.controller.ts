@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
 import { Response, Request } from "express";
 import { StorefrontService } from "./storefront.service.js";
 
@@ -20,19 +20,6 @@ export class StorefrontController {
     result ? res.status(200).send(result) : res.status(500).send('Server error');
   }
 
-  @Post('cart/create')
-  async createCart(@Req() req: Request, @Res() res: Response) {
-    const shopDomain = req.get('x-shopify-shop-domain');
-
-    if (shopDomain) {
-      const cart = await this.storefrontService.createCart(shopDomain, req.body);
-
-      cart ? res.status(200).send(cart) : res.status(500).send('Server error');
-    } else {
-      res.status(404).send('Unable to identify the store');
-    }
-  }
-
   @Post('cart/update')
   async updateCart(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
@@ -43,19 +30,6 @@ export class StorefrontController {
     } else {
       res.status(404).send('Unable to identify the store');
     }
-  }
-
-  @Post('customer/create')
-  async createCustomer(@Req() req: Request, @Res() res: Response) {
-    // const shopDomain = req.get('x-shopify-shop-domain');
-
-    // if (shopDomain) {
-    //   const user = await this.storefrontService.createUser(shopDomain, req.body);
-    //   user ? res.status(200).send(user) : res.status(500).send('Server error');
-    // } else {
-    //   res.status(404).send('Unable to identify the store');
-    // }
-    return true;
   }
 
   @Post('customer/update')
@@ -81,4 +55,10 @@ export class StorefrontController {
 
     paidCart ? res.status(200).send(paidCart) : res.status(500).send('Server error'); 
   }
+
+  @Post('app/uninstalled')
+  async removeShopData(@Body() body: any, @Res() res: Response) {
+    const shopify_id = body.id;
+    const removedShop = await this.storefrontService.removeShop(shopify_id);
+  } 
 }

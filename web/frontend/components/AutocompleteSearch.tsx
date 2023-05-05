@@ -6,6 +6,7 @@ import {
   Modal,
   Icon,
   VerticalStack,
+  LegacyCard,
 } from '@shopify/polaris';
 import { SearchMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
@@ -260,6 +261,17 @@ export default function AutocompleteSearch({
     dispatch({ type: 'closeModal' });
   };
 
+  const emptyState = (
+    <>
+      <Icon color="subdued" source={SearchMinor} />
+      <div style={{ textAlign: 'center' }}>
+        <Text color="subdued" as="span">
+          Could not find any results
+        </Text>
+      </div>
+    </>
+  );
+
   const createProductOption = (
     title: string,
     url: string,
@@ -326,6 +338,7 @@ export default function AutocompleteSearch({
     <Autocomplete.TextField
       prefix={<Icon source={SearchMinor} color="base" />}
       onChange={updateText}
+      onFocus={() => updateText(state.inputValue)}
       label={''}
       value={state.inputValue}
       placeholder={type === 'products' ? 'Search products' : 'Search customer'}
@@ -343,6 +356,7 @@ export default function AutocompleteSearch({
         loading={state.isLoading}
         onLoadMoreResults={handleLoadMoreResults}
         willLoadMoreResults={state.willLoadMoreResults}
+        emptyState={emptyState}
       />
       {state.isModalOpen && (
         <Modal

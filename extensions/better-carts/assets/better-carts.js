@@ -8,7 +8,12 @@ const APP_URL = 'https://better-carts.dev-test.pro';
     const cookie = getCartCookie();  
     const os = getOS()
 
-    setInterval(() => updateData(window.customer.id, cookie, window.customer.shop, os), 10000)
+    setInterval(() => {
+      const cookie = getCartCookie();  
+      const os = getOS()
+
+      updateData(window.customer.id, cookie, window.customer.shop, os)
+    }, 10000)
   }
 })()
 
@@ -107,9 +112,6 @@ async function updateData(id, cart_id, shop_id, os) {
       body: JSON.stringify(updatedItems)
     });
   }
-
-  // ---------------------------------------
-  // ---------------------------------------
 }
 
 function swapAddToCartBtn() {
@@ -152,6 +154,13 @@ async function addToCart() {
   } else {
     const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
     button.click()
+
+    setTimeout(() => {
+      const cookie = getCartCookie();
+      const os = getOS();
+
+      updateData(window.customer.id, cookie, window.customer.shop, os);
+    }, 1000)
   }
 }
 
@@ -159,43 +168,44 @@ class BetterCartsTimer extends HTMLElement {
   constructor() {
     super();
 
-    // this.initializeTimer();
-
     this.getData()
       .then(data => {
         this.initializeTimer(data);
       }).catch(error => {
-        console.error(error);
+        console.error(error); 
       });
   }
 
   getData() {
     if (window.customer) {
       return new Promise(async (res, rej) => {
-        let retryCount = 0;
-        const variantId = Number(this.dataset.timerId);
-        const userId = window.customer.id;
-        const shopId = window.customer.shop;
-        const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
-  
-        const fromServ = async () => {
-          const response = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
-  
-          if (response.ok) {
-            const data = await response.json()
-            res(data)
-          } else {
-            retryCount++;
-  
-            if (retryCount <= 5) {
-              await fromServ();
+        setTimeout(async () => {
+          let retryCount = 0;
+          const variantId = Number(this.dataset.timerId);
+          const userId = window.customer.id;
+          const shopId = window.customer.shop;
+          const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
+    
+          const fromServ = async () => {
+            const response = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
+    
+            if (response.ok) {
+              const data = await response.json()
+              res(data)
             } else {
-              rej(new Error('Failed to get data after 5 retries.'));
+              retryCount++;
+    
+              if (retryCount <= 5) {
+                setTimeout(async () => await fromServ(), 1000)
+                
+              } else {
+                rej(new Error('Failed to get data after 5 retries.'));
+              }
             }
           }
-        }
-  
-        await fromServ();
+    
+          await fromServ();
+        }, 1000)
       });
     }
   }

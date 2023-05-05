@@ -28,7 +28,6 @@ export default function EmailCustomizer() {
   const exportHtml = async () => {
     emailEditorRef.current.editor.exportHtml((data: any) => {
       const { design, html } = data;
-      console.log(design);
       saveTemplate(name, html, design);
     });
   };

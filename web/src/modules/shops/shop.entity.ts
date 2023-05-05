@@ -1,14 +1,6 @@
 import { json } from "stream/consumers";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-const initialTimers = JSON.stringify({
-  max_priority: 336,
-  high_priority: 72,
-  normal_priority: 24,
-  low_priority: 8,
-  min_priority: 1,
-})
-
 @Entity('shops')
 export class Shop {
   @PrimaryGeneratedColumn()
@@ -44,7 +36,7 @@ export class Shop {
   @Column({ default: 'active' })
   status: string;
 
-  @Column({ type: 'json', default: initialTimers, nullable: true })
+  @Column({ type: 'json', nullable: true })
   priorities: string;
 
   @Column({ type: 'json', nullable: true })

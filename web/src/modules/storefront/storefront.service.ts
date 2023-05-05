@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
@@ -82,6 +82,7 @@ export class StorefrontService {
         const addedItems = items.filter(item => item.status === 'added');
         const unsyncedItems = items.filter(item => item.status === 'unsynced');
         const removedItems = items.filter(item => item.status === 'removed');
+        const recountItems = items.filter(item => item.status === 'recount');
 
         const response: any = {
           data: {}
@@ -106,6 +107,12 @@ export class StorefrontService {
 
           response.type = 'Update';
           response.data.removedItems = removedItems;
+        }
+
+        if (recountItems) {
+          for (const item of recountItems) {
+            await this.itemRepository.update({ id: item.id }, { status: 'reserved', expire_at: await this.countExpireDate(item.created_at, user.priority, JSON.parse(shopData.priorities) )})
+          }
         }
 
         if (response.type) {
@@ -174,7 +181,11 @@ export class StorefrontService {
         }
       }
 
-      const customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
+      let customer = null;
+
+      if (cart.customer_id) {
+        customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
+      }
 
       const items = await this.itemRepository.createQueryBuilder('items')
         .leftJoin('items.cart', 'carts')
@@ -209,24 +220,38 @@ export class StorefrontService {
         const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
 
         if (item && Number(item.qty) !== line_item.quantity) {
-          updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }))
+          updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }));
+
+          const log = {
+            type: 'qty',
+            domain: shop,
+            date: new Date(),
+            customer_name: customer ? customer.name : null,
+            product_name: item.title,
+            link_id: `${item.product_id}`,
+            qty: line_item.quantity,
+          }
+
+          const newLog = await this.logService.createLog(log);
         } else if (!item) {
+          const product = await shopify.api.rest.Product.find({
+            session,
+            id: line_item.product_id,
+          })
+  
+          const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
+  
+          const imgSrc = await shopify.api.rest.Image.find({
+            session,
+            product_id: product.id,
+            id: variant.image_id,
+          })
+  
+          let expireTime = null;
+
           if (customer) {
-            const product = await shopify.api.rest.Product.find({
-              session,
-              id: line_item.product_id,
-            })
-    
-            const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
-    
-            const imgSrc = await shopify.api.rest.Image.find({
-              session,
-              product_id: product.id,
-              id: variant.image_id,
-            })
-    
-            const expireTime = this.countExpireDate(new Date(), customer?.priority, JSON.parse(store.priorities));
-    
+            expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(store.priorities));
+
             updatedItems.push(await this.itemRepository.save({ 
               variant_id: line_item.variant_id, 
               qty: line_item.quantity, 
@@ -242,11 +267,37 @@ export class StorefrontService {
               type: 'add',
               domain: shop,
               date: new Date(),
-              customer_name: customer?.name,
+              customer_name: customer ? customer.name : null,
               product_name: product.title,
               link_id: `${variant.product_id}`,
             }
-        
+
+            const newLog = await this.logService.createLog(log);
+          } else {
+            expireTime = this.countExpireDate(new Date(), 'unknown', JSON.parse(store.priorities));
+            const newItem = { 
+              variant_id: line_item.variant_id, 
+              qty: line_item.quantity, 
+              cart_id: cart?.id, 
+              price: line_item.price, 
+              title: product.title, 
+              image_link: imgSrc.src, 
+              product_id: variant.product_id,
+              status: 'recount',
+              expire_at: await expireTime,
+            }
+
+            updatedItems.push(await this.itemRepository.save(newItem))
+
+            const log = {
+              type: 'created',
+              domain: shop,
+              date: new Date(),
+              customer_name: null,
+              product_name: product.title,
+              link_id: `${variant.product_id}`,
+            }
+
             const newLog = await this.logService.createLog(log);
           }
         }
@@ -303,31 +354,36 @@ export class StorefrontService {
   }
 
   async handleOrderPaid(cart_token: string, totalPrice: number) {
-    // const cart = await this.cartRepository.findOneBy({ cart_token })
-    const cart = await this.cartRepository.query(
-      `select * from carts
+    const [cart] = await this.cartRepository.query(
+      `select carts.*, shops.domain, customers.name 
+      from carts
       left join customers on customers.id = carts.customer_id
       left join shops on shops.id = carts.shop_id
-      where carts.cart_token = ${cart_token}`
-    )
+      where carts.cart_token = '${cart_token}'`
+    );
+
     const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
     const paidItems = await this.itemRepository.createQueryBuilder()
       .update()
       .set({ status: 'paid' })
-      .where({ cart_id: cart?.id })
+      .where({ cart_id: cart.id })
       .execute();
 
-    await this.cartRepository.update({ id: cart?.id }, { last_action: new Date() })
+    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
     const log = {
       type: 'paid',
       domain: cart.domain,
       date: new Date(),
-      customer_name: cart.customer_name,
+      customer_name: cart.name,
     }
 
     const newLog = await this.logService.createLog(log);
 
     return [paidCart, paidItems]
+  }
+
+  async removeShop(shopify_id: number) {
+    const removedShop = await this.shopsRepository.delete({ shopify_id });
   }
 }

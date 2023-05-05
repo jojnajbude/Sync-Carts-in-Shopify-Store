@@ -20,6 +20,7 @@ type Props = {
     customer_name: string;
     product_name: string;
     link_id: string;
+    qty: string | number;
   }[];
   isLoading: boolean;
 };
@@ -31,7 +32,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
 
   const rowMarkup = logs.map(
     (
-      { _id, type, domain, date, customer_name, product_name, link_id },
+      { _id, type, domain, date, customer_name, product_name, link_id, qty },
       index,
     ) => {
       let textMarkup = null;
@@ -89,6 +90,38 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 {product_name}
               </Link>{' '}
               from cart
+            </Text>
+          );
+          break;
+
+        case 'created':
+          textMarkup = (
+            <Text as="span" variant="bodySm">
+              New cart was created with{' '}
+              <Link
+                removeUnderline
+                url={`https://${domain}/admin/products/${link_id}`}
+                external={true}
+              >
+                {product_name}
+              </Link>{' '}
+              in it
+            </Text>
+          );
+          break;
+
+        case 'qty':
+          textMarkup = (
+            <Text as="span" variant="bodySm">
+              {customer_name} changed quantity of{' '}
+              <Link
+                removeUnderline
+                url={`https://${domain}/admin/products/${link_id}`}
+                external={true}
+              >
+                {product_name}
+              </Link>{' '}
+              for {qty}
             </Text>
           );
           break;

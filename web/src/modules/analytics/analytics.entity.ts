@@ -10,7 +10,7 @@ export class Analytics {
   @Column()
   shop_id: number;
 
-  @OneToOne(() => Shop)
+  @OneToOne(() => Shop,  { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 

@@ -242,7 +242,7 @@ export class CartService {
   }
 
   async removeItems(ids: number[]) {
-    const removedItems = await this.itemRepository.delete({ cart_id: In(ids)})
+    const removedItems = await this.itemRepository.update({ cart_id: In(ids)}, { status: 'removed'})
     await this.cartRepository.update({ id: In(ids) }, { last_action: new Date() })
 
     return removedItems

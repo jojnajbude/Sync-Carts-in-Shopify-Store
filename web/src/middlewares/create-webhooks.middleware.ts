@@ -14,19 +14,9 @@ export class createWebhooks implements NestMiddleware {
       session
     })
 
-    const cartCreate = webhooks.find(webhook => webhook.topic.includes('carts/create'));
     const cartUpdate = webhooks.find(webhook => webhook.topic.includes('carts/update'));
     const orderPaid = webhooks.find(webhook => webhook.topic.includes('orders/paid'));
-
-    if (!cartCreate) {
-      const cartCreateWebhook = new shopify.api.rest.Webhook({session});
-      cartCreateWebhook.address = 'https://better-carts.dev-test.pro/storefront/cart/create';
-      cartCreateWebhook.topic = 'carts/create';
-      cartCreateWebhook.format = 'json';
-      await cartCreateWebhook.save({
-        update: true
-      })
-    }
+    const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled'));
 
     if (!cartUpdate) {
       const cartUpdateWebhook = new shopify.api.rest.Webhook({session});
@@ -44,6 +34,16 @@ export class createWebhooks implements NestMiddleware {
       customerUpdateWebhook.topic = 'orders/paid';
       customerUpdateWebhook.format = 'json';
       await customerUpdateWebhook.save({
+        update: true
+      })
+    }
+
+    if (!appUninstalled) {
+      const appUninstalledWebhook = new shopify.api.rest.Webhook({session});
+      appUninstalledWebhook.address = 'https://better-carts.dev-test.pro/storefront/app/uninstalled';
+      appUninstalledWebhook.topic = 'app/uninstalled';
+      appUninstalledWebhook.format = 'json';
+      await appUninstalledWebhook.save({
         update: true
       })
     }

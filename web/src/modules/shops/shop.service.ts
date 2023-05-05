@@ -20,11 +20,8 @@ export class ShopService {
 
     if (shopData) {
       const priorities = JSON.parse(shopData.priorities)
-      // const templates = JSON.parse(shopData.email_templates)
 
-      return [priorities 
-        // templates
-      ]
+      return [priorities]
     }
 
     return false
@@ -50,7 +47,6 @@ export class ShopService {
     const templates = { add_email, expire_soon_email, expired_email, reminder_email }
 
     const updateSettings = await this.shopRepository.update({ domain }, { priorities: JSON.stringify(updatedPriorities), 
-      // email_templates: JSON.stringify(templates) 
     })
 
     return updateSettings;

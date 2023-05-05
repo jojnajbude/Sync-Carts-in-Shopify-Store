@@ -5,7 +5,9 @@ import {
   Text,
   LegacyStack,
   Thumbnail,
+  Icon,
 } from '@shopify/polaris';
+import { ProductsMajor } from '@shopify/polaris-icons';
 import { Product, Variant } from '../types/product';
 
 import { formatter } from '../services/formatter';
@@ -22,10 +24,29 @@ export default function VariantsList({
   addItemToCart,
   currency,
 }: Props) {
+  const filterOutOfStock = product.variants.filter(
+    variant => variant.inventory_quantity !== 0,
+  );
+
+  const emptyStateMarkup = (
+    <>
+      <LegacyCard sectioned>
+        <Icon color="subdued" source={ProductsMajor} />
+        <div style={{ textAlign: 'center' }}>
+          <Text color="subdued" as="span">
+            Could not find any available variants. Check if this product is out
+            of stock.
+          </Text>
+        </div>
+      </LegacyCard>
+    </>
+  );
+
   return (
     <LegacyCard>
       <ResourceList
-        items={product.variants}
+        emptyState={emptyStateMarkup}
+        items={filterOutOfStock}
         renderItem={variant => {
           const { id, title, inventory_quantity, price, image_id } = variant;
 

@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
-import { Response } from "express";
+import e, { Response } from "express";
+import { ShopService } from "../shops/shop.service.js";
 import { CartService } from "./cart.service.js";
 
 @Controller('/api/carts')
 export class CartController {
-  constructor (private cartService: CartService) {}
+  constructor (private cartService: CartService, private shopService: ShopService) {}
 
   @Post('create')
   async createNewCart(@Body() body: any, @Res() res: Response) {
@@ -52,12 +53,17 @@ export class CartController {
   }
 
   @Get('sort')
-  async getSortedCarts(@Query() query: { dir: 'ascending' | 'descending', index: string }, @Res() res: Response) {
+  async getSortedCarts(@Query() query: { dir: 'ascending' | 'descending', index: string, shop?: string }, @Res() res: Response) {
     const session = res.locals.shopify.session;
 
     const sortedCarts = await this.cartService.getSortedCarts(session, query.dir, query.index)
 
-    sortedCarts ? res.status(200).send(sortedCarts) : res.status(500).send('Server error')
+    if (query.shop) {
+      const [shop] = await this.shopService.getShopData(session);
+      sortedCarts ? res.status(200).send({ shop, sortedCarts }) : res.status(500).send('Server error')
+    } else {
+      sortedCarts ? res.status(200).send(sortedCarts) : res.status(500).send('Server error')
+    }
   }
 
   @Post('expand')

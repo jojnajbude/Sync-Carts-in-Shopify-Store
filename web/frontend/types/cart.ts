@@ -26,4 +26,5 @@ export interface Item {
   title: string;
   image_link: string;
   reserved_indicator: string;
+  inventory_quantity?: number;
 }

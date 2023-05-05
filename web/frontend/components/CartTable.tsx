@@ -45,15 +45,14 @@ export default function CartsTable() {
     const getCarts = async () => {
       try {
         if (isLoading) {
-          const shop = await fetch('api/shop');
-          const [shopData] = await shop.json();
-
-          const result = await fetch(`/api/carts/sort?dir=ascending&index=0`);
-          const cartData = await result.json();
+          const result = await fetch(
+            `/api/carts/sort?dir=descending&index=0&shop=true`,
+          );
+          const data = await result.json();
 
           if (!ignore) {
-            setCurrency(shopData.currency);
-            setCarts(cartData);
+            setCurrency(data.shop.currency);
+            setCarts(data.sortedCarts);
             setIsLoading(false);
           }
         }

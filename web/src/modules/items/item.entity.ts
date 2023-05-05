@@ -16,7 +16,7 @@ export class Item {
   @Column({ type: 'bigint', nullable: true })
   cart_id: number;
 
-  @ManyToOne((type) => Cart)
+  @ManyToOne((type) => Cart, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cart_id', referencedColumnName: 'id' })
   cart: Cart;
 
