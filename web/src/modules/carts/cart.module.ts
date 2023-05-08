@@ -15,6 +15,6 @@ import { NotificationsModule } from "../notifications/notifications.module.js";
   controllers: [CartController],
   providers: [CartService],
   imports: [TypeOrmModule.forFeature([Cart, Shop, Item, Customer]), CustomerModule, ShopModule, StorefrontModule, NotificationsModule],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, CartService]
 })
 export class CartModule {}

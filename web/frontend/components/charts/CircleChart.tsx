@@ -7,10 +7,14 @@ type Props = {
 };
 
 export default function CircleChart({ status, data }: Props) {
-  data.forEach(
-    (os: { data: { value: any }[] }) =>
-      (os.data[0].value = Number(os.data[0].value)),
-  );
+  data.forEach((os: { name: string; data: { value: any; key: string }[] }) => {
+    if (!os.name) {
+      os.name = 'Other';
+      os.data.key = 'Other';
+    }
+
+    os.data[0].value = Number(os.data[0].value);
+  });
 
   return (
     <LegacyCard title="Carts opened by device" sectioned>

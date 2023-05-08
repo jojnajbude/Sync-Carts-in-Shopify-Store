@@ -15,12 +15,13 @@ import {
   CircleDownMajor,
   ChevronDownMinor,
   ChevronUpMinor,
+  QuestionMarkMajor,
 } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
 import { useNavigate } from '@shopify/app-bridge-react';
 
 export default function CollapsibleTab() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [firstTabOpen, setFirstTabOpen] = useState(false);
   const [secondTabOpen, setSecondTabOpen] = useState(false);
   const [firstChecked, setFirstChecked] = useState(false);
@@ -58,7 +59,7 @@ export default function CollapsibleTab() {
             Use this step by step guide to get started with Better Carts
           </Text>
 
-          <HorizontalStack blockAlign="center" gap="2">
+          {/* <HorizontalStack blockAlign="center" gap="2">
             <Text as="span" color="subdued">
               {`${tasks.reduce((sum, curr) => sum + (curr ? 1 : 0), 0)} of ${
                 tasks.length
@@ -73,7 +74,7 @@ export default function CollapsibleTab() {
               }
               size="small"
             />
-          </HorizontalStack>
+          </HorizontalStack> */}
         </VerticalStack>
       </LegacyCard.Section>
 
@@ -125,6 +126,9 @@ export default function CollapsibleTab() {
                   </List.Item>
                   <List.Item>
                     Go to <b>App embeds</b> section in the aside bar
+                  </List.Item>
+                  <List.Item>
+                    Switch on <b>Better Carts</b> embed section
                   </List.Item>
                 </List>
 

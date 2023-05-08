@@ -189,9 +189,6 @@ export default function ProductsList({
                     <Text variant="bodyMd" as="h3" alignment="end">
                       {`${formatter(price, currency)} x ${qty}`}
                     </Text>
-                  </LegacyStack.Item>
-
-                  <LegacyStack.Item>
                     <Text variant="bodyMd" as="h3" alignment="end">
                       {formatter(Number(price) * Number(qty), currency)}
                     </Text>

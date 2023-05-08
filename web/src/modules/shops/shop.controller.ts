@@ -25,4 +25,10 @@ export class ShopController {
 
     updates ? res.status(200).send(updates) : res.status(500).send('Server error')  
   }
+
+  @Get('tutorial')
+  async disableTutorial(@Res() res: Response) {
+    const domain = res.locals.shopify.session.shop;
+    this.shopService.disableTutorial(domain);
+  }
 }

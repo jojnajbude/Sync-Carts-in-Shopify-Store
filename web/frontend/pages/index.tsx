@@ -74,28 +74,19 @@ export default function HomePage() {
 
   useEffect(() => {
     if (state.isLoading) {
-      const fetchData = async () => {
-        const analyticsData = await fetch('/api/analytics');
-        const lastCartsData = await fetch('/api/carts/last');
-        const handleLogs = await fetch('/api/logs');
-
-        if (analyticsData.ok && lastCartsData.ok && handleLogs.ok) {
-          const analytics = await analyticsData.json();
-          const lastCarts = await lastCartsData.json();
-          const logs = await handleLogs.json();
-
-          if (!lastCarts.length) {
-            dispatch({ type: 'Error' });
-            return;
-          }
+      try {
+        (async () => {
+          const [analytics, lastCarts, logs] = await Promise.all([
+            fetch('/api/analytics').then(res => res.json()),
+            fetch('/api/carts/last').then(res => res.json()),
+            fetch('/api/logs').then(res => res.json()),
+          ]);
 
           dispatch({ type: 'setStates', analytics, lastCarts, logs });
-        } else {
-          dispatch({ type: 'Error' });
-        }
-      };
-
-      fetchData();
+        })();
+      } catch (err) {
+        dispatch({ type: 'Error' });
+      }
     }
   }, [state, context.plan]);
 
@@ -125,10 +116,6 @@ export default function HomePage() {
       ]}
     >
       <Layout>
-        <Layout.Section>
-          <MediaCardBanner></MediaCardBanner>
-        </Layout.Section>
-
         {context.plan && context.plan.carts >= context.plan.limit && (
           <Layout.Section>
             <Banner
@@ -143,6 +130,12 @@ export default function HomePage() {
             </Banner>
           </Layout.Section>
         )}
+
+        {context.plan ? (
+          <Layout.Section>
+            <MediaCardBanner plan={context.plan}></MediaCardBanner>
+          </Layout.Section>
+        ) : null}
 
         <Layout.Section fullWidth>
           <LinearChart

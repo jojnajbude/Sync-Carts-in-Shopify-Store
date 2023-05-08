@@ -19,371 +19,445 @@ export class StorefrontService {
   ) {}
 
   async updateData(cart_id: string, customer_id: string, shop_id: string, os: string) {
-    const shopData = await this.shopsRepository.findOneBy({ shopify_id: Number(shop_id) });
+    try {
+      const shopData = await this.shopsRepository.findOneBy({ shopify_id: Number(shop_id) });
 
-    if (shopData && shopData.carts < shopData.limit) {
-      let user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
+      if (shopData && shopData.carts < shopData.limit) {
+        let user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
 
-      if (!user?.os) {
-        await this.customerRepository.update({ id: user?.id }, { os: os });
-      }
-
-      if (!user) {
-        const session = JSON.parse(shopData?.session);
-
-        const shopifyCustomer = await shopify.api.rest.Customer.find({
-          session: session,
-          id: customer_id
-        });
-  
-        user = await this.customerRepository.save({ 
-          name: `${shopifyCustomer.first_name} ${shopifyCustomer.last_name}`, 
-          shopify_user_id: shopifyCustomer.id, 
-          shop_id: shopData?.id,
-          priority: 'normal',
-          email: shopifyCustomer.email,
-          location: shopifyCustomer.default_address.country_name,
-          os: os,
-        }) 
-      }
-
-      if (cart_id === 'undefined') {
-        const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
-
-        if (newCart?.cart_token) {
-          return { type: 'Ok' };
+        if (!user?.os) {
+          await this.customerRepository.update({ id: user?.id }, { os: os });
         }
 
-        if (newCart) {
-          const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
+        if (!user) {
+          const session = JSON.parse(shopData?.session);
 
-          await this.itemRepository.remove(newItems);
-          await this.cartRepository.remove(newCart);
+          const shopifyCustomer = await shopify.api.rest.Customer.find({
+            session: session,
+            id: customer_id
+          });
+    
+          user = await this.customerRepository.save({ 
+            name: `${shopifyCustomer.first_name} ${shopifyCustomer.last_name}`, 
+            shopify_user_id: shopifyCustomer.id, 
+            shop_id: shopData?.id,
+            priority: 'normal',
+            email: shopifyCustomer.email,
+            location: shopifyCustomer.default_address.country_name,
+            os: os,
+          }) 
+        }
 
-          return {
-            type: 'New cart',
-            data: {
-              cart: newCart, 
-              items: newItems
-            }
+        if (cart_id === 'undefined') {
+          const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
+
+          if (newCart?.cart_token) {
+            return { type: 'Ok' };
+          }
+
+          if (newCart) {
+            const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
+
+            await this.itemRepository.remove(newItems);
+            await this.cartRepository.remove(newCart);
+
+            return {
+              type: 'New cart',
+              data: {
+                cart: newCart, 
+                items: newItems
+              }
+            };
+          }
+
+
+          return true;
+        } else {
+          const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+
+          if(cart?.customer_id !== user?.id) {
+            await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
+          }
+
+          const items = await this.itemRepository.findBy({ cart_id: cart?.id });
+          const addedItems = items.filter(item => item.status === 'added');
+          const unsyncedItems = items.filter(item => item.status === 'unsynced');
+          const removedItems = items.filter(item => item.status === 'removed');
+          const recountItems = items.filter(item => item.status === 'recount');
+
+          const response: any = {
+            data: {}
           };
-        }
 
+          if (addedItems.length) {
+            await this.itemRepository.remove(addedItems);
 
-        return true;
-      } else {
-        const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+            response.type = 'Update';
+            response.data.addedItems = addedItems;
+          }
 
-        if(cart?.customer_id !== user?.id) {
-          await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
-        }
+          if (unsyncedItems.length) {
+            await this.itemRepository.remove(unsyncedItems);
 
-        const items = await this.itemRepository.findBy({ cart_id: cart?.id });
-        const addedItems = items.filter(item => item.status === 'added');
-        const unsyncedItems = items.filter(item => item.status === 'unsynced');
-        const removedItems = items.filter(item => item.status === 'removed');
-        const recountItems = items.filter(item => item.status === 'recount');
+            response.type = 'Update';
+            response.data.updatedItems = unsyncedItems;
+          }
 
-        const response: any = {
-          data: {}
-        };
+          if (removedItems.length) {
+            await this.itemRepository.remove(removedItems);
 
-        if (addedItems.length) {
-          await this.itemRepository.remove(addedItems);
+            response.type = 'Update';
+            response.data.removedItems = removedItems;
+          }
 
-          response.type = 'Update';
-          response.data.addedItems = addedItems;
-        }
+          if (recountItems) {
+            for (const item of recountItems) {
+              await this.itemRepository.update({ id: item.id }, { status: 'reserved', expire_at: await this.countExpireDate(item.created_at, user.priority, JSON.parse(shopData.priorities) )})
+            }
+          }
 
-        if (unsyncedItems.length) {
-          await this.itemRepository.remove(unsyncedItems);
-
-          response.type = 'Update';
-          response.data.updatedItems = unsyncedItems;
-        }
-
-        if (removedItems.length) {
-          await this.itemRepository.remove(removedItems);
-
-          response.type = 'Update';
-          response.data.removedItems = removedItems;
-        }
-
-        if (recountItems) {
-          for (const item of recountItems) {
-            await this.itemRepository.update({ id: item.id }, { status: 'reserved', expire_at: await this.countExpireDate(item.created_at, user.priority, JSON.parse(shopData.priorities) )})
+          if (response.type) {
+            return response;
           }
         }
-
-        if (response.type) {
-          return response;
-        }
       }
+    
+      return { type: 'Ok' };
+    } catch(err) {
+      console.log(err);
+      return false;
     }
-  
-    return { type: 'Ok' };
+    
   }
 
   async handleAdding(shop: string, variant: number, qty: number) {
-    const store = await this.shopsRepository.findOneBy({ domain: shop })
+    try {
+      const store = await this.shopsRepository.findOneBy({ domain: shop })
 
-    if (store && store.carts < store.limit) {
-      if (store && store.session) {
-        const session = JSON.parse(store?.session);
-  
-        const variantRes = await shopify.api.rest.Variant.find({
-          session,
-          id: variant,
-        });
-  
-        const [variantsReserved] = await this.itemRepository.query(
-          `select sum(qty)
-          from items
-          where variant_id = ${variant}
-          AND status = 'reserved'`
-        );
-  
-        if (Number(variantsReserved.sum) + Number(qty) > variantRes.inventory_quantity) {
-          return 'All items reserved';
-        }
-      }
-    }  
+      if (store && store.carts < store.limit) {
+        if (store && store.session) {
+          const session = JSON.parse(store?.session);
     
-    return 'Can reserve';
+          const variantRes = await shopify.api.rest.Variant.find({
+            session,
+            id: variant,
+          });
+    
+          const [variantsReserved] = await this.itemRepository.query(
+            `select sum(qty)
+            from items
+            where variant_id = ${variant}
+            AND status = 'reserved'`
+          );
+    
+          if (Number(variantsReserved.sum) + Number(qty) > variantRes.inventory_quantity) {
+            return 'All items reserved';
+          }
+        }
+      }  
+      
+      return 'Can reserve';
+    } catch(err) {
+      console.log(err);
+      return false;
+    } 
   }
 
   async createCart(shop: string, cartData: any) {
-    const store = await this.shopsRepository.findOneBy({ domain: shop });
+    try {
+      const store = await this.shopsRepository.findOneBy({ domain: shop });
 
-    if (store) {
-      const cart = await this.cartRepository.save({ cart_token: cartData.token, shop_id: store?.id });
-      const updatePlan = await this.shopsRepository.update({ id: store.id }, { carts: store.carts + 1 })
+      if (store) {
+        const cart = await this.cartRepository.save({ cart_token: cartData.token, shop_id: store?.id });
+        await this.shopsRepository.update({ id: store.id }, { carts: store.carts + 1 })
 
-      return cart;
+        return cart;
+      }
+      
+      return undefined;
+    } catch(err) {
+      console.log(err);
+      // return false;
     }
-    
-    return null;
   }
 
   async updateCart(cartData: any, shop: string) {
-    const store = await this.shopsRepository.findOneBy({ domain: shop });
+    try {
+      const store = await this.shopsRepository.findOneBy({ domain: shop });
 
-    if (store) {
-      const session = JSON.parse(store.session);
+      if (store && store.carts < store.limit) {
+        console.log('here')
+        const session = JSON.parse(store.session);
 
-      let cart = await this.cartRepository.findOneBy({ cart_token: cartData.token })
+        let cart: Cart | null | undefined = await this.cartRepository.findOneBy({ cart_token: cartData.token })
 
-      if (!cart) {
-        cart = await this.createCart(shop, cartData)
-        
         if (!cart) {
-          return false;
-        }
-      }
-
-      let customer = null;
-
-      if (cart.customer_id) {
-        customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
-      }
-
-      const items = await this.itemRepository.createQueryBuilder('items')
-        .leftJoin('items.cart', 'carts')
-        .where('carts.cart_token = :token', { token: cartData.token })
-        .getMany();
-
-      const updatedItems = [];
-
-      if (items.length > cartData.line_items.length) {
-        const deletedItem = items.find(item => !cartData.line_items.find((line_item: { id: number; }) => line_item.id === Number(item.variant_id)))
-
-        if (deletedItem) {
-          const removeItem = await this.itemRepository.remove(deletedItem)
-          await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
-
-          const log = {
-            type: 'delete',
-            domain: shop,
-            date: new Date(),
-            customer_name: customer?.name,
-            product_name: deletedItem.title,
-            link_id: `${deletedItem.product_id}`,
+          cart = await this.createCart(shop, cartData)
+          
+          if (!cart) {
+            return false;
           }
-      
-          const newLog = await this.logService.createLog(log);
-
-          return removeItem
         }
-      }
 
-      for (const line_item of cartData.line_items) {
-        const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
+        let customer = null;
 
-        if (item && Number(item.qty) !== line_item.quantity) {
-          updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }));
+        if (cart.customer_id) {
+          customer = await this.customerRepository.findOneBy({ id: cart.customer_id });
+        }
 
-          const log = {
-            type: 'qty',
-            domain: shop,
-            date: new Date(),
-            customer_name: customer ? customer.name : null,
-            product_name: item.title,
-            link_id: `${item.product_id}`,
-            qty: line_item.quantity,
-          }
+        const items = await this.itemRepository.createQueryBuilder('items')
+          .leftJoin('items.cart', 'carts')
+          .where('carts.cart_token = :token', { token: cartData.token })
+          .getMany();
 
-          const newLog = await this.logService.createLog(log);
-        } else if (!item) {
-          const product = await shopify.api.rest.Product.find({
-            session,
-            id: line_item.product_id,
-          })
-  
-          const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
-  
-          const imgSrc = await shopify.api.rest.Image.find({
-            session,
-            product_id: product.id,
-            id: variant.image_id,
-          })
-  
-          let expireTime = null;
+        const updatedItems = [];
 
-          if (customer) {
-            expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(store.priorities));
+        if (items.length > cartData.line_items.length) {
+          const deletedItem = items.find(item => !cartData.line_items.find((line_item: { id: number; }) => line_item.id === Number(item.variant_id)))
 
-            updatedItems.push(await this.itemRepository.save({ 
-              variant_id: line_item.variant_id, 
-              qty: line_item.quantity, 
-              cart_id: cart?.id, 
-              price: line_item.price, 
-              title: product.title, 
-              image_link: imgSrc.src, 
-              product_id: variant.product_id,
-              expire_at: await expireTime,
-            }))
+          if (deletedItem) {
+            const removeItem = await this.itemRepository.remove(deletedItem)
+            await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
             const log = {
-              type: 'add',
+              type: 'delete',
+              domain: shop,
+              date: new Date(),
+              customer_name: customer?.name,
+              product_name: deletedItem.title,
+              link_id: `${deletedItem.product_id}`,
+            }
+        
+            const newLog = await this.logService.createLog(log);
+
+            return removeItem
+          }
+        }
+
+        for (const line_item of cartData.line_items) {
+          const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
+
+          if (item && Number(item.qty) !== line_item.quantity) {
+            updatedItems.push(await this.itemRepository.save({ id: item.id, qty: line_item.quantity }));
+
+            const log = {
+              type: 'qty',
               domain: shop,
               date: new Date(),
               customer_name: customer ? customer.name : null,
-              product_name: product.title,
-              link_id: `${variant.product_id}`,
+              product_name: item.title,
+              link_id: `${item.product_id}`,
+              qty: line_item.quantity,
             }
 
             const newLog = await this.logService.createLog(log);
-          } else {
-            expireTime = this.countExpireDate(new Date(), 'unknown', JSON.parse(store.priorities));
-            const newItem = { 
-              variant_id: line_item.variant_id, 
-              qty: line_item.quantity, 
-              cart_id: cart?.id, 
-              price: line_item.price, 
-              title: product.title, 
-              image_link: imgSrc.src, 
-              product_id: variant.product_id,
-              status: 'recount',
-              expire_at: await expireTime,
+          } else if (!item) {
+            const product = await shopify.api.rest.Product.find({
+              session,
+              id: line_item.product_id,
+            })
+    
+            const variant = product.variants.find((variant: { id: number; }) => variant.id === line_item.variant_id)
+    
+            const imgSrc = await shopify.api.rest.Image.find({
+              session,
+              product_id: product.id,
+              id: variant.image_id,
+            })
+    
+            let expireTime = null;
+
+            if (customer) {
+              expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(store.priorities));
+
+              updatedItems.push(await this.itemRepository.save({ 
+                variant_id: line_item.variant_id, 
+                qty: line_item.quantity, 
+                cart_id: cart?.id, 
+                price: line_item.price, 
+                title: product.title, 
+                image_link: imgSrc.src, 
+                product_id: variant.product_id,
+                expire_at: await expireTime,
+              }))
+
+              const log = {
+                type: 'add',
+                domain: shop,
+                date: new Date(),
+                customer_name: customer ? customer.name : null,
+                product_name: product.title,
+                link_id: `${variant.product_id}`,
+              }
+
+              const newLog = await this.logService.createLog(log);
+            } else {
+              expireTime = this.countExpireDate(new Date(), 'unknown', JSON.parse(store.priorities));
+              const newItem = { 
+                variant_id: line_item.variant_id, 
+                qty: line_item.quantity, 
+                cart_id: cart?.id, 
+                price: line_item.price, 
+                title: product.title, 
+                image_link: imgSrc.src, 
+                product_id: variant.product_id,
+                status: 'recount',
+                expire_at: await expireTime,
+              }
+
+              updatedItems.push(await this.itemRepository.save(newItem))
+
+              const log = {
+                type: 'created',
+                domain: shop,
+                date: new Date(),
+                customer_name: null,
+                product_name: product.title,
+                link_id: `${variant.product_id}`,
+              }
+
+              const newLog = await this.logService.createLog(log);
             }
-
-            updatedItems.push(await this.itemRepository.save(newItem))
-
-            const log = {
-              type: 'created',
-              domain: shop,
-              date: new Date(),
-              customer_name: null,
-              product_name: product.title,
-              link_id: `${variant.product_id}`,
-            }
-
-            const newLog = await this.logService.createLog(log);
           }
         }
-      }
-      await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+        await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
-      return updatedItems;
+        return updatedItems;
+      }
+
+      return false;
+    } catch(err) {
+      console.log(err);
+      return false;
     }
   }
 
   async updateUser(user: any) {
-    const customer = await this.customerRepository.findOneBy({ shopify_user_id: user.id });
+    try {
+      const customer = await this.customerRepository.findOneBy({ shopify_user_id: user.id });
 
-    // logic of updating name or email or phone
-    // add when receive access
+      // logic of updating name or email or phone
+      // add when receive access
 
-    return customer
+      return customer
+    } catch(err) {
+      console.log(err);
+      return false;
+    }
+    
   }
 
-  async getReserveTime(variant: string, cart_token: string, user: string, shop: string) {
-    const cart = await this.cartRepository.findOneBy({ cart_token: cart_token });
-    const cartItem = await this.itemRepository.findOneBy({ variant_id: Number(variant), cart_id: cart?.id });
+  async getReserveTime(variant: string, cart_token: string, user: string, shop: number) {
+    try {
+      const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop })
 
-    return cartItem?.status === 'reserved' ? cartItem : false;
+      if (shopData && shopData.carts < shopData.limit) {
+        const cart = await this.cartRepository.findOneBy({ cart_token: cart_token });
+        const cartItem = await this.itemRepository.findOneBy({ variant_id: Number(variant), cart_id: cart?.id });
+
+        return cartItem?.status === 'reserved' ? cartItem : false;
+      }
+      
+      return false;
+    } catch(err) {
+      console.log(err);
+      return false;
+    }
+    
   }
 
   async countExpireDate(startDate: Date, priority: string, priorities: any) {
-    let reservationTime = 0;
+    try {
+      let reservationTime = 0;
 
-    switch(true) {
-      case priority === 'max':
-        reservationTime = priorities.max_priority;
-        break;
-      case priority === 'high':
-        reservationTime = priorities.high_priority;
-        break;
-      case priority === 'normal':
-        reservationTime = priorities.normal_priority;
-        break;
-      case priority === 'low':
-        reservationTime = priorities.low_priority;
-        break;
-      case priority === 'min':
-        reservationTime = priorities.min_priority;
-        break;
-      default:
-        reservationTime = 24;
-        break;
+      switch(true) {
+        case priority === 'max':
+          reservationTime = priorities.max_priority;
+          break;
+        case priority === 'high':
+          reservationTime = priorities.high_priority;
+          break;
+        case priority === 'normal':
+          reservationTime = priorities.normal_priority;
+          break;
+        case priority === 'low':
+          reservationTime = priorities.low_priority;
+          break;
+        case priority === 'min':
+          reservationTime = priorities.min_priority;
+          break;
+        default:
+          reservationTime = 24;
+          break;
+      }
+      
+      const expandTime = 3600000 * reservationTime;
+
+      return new Date(startDate.getTime() + expandTime);
+    } catch(err) {
+      console.log(err);
     }
-    
-    const expandTime = 3600000 * reservationTime;
-
-    return new Date(startDate.getTime() + expandTime);
   }
 
   async handleOrderPaid(cart_token: string, totalPrice: number) {
-    const [cart] = await this.cartRepository.query(
-      `select carts.*, shops.domain, customers.name 
-      from carts
-      left join customers on customers.id = carts.customer_id
-      left join shops on shops.id = carts.shop_id
-      where carts.cart_token = '${cart_token}'`
-    );
-
-    const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
-    const paidItems = await this.itemRepository.createQueryBuilder()
-      .update()
-      .set({ status: 'paid' })
-      .where({ cart_id: cart.id })
-      .execute();
-
-    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
-
-    const log = {
-      type: 'paid',
-      domain: cart.domain,
-      date: new Date(),
-      customer_name: cart.name,
+    try {
+      const [cart] = await this.cartRepository.query(
+        `select carts.*, shops.domain, customers.name 
+        from carts
+        left join customers on customers.id = carts.customer_id
+        left join shops on shops.id = carts.shop_id
+        where carts.cart_token = '${cart_token}'`
+      );
+  
+      const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
+      const paidItems = await this.itemRepository.createQueryBuilder()
+        .update()
+        .set({ status: 'paid' })
+        .where({ cart_id: cart.id })
+        .execute();
+  
+      await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+  
+      const log = {
+        type: 'paid',
+        domain: cart.domain,
+        date: new Date(),
+        customer_name: cart.name,
+      }
+  
+      const newLog = await this.logService.createLog(log);
+  
+      return [paidCart, paidItems]
+    } catch(err) {
+      console.log(err);
     }
-
-    const newLog = await this.logService.createLog(log);
-
-    return [paidCart, paidItems]
   }
 
   async removeShop(shopify_id: number) {
-    const removedShop = await this.shopsRepository.delete({ shopify_id });
+    try {
+      const removedShop = await this.shopsRepository.delete({ shopify_id });
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  async updateTime(oldItems: any[], cart_token: string) {
+    try {
+      const items = await this.itemRepository.query(
+        `select * from items
+        left join carts on carts.id = items.cart_id
+        where cart_token = '${cart_token}'`
+      )
+
+      for (const oldItem of oldItems) {
+        const index = items.findIndex((item: any) => String(item.variant_id) === String(oldItem.variant_id))
+
+        items[index].expire_at = oldItem.expire_at;
+      }
+
+      await this.itemRepository.save(items)
+    } catch(err) {
+      return false;
+    }
   }
 }

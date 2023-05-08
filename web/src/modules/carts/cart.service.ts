@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, IsNull, Repository } from "typeorm";
 import { Item } from "../items/item.entity.js";
@@ -122,25 +122,34 @@ export class CartService {
   }
 
   async getCart(cartId: string, session: shopifySession) {
-    const cartItems = await this.itemRepository.query(
-      `select items.*, customers.name, customers.id as customer_id, customers.shopify_user_id, customers.priority
-      from items
-      left join carts
-      on items.cart_id = carts.id
-      left join customers
-      on carts.customer_id = customers.id
-      where items.cart_id = ${cartId}`
-    )
+    try {
+      const cartItems = await this.itemRepository.query(
+        `select items.*, customers.name, customers.id as customer_id, customers.shopify_user_id, customers.priority
+        from items
+        left join carts
+        on items.cart_id = carts.id
+        left join customers
+        on carts.customer_id = customers.id
+        where items.cart_id = ${cartId}`
+      )
 
-    const customer = await this.customerService.getCustomer(session, cartItems[0].shopify_user_id)
-
-    const shop = await shopify.api.rest.Shop.all({
-      session,
-    });
-
-    const cart = await this.handleData(cartItems, session.shop);
-
-    return cart && customer && shop ? [cart, customer, shop] : false
+      let customer = null;
+  
+      if (cartItems[0].shopify_user_id) {
+        customer = await this.customerService.getCustomer(session, cartItems[0].shopify_user_id)
+      }
+  
+      const shop = await shopify.api.rest.Shop.all({
+        session,
+      });
+  
+      const cart = await this.handleData(cartItems, session.shop);
+  
+      return cart && shop ? [cart, customer, shop] : false
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
   async updateCartItems(cart: any, customer: any) {
@@ -149,13 +158,19 @@ export class CartService {
     if (shop) {
       const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
 
-      if (oldItems.length > cart.items.length) {
-        for (const oldItem of oldItems) {
-          if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
-            await this.itemRepository.save({ id: oldItem.id, status: 'removed' })
-          }
+      for (const oldItem of oldItems) {
+        if (!cart.items.find((item: any) => item.variant_id == oldItem.variant_id)) {
+          await this.itemRepository.save({ id: oldItem.id, status: 'removed' })
         }
       }
+
+      // if (oldItems.length > cart.items.length) {
+      //   for (const oldItem of oldItems) {
+      //     if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
+            
+      //     }
+      //   }
+      // }
 
       for (const item of cart.items) {
         const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);

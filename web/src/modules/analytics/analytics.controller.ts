@@ -4,7 +4,8 @@ import { AnalyticsService } from "./analytics.service.js";
 
 @Controller('/api/analytics')
 export class AnalyticsController {
-  constructor (private analyticsService: AnalyticsService) {}
+  constructor (
+    private analyticsService: AnalyticsService) {}
 
   @Get()
   async getAnalytics(@Res() res: Response) {

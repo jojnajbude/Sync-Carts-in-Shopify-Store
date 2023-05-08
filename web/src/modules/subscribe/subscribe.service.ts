@@ -11,93 +11,102 @@ export class SubscribeService {
   constructor(@InjectRepository(Shop) private shopRepository: Repository<Shop>) {}
 
   async getSubscription(session: shopifySession) {
-    const plan = await this.shopRepository.findOneBy({ domain: session.shop });
+    try {
+      const plan = await this.shopRepository.findOneBy({ domain: session.shop });
 
-    return plan ? plan : false;
+      return plan ? plan : false;
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   async createRecurringApplicationCharge(session: shopifySession, plan: string) {
-    let plan_config = null;
-
-    switch (plan) {
-      case 'Basic':
-        plan_config = {
-          name: 'Basic plan',
-          price: 30.0,
-        }
-        break;
-
-      case 'Premium':
-        plan_config = {
-          name: 'Premium plan',
-          price: 60.0,
-        }
-        break;
-
-      case 'Elite':
-        plan_config = {
-          name: 'Elite plan',
-          price: 100.0,
-        }
-        break;
-    }
-
-    if (plan_config) {
-      const recurring_application_charge = new shopify.api.rest.RecurringApplicationCharge({session: session});
-      recurring_application_charge.name = plan_config.name;
-      recurring_application_charge.price = plan_config.price;
-      recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts/subscribe`;
-      recurring_application_charge.test = true;
-      await recurring_application_charge.save({
-        update: true,
-      });
-
-      return recurring_application_charge;
-    }
-
-    return false;
-  }
-
-  async activatePlan(session: shopifySession, charge_id: string) {
-    const plan = await shopify.api.rest.RecurringApplicationCharge.find({
-      session,
-      id: charge_id,
-    });
-
-    if (plan.status === 'active') {
+    try {
       let plan_config = null;
 
-      switch (plan.name) {
-        case 'Basic plan':
+      switch (plan) {
+        case 'Basic':
           plan_config = {
-            name: 'Basic',
-            limit: 500,
+            name: 'Basic plan',
+            price: 30.0,
           }
           break;
 
-        case 'Premium plan':
+        case 'Premium':
           plan_config = {
-            name: 'Premium',
-            limit: 1000,
+            name: 'Premium plan',
+            price: 60.0,
           }
           break;
 
-        case 'Elite plan':
+        case 'Elite':
           plan_config = {
-            name: 'Elite',
-            limit: 2000,
+            name: 'Elite plan',
+            price: 100.0,
           }
           break;
       }
 
       if (plan_config) {
-        const activatePlan = await this.shopRepository.update({ domain: session.shop }, { plan: plan_config.name, limit: plan_config.limit, charge_id: Number(charge_id), status: 'active' })
+        const recurring_application_charge = new shopify.api.rest.RecurringApplicationCharge({session: session});
+        recurring_application_charge.name = plan_config.name;
+        recurring_application_charge.price = plan_config.price;
+        recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts/subscribe`;
+        await recurring_application_charge.save({
+          update: true,
+        });
 
-        return activatePlan ? activatePlan : false;
-      }      
+        return recurring_application_charge;
+      }
+    } catch(err) {
+      console.log(err);
     }
+  }
 
-    return false
+  async activatePlan(session: shopifySession, charge_id: string) {
+    try {
+      const plan = await shopify.api.rest.RecurringApplicationCharge.find({
+        session,
+        id: charge_id,
+      });
+  
+      if (plan.status === 'active') {
+        let plan_config = null;
+  
+        switch (plan.name) {
+          case 'Basic plan':
+            plan_config = {
+              name: 'Basic',
+              limit: 500,
+            }
+            break;
+  
+          case 'Premium plan':
+            plan_config = {
+              name: 'Premium',
+              limit: 1000,
+            }
+            break;
+  
+          case 'Elite plan':
+            plan_config = {
+              name: 'Elite',
+              limit: 2000,
+            }
+            break;
+        }
+  
+        if (plan_config) {
+          const activatePlan = await this.shopRepository.update({ domain: session.shop }, { plan: plan_config.name, limit: plan_config.limit, charge_id: Number(charge_id), status: 'active' })
+  
+          return activatePlan ? activatePlan : false;
+        }      
+      }
+  
+      return false
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   async cancelPlan(session: shopifySession) {

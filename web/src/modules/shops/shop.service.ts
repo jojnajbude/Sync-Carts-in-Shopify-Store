@@ -51,4 +51,8 @@ export class ShopService {
 
     return updateSettings;
   }
+
+  async disableTutorial(domain: string) {
+    await this.shopRepository.update({ domain }, { tutorial: false })
+  }
 }

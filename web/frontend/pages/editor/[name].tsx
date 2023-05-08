@@ -18,8 +18,9 @@ export default function EmailCustomizer() {
     const takeTemplate = async () => {
       const template = await fetch(`/api/notifications/get?name=${name}`);
       const templateJson = await template.json();
+      const templateData = await JSON.parse(templateJson);
 
-      setTemplate(templateJson);
+      setTemplate(templateData);
     };
 
     takeTemplate();

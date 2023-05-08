@@ -53,6 +53,16 @@ export default function CustomerCard({
     setCustomer(null);
   };
 
+  if (!isEditing && !customer) {
+    return (
+      <LegacyCard title="Customer" sectioned>
+        <Text as="span" color="subdued">
+          No customer yet. Click Edit cart for change.
+        </Text>
+      </LegacyCard>
+    );
+  }
+
   if (customer) {
     return (
       <LegacyCard
@@ -79,6 +89,7 @@ export default function CustomerCard({
         <LegacyCard.Section>
           <LegacyStack vertical>
             <Link
+              target="_blank"
               url={`https://${cart.shop_domain}/admin/customers/${customer.id}`}
             >
               {`${customer.first_name} ${customer.last_name}`}

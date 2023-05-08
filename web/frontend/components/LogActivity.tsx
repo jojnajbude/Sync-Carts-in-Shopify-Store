@@ -5,7 +5,6 @@ import {
   VerticalStack,
   Scrollable,
   Link,
-  Spinner,
   SkeletonBodyText,
   EmptySearchResult,
 } from '@shopify/polaris';

@@ -8,9 +8,12 @@ import { Customer } from "../customers/customer.entity.js";
 import { Cart } from "../carts/cart.entity.js";
 import { Item } from "../items/item.entity.js";
 
+import { config } from 'dotenv';
+config();
+
 const client = ElasticEmail.ApiClient.instance;
 const apikey = client.authentications['apikey'];
-apikey.apiKey = "042A1A09D17EA1C97B294AB78AC142952799232D03C0CD7717B010F9A92D7E2BB417A673BC95131FEDC4DE8DCF8FB5C2";
+apikey.apiKey = process.env.ELASTIC_TOKEN;
 const emailsApi = new ElasticEmail.EmailsApi();
 
 @Injectable()
@@ -73,7 +76,7 @@ export class NotificationsService {
   }
 
   async sendEmail(type: string, shop: any, emails: string[]) {
-    const content = this.handleContent(type, shop)
+    const content = await this.handleContent(type, shop)
 
     const subject = ((type: string) => {
       switch (type) {
@@ -167,27 +170,28 @@ export class NotificationsService {
     }
   }
 
-  handleContent(type: string, shop: any) {
+  async handleContent(type: string, shop: any) {
     let template = null;
 
     switch (type) {
       case 'reminder':
-        template = shop.cart_reminder_html
+        template = await JSON.parse(shop.cart_reminder_html)
         break;
 
       case 'update':
-        template = shop.cart_updated_html
+        template = await JSON.parse(shop.cart_updated_html)
         break;
 
       case 'soon':
-        template = shop.expiring_soon_html
+        template = await JSON.parse(shop.expiring_soon_html)
         break;
 
       case 'expired':
-        template = shop.expired_items_html
+        template = await JSON.parse(shop.expired_items_html)
         break;
     }
 
+    
     template = template.replace('{{link}}', `https://${shop.domain}/cart`);
     template = template.replace('{{shop_email}}', `${shop.email}`);
 

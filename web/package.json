@@ -6,7 +6,8 @@
     "debug": "node --inspect-brk index.js",
     "dev": "cross-env NODE_ENV=development nodemon ./src/index.ts",
     "serve": "cross-env NODE_ENV=production nodemon ./src/index.ts",
-    "nest": "npx @nestjs/cli"
+    "nest": "npx @nestjs/cli",
+    "typeorm": "typeorm-ts-node-esm"
   },
   "type": "module",
   "engines": {

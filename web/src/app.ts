@@ -8,9 +8,6 @@ import {
 } from "@nestjs/platform-express";
 import { Express } from "express";
 
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT || "", 10);
 const STATIC_PATH =
   process.env.NODE_ENV === "production"

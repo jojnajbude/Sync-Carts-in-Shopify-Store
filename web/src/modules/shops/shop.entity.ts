@@ -36,6 +36,9 @@ export class Shop {
   @Column({ default: 'active' })
   status: string;
 
+  @Column({ default: true, nullable: true })
+  tutorial: boolean
+
   @Column({ type: 'json', nullable: true })
   priorities: string;
 

@@ -104,11 +104,18 @@ export default function Subscribe() {
       title="Subscribe"
       backAction={{ onAction: () => navigate('/') }}
       primaryAction={
-        <div style={{ color: '#bf0711' }}>
-          <Button monochrome outline onClick={handleModal}>
-            Cancel subscription
-          </Button>
-        </div>
+        plan ? (
+          <div style={{ color: '#bf0711' }}>
+            <Button
+              disabled={plan.plan === 'free'}
+              monochrome
+              outline
+              onClick={handleModal}
+            >
+              Cancel subscription
+            </Button>
+          </div>
+        ) : null
       }
     >
       <Frame>

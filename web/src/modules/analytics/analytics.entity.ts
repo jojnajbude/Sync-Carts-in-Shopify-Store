@@ -1,4 +1,3 @@
-import { json } from "stream/consumers";
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Shop } from "../shops/shop.entity.js";
 
