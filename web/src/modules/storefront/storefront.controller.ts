@@ -23,6 +23,7 @@ export class StorefrontController {
   @Post('cart/update')
   async updateCart(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
+    console.log('webhook controller', shopDomain)
 
     if (shopDomain) {
       const changedItems = await this.storefrontService.updateCart(req.body, shopDomain);

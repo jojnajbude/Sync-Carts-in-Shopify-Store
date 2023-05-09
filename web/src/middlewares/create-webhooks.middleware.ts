@@ -3,12 +3,16 @@ import { NextFunction, Response, Request } from "express";
 import { Webhook } from "../types/webhook.js";
 import shopify from "../utils/shopify.js";
 
+import { config } from 'dotenv';
+config();
+
 @Injectable()
 export class createWebhooks implements NestMiddleware {
   constructor() {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
+    console.log('webhook', session)
 
     const webhooks: Webhook[] = await shopify.api.rest.Webhook.all({
       session
@@ -18,9 +22,11 @@ export class createWebhooks implements NestMiddleware {
     const orderPaid = webhooks.find(webhook => webhook.topic.includes('orders/paid'));
     const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled'));
 
+    console.log('cartUpdate', cartUpdate)
+
     if (!cartUpdate) {
       const cartUpdateWebhook = new shopify.api.rest.Webhook({session});
-      cartUpdateWebhook.address = 'https://better-carts.dev-test.pro/storefront/cart/update';
+      cartUpdateWebhook.address = `${process.env.HOST}storefront/cart/update`;
       cartUpdateWebhook.topic = 'carts/update';
       cartUpdateWebhook.format = 'json';
       await cartUpdateWebhook.save({
@@ -30,7 +36,7 @@ export class createWebhooks implements NestMiddleware {
 
     if (!orderPaid) {
       const customerUpdateWebhook = new shopify.api.rest.Webhook({session});
-      customerUpdateWebhook.address = 'https://better-carts.dev-test.pro/storefront/order/paid';
+      customerUpdateWebhook.address = `${process.env.HOST}storefront/order/paid`;
       customerUpdateWebhook.topic = 'orders/paid';
       customerUpdateWebhook.format = 'json';
       await customerUpdateWebhook.save({
@@ -40,7 +46,7 @@ export class createWebhooks implements NestMiddleware {
 
     if (!appUninstalled) {
       const appUninstalledWebhook = new shopify.api.rest.Webhook({session});
-      appUninstalledWebhook.address = 'https://better-carts.dev-test.pro/storefront/app/uninstalled';
+      appUninstalledWebhook.address = `${process.env.HOST}storefront/app/uninstalled`;
       appUninstalledWebhook.topic = 'app/uninstalled';
       appUninstalledWebhook.format = 'json';
       await appUninstalledWebhook.save({

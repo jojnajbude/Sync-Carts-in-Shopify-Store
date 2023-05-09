@@ -1,4 +1,4 @@
-const APP_URL = 'https://better-carts.dev-test.pro';
+const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
 
 (function initializeBetterCarts() {
   initializeObserver();
@@ -83,6 +83,14 @@ async function updateData(id, cart_id, shop_id, os) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
+
+    const cookie = getCartCookie();
+
+    const updateExpireDate = await fetch(`${APP_URL}/storefront/update/time`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: await JSON.stringify([response.data.items, cookie])
+    })
   } else if (response.type === 'Update') {
     const updatedItems = {
       updates: {}
@@ -212,7 +220,8 @@ class BetterCartsTimer extends HTMLElement {
 
   async initializeTimer(cartItemData) {
     const variantId = Number(this.dataset.timerId);
-    const text = document.getElementById(`bc-countdown-${variantId}`);
+    // const text = document.getElementById(`bc-countdown-${variantId}`);
+    const text = this.querySelector('span');
     
     if (cartItemData) {
       if (cartItemData.status === 'unreserved') {

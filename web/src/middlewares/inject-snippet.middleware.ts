@@ -11,7 +11,7 @@ export class injectSnippet implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
 
-    const snippet = fs.readFileSync(path.resolve(process.cwd(), '../extensions/better-carts/snippets/reserve-timer.liquid')).toString('utf8');
+    const snippet = fs.readFileSync(path.resolve(process.cwd(), './src/snippet/reserve-timer.liquid')).toString('utf8');
 
     try {
       const themes = await shopify.api.rest.Theme.all({

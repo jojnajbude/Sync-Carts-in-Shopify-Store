@@ -177,13 +177,13 @@ export class StorefrontService {
       return undefined;
     } catch(err) {
       console.log(err);
-      // return false;
     }
   }
 
   async updateCart(cartData: any, shop: string) {
     try {
       const store = await this.shopsRepository.findOneBy({ domain: shop });
+      console.log('store', store)
 
       if (store && store.carts < store.limit) {
         console.log('here')
@@ -193,7 +193,7 @@ export class StorefrontService {
 
         if (!cart) {
           cart = await this.createCart(shop, cartData)
-          
+          console.log('cart', cart)
           if (!cart) {
             return false;
           }
