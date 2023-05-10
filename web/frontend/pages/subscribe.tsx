@@ -101,7 +101,7 @@ export default function Subscribe() {
 
   return (
     <Page
-      title="Subscribe"
+      title="Subscribtions"
       backAction={{ onAction: () => navigate('/') }}
       primaryAction={
         plan ? (

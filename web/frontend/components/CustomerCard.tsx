@@ -144,7 +144,7 @@ export default function CustomerCard({
           </LegacyStack>
         </LegacyCard.Section>
 
-        <LegacyCard.Section title="Statistic">
+        <LegacyCard.Section title="Statistics">
           <LegacyStack vertical>
             <Text color="subdued" as="span">
               {`Item drop rate: ${customer.itemDropRate}%`}

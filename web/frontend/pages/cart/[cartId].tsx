@@ -267,7 +267,7 @@ export default function CartPage() {
 
   if (cartId === 'create' && context.plan.carts >= context.plan.limit) {
     return (
-      <Page backAction={{ onAction: () => navigate(-1) }}>
+      <Page backAction={{ onAction: () => navigate('/summary') }}>
         <Layout>
           <Layout.Section>
             <Banner
@@ -290,7 +290,7 @@ export default function CartPage() {
     return (
       <Frame>
         <Page
-          backAction={{ onAction: () => navigate(-1) }}
+          backAction={{ onAction: () => navigate('/summary') }}
           title={cartId !== 'create' ? `Cart #${cartId}` : 'Create cart'}
           titleMetadata={
             cartId !== 'create' && cart ? (

@@ -102,7 +102,7 @@ export default function HomePage() {
   return (
     <Page
       divider
-      title="Better Carts Dashboard"
+      title="Dashboard"
       primaryAction={{
         content: 'Create new cart',
         onAction: () => navigate('/cart/create'),
@@ -182,7 +182,7 @@ export default function HomePage() {
                 headings={[
                   { title: 'Customer' },
                   { title: 'Items Quantity' },
-                  { title: 'Reserved Indicator' },
+                  { title: 'Reserved Status' },
                   { title: 'Last action' },
                 ]}
               >

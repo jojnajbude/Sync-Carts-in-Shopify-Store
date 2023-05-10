@@ -183,17 +183,15 @@ export class StorefrontService {
   async updateCart(cartData: any, shop: string) {
     try {
       const store = await this.shopsRepository.findOneBy({ domain: shop });
-      console.log('store', store)
 
       if (store && store.carts < store.limit) {
-        console.log('here')
         const session = JSON.parse(store.session);
 
         let cart: Cart | null | undefined = await this.cartRepository.findOneBy({ cart_token: cartData.token })
 
         if (!cart) {
           cart = await this.createCart(shop, cartData)
-          console.log('cart', cart)
+
           if (!cart) {
             return false;
           }

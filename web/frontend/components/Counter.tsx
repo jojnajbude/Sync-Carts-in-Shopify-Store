@@ -18,13 +18,25 @@ export default function Counter({ expireAt, status }: Props) {
   } else if (days + hours + minutes + seconds <= 0 || status === 'expired') {
     return (
       <Text as="p" color="critical">
-        {`Reservation time expired!`}
+        {`Reservation expired!`}
       </Text>
     );
   } else if (status === 'unreserved') {
     return (
       <Text as="p" color="subdued">
         {`This item isn't reserved`}
+      </Text>
+    );
+  } else if (status === 'expiring') {
+    return (
+      <Text as="p" color={days || hours >= 2 ? 'success' : 'warning'}>
+        {days ? (days > 1 ? `${days} days ` : `${days} day `) : null}
+        {hours ? (hours > 1 ? `${hours} hours ` : `${hours} hour `) : null}
+        {minutes
+          ? minutes > 1
+            ? `${minutes} minutes`
+            : `${minutes} minute`
+          : null}
       </Text>
     );
   } else {

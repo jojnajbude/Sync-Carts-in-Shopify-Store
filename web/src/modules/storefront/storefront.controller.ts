@@ -23,7 +23,6 @@ export class StorefrontController {
   @Post('cart/update')
   async updateCart(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
-    console.log('webhook controller', shopDomain)
 
     if (shopDomain) {
       const changedItems = await this.storefrontService.updateCart(req.body, shopDomain);
@@ -61,7 +60,6 @@ export class StorefrontController {
   async handleTimeUpdate(@Body() body: any, @Res() res: Response) {
     const [ oldItems, cart_token ] = body;
 
-    console.log( oldItems, cart_token)
     const newExpireDates = await this.storefrontService.updateTime(oldItems, cart_token)
   }
 

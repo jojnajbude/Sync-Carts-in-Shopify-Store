@@ -138,7 +138,7 @@ export default function ProductsList({
         !isEditing
           ? [
               {
-                content: 'Reset reservation timers',
+                content: 'Unreserve items',
                 onAction: () => openModal('unreserve'),
               },
             ]

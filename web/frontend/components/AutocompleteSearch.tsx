@@ -6,9 +6,8 @@ import {
   Modal,
   Icon,
   VerticalStack,
-  LegacyCard,
 } from '@shopify/polaris';
-import { SearchMinor } from '@shopify/polaris-icons';
+import { SearchMinor, ImageMajor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
 import { useCallback, useReducer } from 'react';
 
@@ -170,7 +169,7 @@ export default function AutocompleteSearch({
         results = products.map((product: GraphQlProduct) => ({
           label: createProductOption(
             product.node.title,
-            product.node.image.url,
+            product.node.image?.url,
             product.node.totalInventory,
             product.node.priceRangeV2.minVariantPrice.amount,
             product.node.priceRangeV2.minVariantPrice.currencyCode,
@@ -274,14 +273,14 @@ export default function AutocompleteSearch({
 
   const createProductOption = (
     title: string,
-    url: string,
+    url: string | undefined,
     totalInventory: string,
     price: string,
     currency: string,
   ) => {
     return (
       <LegacyStack>
-        <Thumbnail source={url} alt={title} size="small" />
+        <Thumbnail source={url ? url : ImageMajor} alt={title} size="small" />
 
         <LegacyStack.Item>
           <VerticalStack gap="3">

@@ -106,7 +106,7 @@ export class NotificationsService {
             Content: content
           },
         ],
-        From: "demigod177712@gmail.com",
+        From: "better-carts.com",
         Subject: subject
       }
     }

@@ -12,7 +12,6 @@ export class createWebhooks implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
-    console.log('webhook', session)
 
     const webhooks: Webhook[] = await shopify.api.rest.Webhook.all({
       session
@@ -21,8 +20,6 @@ export class createWebhooks implements NestMiddleware {
     const cartUpdate = webhooks.find(webhook => webhook.topic.includes('carts/update'));
     const orderPaid = webhooks.find(webhook => webhook.topic.includes('orders/paid'));
     const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled'));
-
-    console.log('cartUpdate', cartUpdate)
 
     if (!cartUpdate) {
       const cartUpdateWebhook = new shopify.api.rest.Webhook({session});

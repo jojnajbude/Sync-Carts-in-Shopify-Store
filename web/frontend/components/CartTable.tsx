@@ -19,6 +19,7 @@ import TablePagination from './Pagination';
 import IndexTableFilters from './IndexFilters';
 import CartBadge from './CartBadge';
 import { SubscribtionContext } from '../context/SubscribtionContext';
+import Counter from './Counter';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
@@ -78,7 +79,7 @@ export default function CartsTable() {
 
   const promotedBulkActions = [
     {
-      content: 'Expand timers',
+      content: 'Set Timers',
       onAction: () => openModal('expand'),
     },
     {
@@ -231,9 +232,9 @@ export default function CartsTable() {
                 { title: 'Cart ID' },
                 { title: 'Customer' },
                 { title: 'Cart Total' },
-                { title: 'Reserved Indicator' },
-                { title: 'Shortest expire time for items' },
-                { title: 'Items Quantity' },
+                { title: 'Reserved Status' },
+                { title: 'Next expiring item' },
+                { title: 'Items' },
               ]}
             >
               {getCurrentTableData().map(
@@ -270,8 +271,15 @@ export default function CartsTable() {
                     <IndexTable.Cell>
                       <CartBadge indicator={reserved_indicator}></CartBadge>
                     </IndexTable.Cell>
-                    <IndexTable.Cell>{reservation_time}</IndexTable.Cell>
-                    <IndexTable.Cell>{qty}</IndexTable.Cell>
+                    <IndexTable.Cell>
+                      <Counter
+                        expireAt={reservation_time}
+                        status={'expiring'}
+                      ></Counter>
+                    </IndexTable.Cell>
+                    <IndexTable.Cell>
+                      {qty > 1 ? `${qty} items` : `${qty} item`}
+                    </IndexTable.Cell>
                   </IndexTable.Row>
                 ),
               )}

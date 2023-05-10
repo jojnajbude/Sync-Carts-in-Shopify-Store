@@ -318,7 +318,7 @@ export class CartService {
       })[0].expire_at;
       cart.qty = qty;
       cart.total = total;
-      cart.reservation_time = new Date(shortestDate).toLocaleString();
+      cart.reservation_time = new Date(shortestDate).toString();
     }
 
     return table;

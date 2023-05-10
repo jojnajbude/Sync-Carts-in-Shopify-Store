@@ -24,7 +24,7 @@ export default function App() {
               <NavigationMenu
                 navigationLinks={[
                   {
-                    label: 'Carts summary',
+                    label: 'Carts',
                     destination: '/summary',
                   },
                   {
@@ -36,7 +36,7 @@ export default function App() {
                     destination: '/settings',
                   },
                   {
-                    label: 'Subscription',
+                    label: 'Subscriptions',
                     destination: '/subscribe',
                   },
                   {

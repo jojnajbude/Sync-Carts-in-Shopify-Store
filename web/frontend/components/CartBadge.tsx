@@ -19,21 +19,21 @@ export default function CartBadge({ indicator }: Props) {
     case indicator === 'all':
       return (
         <Badge status="success" progress="complete">
-          All items reserved
+          Reserved
         </Badge>
       );
 
     case indicator === 'part':
       return (
         <Badge status="attention" progress="partiallyComplete">
-          Partially reserved
+          Partially Reserved
         </Badge>
       );
 
     case indicator === 'no':
       return (
         <Badge status="warning" progress="incomplete">
-          No items reserved
+          Unreserved
         </Badge>
       );
   }

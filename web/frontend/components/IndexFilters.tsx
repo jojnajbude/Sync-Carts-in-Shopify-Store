@@ -80,13 +80,14 @@ const IndexTableFilters: React.FC<Props> = ({
 
   return (
     <IndexFilters
+      hideFilters
+      hideQueryField
       queryValue={queryValue}
       queryPlaceholder="Search by customers"
       onQueryChange={handleFiltersQueryChange}
       onQueryClear={() => setQueryValue('')}
       cancelAction={{
         onAction: null,
-        disabled: false,
         loading: false,
       }}
       tabs={tabs}
