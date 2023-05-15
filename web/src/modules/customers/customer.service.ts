@@ -44,7 +44,7 @@ export class CustomerService {
   async getCustomersByInput(inputText: string, client: any) {
     const data = await client.query({
       data: `{
-        customers (first: 25, query: "displayName:${inputText}*") {
+        customers (first: 25, query: "${inputText}") {
           edges {
             node {
               id
@@ -76,7 +76,7 @@ export class CustomerService {
       const index = customersData.findIndex((user: { shopify_user_id: any; }) => id === user.shopify_user_id);
       if (index !== -1) {
         if (customersData[index].cart_id) {
-          customer.node.hasCart = true;
+          customer.node.hasCart = customersData[index].cart_id;
           continue;
         }
       }

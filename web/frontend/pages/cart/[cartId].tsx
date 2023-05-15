@@ -41,6 +41,7 @@ export default function CartPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUnvalidInputs, setIsUnvalidInputs] = useState('none');
+  const [isPriorityChange, setIsPriorityChange] = useState(false);
 
   const { cartId } = useParams();
   const navigate = useNavigate();
@@ -240,6 +241,7 @@ export default function CartPage() {
 
       setIsSaving(false);
       setIsEditing(false);
+      setIsPriorityChange(false);
       setIsLoading(true);
     }
   };
@@ -307,11 +309,13 @@ export default function CartPage() {
                   },
                   {
                     content: 'Edit cart',
+                    disabled: cart.reserved_indicator === 'paid',
                     onAction: () => setIsEditing(true),
                   },
                   {
                     content: 'Delete cart',
-                    destructive: true,
+                    destructive: cart.reserved_indicator !== 'paid',
+                    disabled: cart.reserved_indicator === 'paid',
                     onAction: () => openModal('remove'),
                   },
                 ]
@@ -369,19 +373,25 @@ export default function CartPage() {
                 initialCustomer={initialCustomer}
                 setCustomer={setCustomer}
                 setIsUnvalidInputs={setIsUnvalidInputs}
+                setIsPriorityChange={setIsPriorityChange}
+                setIsLoading={setIsLoading}
               ></CustomerCard>
 
               <PageActions
                 primaryAction={{
                   content: 'Save',
-                  disabled: !isEditing || isUnvalidInputs !== 'none',
+                  disabled:
+                    !isPriorityChange ||
+                    (!isEditing && !isPriorityChange) ||
+                    isUnvalidInputs !== 'none',
                   loading: isSaving,
                   onAction: () => saveCart(),
                 }}
                 secondaryActions={[
                   {
                     content: 'Discard',
-                    disabled: !isEditing,
+                    disabled:
+                      !isPriorityChange || (!isEditing && !isPriorityChange),
                     onAction: () => cancelChanges(),
                   },
                 ]}

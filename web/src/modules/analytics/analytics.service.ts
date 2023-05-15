@@ -34,6 +34,7 @@ export class AnalyticsService {
       analytics.device_statistic = JSON.parse(analytics.device_statistic);
       analytics.top_sold = JSON.parse(analytics.top_sold);
       analytics.top_abandoned = JSON.parse(analytics.top_abandoned);
+      analytics.top_abandoned_customers = JSON.parse(analytics.top_abandoned_customers);
 
       return analytics;
     }
@@ -290,7 +291,7 @@ export class AnalyticsService {
     const devicesCount = await this.customerRepository.query(
       `select customers.os as key, count(*) as value from customers
       left join shops on shops.id = customers.shop_id
-      where shops.domain = 'better-carts-test.myshopify.com'
+      where shops.domain = '${domain}'
       group by customers.os`
     )
 
@@ -312,7 +313,7 @@ export class AnalyticsService {
       `select items.title, items.product_id, SUM(items.qty) as sold, shops.domain from items
       left join carts on carts.id = items.cart_id
       left join shops on shops.id = carts.shop_id
-      where items.status = 'paid' AND shops.domain = 'better-carts-test.myshopify.com'
+      where items.status = 'paid' AND shops.domain = '${domain}'
       group by items.title, items.product_id, shops.domain
       order by sold desc
       limit 10`
@@ -326,13 +327,29 @@ export class AnalyticsService {
       `select items.title, items.product_id, SUM(items.qty) as sold, shops.domain from items
       left join carts on carts.id = items.cart_id
       left join shops on shops.id = carts.shop_id
-      where items.status = 'expired' AND shops.domain = 'better-carts-test.myshopify.com'
+      where items.status = 'expired' AND shops.domain = '${domain}'
       group by items.title, items.product_id, shops.domain
       order by sold desc
       limit 10`
     )
     const shop = await this.shopsRepository.findOneBy({ domain });
     const top_abandoned = await this.analyticsRepository.update({ shop_id: shop?.id }, { top_abandoned: JSON.stringify(topAbandonedProducts)});
+  }
+
+  async getTopAbandonedCustomers(domain: string) {
+    const topAbandonedCustomers = await this.itemRepository.query(
+      `select customers.name, customers.shopify_user_id, shops.domain, SUM(items.qty) as sold
+      from items
+      left join carts on carts.id = items.cart_id
+      left join customers on customers.id = carts.customer_id
+      left join shops on shops.id = carts.shop_id
+      where items.status = 'expired' AND shops.domain = '${domain}'
+      group by customers.name, customers.shopify_user_id, shops.domain
+      order by sold desc
+      limit 10`
+    )
+    const shop = await this.shopsRepository.findOneBy({ domain });
+    const top_abandoned_customers = await this.analyticsRepository.update({ shop_id: shop?.id }, { top_abandoned_customers: JSON.stringify(topAbandonedCustomers)});
   }
 
   @Cron(CronExpression.EVERY_MINUTE) 
@@ -348,6 +365,7 @@ export class AnalyticsService {
       await this.getDeviceStatistic(shop.domain);
       await this.getTopSoldProducts(shop.domain);
       await this.getTopAbandonedProducts(shop.domain);
+      await this.getTopAbandonedCustomers(shop.domain);
     }
   }
 }

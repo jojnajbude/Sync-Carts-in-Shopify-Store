@@ -6,6 +6,7 @@ import {
   Modal,
   Icon,
   VerticalStack,
+  Link,
 } from '@shopify/polaris';
 import { SearchMinor, ImageMajor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
@@ -16,6 +17,7 @@ import { formatter } from '../services/formatter';
 
 import { Cart, Item } from '../types/cart';
 import { Customer } from '../types/customer';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   type: string;
@@ -24,6 +26,7 @@ type Props = {
   setCart?: (value: Cart) => void;
   setCustomer?: (value: Customer) => void;
   setIsUnvalidInputs: (value: string) => void;
+  setIsLoading: (value: boolean) => void;
 };
 
 type State = {
@@ -72,6 +75,47 @@ type GraphQlCustomer = {
   };
 };
 
+const paginationInterval = 25;
+
+const initialState: State = {
+  isModalOpen: false,
+  product: null,
+  selectedOptions: [],
+  inputValue: '',
+  options: [],
+  isLoading: false,
+  willLoadMoreResults: true,
+  visibleOptionIndex: paginationInterval,
+};
+
+function reducer(state: State, action: Action) {
+  switch (action.type) {
+    case 'setLoading':
+      return { ...state, isLoading: action.value };
+
+    case 'changeVisibleOptionIndex':
+      return { ...state, visibleOptionIndex: action.value };
+
+    case 'setLoadMoreResults':
+      return { ...state, willLoadMoreResults: action.value };
+
+    case 'setInputValue':
+      return { ...state, inputValue: action.value };
+
+    case 'setOptions':
+      return { ...state, options: action.value };
+
+    case 'setVariantModal':
+      return { ...state, isModalOpen: true, product: action.value };
+
+    case 'closeModal':
+      return { ...state, isModalOpen: false, product: null };
+
+    default:
+      return state;
+  }
+}
+
 export default function AutocompleteSearch({
   type,
   cart,
@@ -79,51 +123,12 @@ export default function AutocompleteSearch({
   setCart,
   setCustomer,
   setIsUnvalidInputs,
+  setIsLoading,
 }: Props) {
-  const paginationInterval = 25;
-
-  const initialState: State = {
-    isModalOpen: false,
-    product: null,
-    selectedOptions: [],
-    inputValue: '',
-    options: [],
-    isLoading: false,
-    willLoadMoreResults: true,
-    visibleOptionIndex: paginationInterval,
-  };
-
-  function reducer(state: State, action: Action) {
-    switch (action.type) {
-      case 'setLoading':
-        return { ...state, isLoading: action.value };
-
-      case 'changeVisibleOptionIndex':
-        return { ...state, visibleOptionIndex: action.value };
-
-      case 'setLoadMoreResults':
-        return { ...state, willLoadMoreResults: action.value };
-
-      case 'setInputValue':
-        return { ...state, inputValue: action.value };
-
-      case 'setOptions':
-        return { ...state, options: action.value };
-
-      case 'setVariantModal':
-        return { ...state, isModalOpen: true, product: action.value };
-
-      case 'closeModal':
-        return { ...state, isModalOpen: false, product: null };
-
-      default:
-        return state;
-    }
-  }
-
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const fetch = useAuthenticatedFetch();
+  const navigate = useNavigate();
 
   const handleLoadMoreResults = useCallback(() => {
     if (state.willLoadMoreResults) {
@@ -260,6 +265,11 @@ export default function AutocompleteSearch({
     dispatch({ type: 'closeModal' });
   };
 
+  const openCart = (cartId: number | boolean) => {
+    setIsLoading(true);
+    navigate(`/cart/${cartId}`);
+  };
+
   const emptyState = (
     <>
       <Icon color="subdued" source={SearchMinor} />
@@ -308,7 +318,7 @@ export default function AutocompleteSearch({
   const createCustomerOption = (
     name: string,
     email: string,
-    hasCart: boolean,
+    hasCart: boolean | number,
   ) => {
     return (
       <LegacyStack>
@@ -321,9 +331,12 @@ export default function AutocompleteSearch({
               {email}
             </Text>
             {hasCart && (
-              <Text variant="bodySm" as="span" color="success">
-                This customer already has а cart
-              </Text>
+              // <Text variant="bodySm" as="span" color="success">
+              //   <Button size="slim" plain monochrome>
+              //     Already has а cart
+              //   </Button>
+              // </Text>
+              <Link onClick={() => openCart(hasCart)}>Already has а cart</Link>
             )}
           </VerticalStack>
         </LegacyStack.Item>

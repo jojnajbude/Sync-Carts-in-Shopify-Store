@@ -36,4 +36,7 @@ export class Analytics {
 
   @Column({ type: 'json', nullable: true })
   top_abandoned: string;
+
+  @Column({ type: 'json', nullable: true })
+  top_abandoned_customers: string;
 }

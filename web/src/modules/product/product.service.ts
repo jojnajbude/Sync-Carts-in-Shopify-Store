@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { GraphqlQueryError } from "@shopify/shopify-api";
-import shopify from "../utils/shopify.js";
-import { shopifySession } from "../types/session.js";
+import shopify from "../../utils/shopify.js";
+import { shopifySession } from "../../types/session.js";
 
 export const DEFAULT_PRODUCTS_COUNT = 5;
 const CREATE_PRODUCTS_MUTATION = `
@@ -18,6 +18,13 @@ const CREATE_PRODUCTS_MUTATION = `
 export class ProductService {
   async getProduct(id: string, session: shopifySession) {
     return await shopify.api.rest.Product.find({
+      session,
+      id,
+    })
+  }
+
+  async getVariant(id: string, session: shopifySession) {
+    return await shopify.api.rest.Variant.find({
       session,
       id,
     })

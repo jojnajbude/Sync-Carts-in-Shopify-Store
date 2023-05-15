@@ -24,6 +24,7 @@ const IndexTableFilters: React.FC<Props> = ({
     'All items reserved',
     'Partially reserved',
     'No items reserved',
+    'Paid carts',
   ]);
   const [selected, setSelected] = useState(0);
   const [queryValue, setQueryValue] = useState<string>('');

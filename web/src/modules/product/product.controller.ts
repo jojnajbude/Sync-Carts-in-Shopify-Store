@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Req, Res } from "@nestjs/common";
 import { LATEST_API_VERSION } from "@shopify/shopify-api";
 import { query, Request, Response } from "express";
-import shopify from "../utils/shopify.js";
+import shopify from "../../utils/shopify.js";
 import { ProductService } from "./product.service.js";
 
 @Controller("/api/products")
@@ -11,6 +11,13 @@ export class ProductController {
   @Get('get')
   async getProduct(@Query() query: { id: string }, @Res() res: Response) {
     const product = await this.productService.getProduct(query.id, res.locals.shopify.session);
+
+    product ? res.status(200).send(product) : res.status(404).send('Not found');
+  }
+
+  @Get('variant')
+  async getVariant(@Query() query: { id: string }, @Res() res: Response) {
+    const product = await this.productService.getVariant(query.id, res.locals.shopify.session);
 
     product ? res.status(200).send(product) : res.status(404).send('Not found');
   }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Layout, Banner } from '@shopify/polaris';
 
 type Props = {
-  type: 'none' | 'qty' | 'empty' | 'user';
+  type: 'none' | 'qty' | 'empty' | 'user' | 'more';
 };
 
 export default function InfoBanner({ type }: Props) {
@@ -27,6 +27,11 @@ export default function InfoBanner({ type }: Props) {
     case banner === 'user':
       config.title = 'To save this draft cart, changes needs to be made:';
       config.info = 'Cart must have customer';
+      break;
+
+    case banner === 'more':
+      config.title = 'To save this draft cart, changes needs to be made:';
+      config.info = 'Quantity must be equal or less of available at store';
       break;
   }
 

@@ -115,8 +115,9 @@ export default function LogActivity({ logs, isLoading }: Props) {
               {customer_name} changed quantity of{' '}
               <Link
                 removeUnderline
+                external
+                target="_blank"
                 url={`https://${domain}/admin/products/${link_id}`}
-                external={true}
               >
                 {product_name}
               </Link>{' '}

@@ -17,6 +17,9 @@ import AutocompleteSearch from './AutocompleteSearch';
 import { formatter } from '../services/formatter';
 
 import { Cart, Item } from '../types/cart';
+import { useAuthenticatedFetch } from '../hooks';
+import { useContext } from 'react';
+import { SubscribtionContext } from '../context/SubscribtionContext';
 
 type Props = {
   openModal: (value: 'remove' | 'unreserve' | 'expand' | 'update') => void;
@@ -35,11 +38,9 @@ export default function ProductsList({
   isEditing,
   setIsUnvalidInputs,
 }: Props) {
-  const handleChange = (newValue: string, item: Item) => {
-    if (Number(newValue) > 10000) {
-      return;
-    }
+  const fetch = useAuthenticatedFetch();
 
+  const handleChange = async (newValue: string, item: Item) => {
     setIsUnvalidInputs('none');
 
     const updatedCart = { ...cart };
@@ -62,6 +63,34 @@ export default function ProductsList({
 
     updatedCart.total = total;
     updatedCart.qty = qty;
+
+    if (!item.inventory_quantity) {
+      const product = await fetch(
+        `/api/products/variant?id=${item.variant_id}`,
+      );
+
+      if (product.ok) {
+        const productData = await product.json();
+
+        const updatedCart = { ...cart };
+        const index = updatedCart.items.findIndex(
+          cartItem => cartItem.id === item.id,
+        );
+
+        updatedCart.items[index].inventory_quantity =
+          productData.inventory_quantity;
+
+        if (newValue > productData.inventory_quantity) {
+          setIsUnvalidInputs('more');
+          return;
+        }
+      }
+    }
+
+    if (Number(newValue) > 10000 || +newValue > item.inventory_quantity) {
+      setIsUnvalidInputs('more');
+      return;
+    }
 
     setCart(updatedCart);
   };
@@ -106,7 +135,8 @@ export default function ProductsList({
           label=""
           type="number"
           min={1}
-          max={item.inventory_quantity}
+          // max={item.inventory_quantity}
+          error={item.qty > item.inventory_quantity}
           value={String(item.qty)}
           onChange={newValue => handleChange(newValue, item)}
           autoComplete="off"
@@ -139,6 +169,7 @@ export default function ProductsList({
           ? [
               {
                 content: 'Unreserve items',
+                disabled: cart.reserved_indicator === 'paid',
                 onAction: () => openModal('unreserve'),
               },
             ]

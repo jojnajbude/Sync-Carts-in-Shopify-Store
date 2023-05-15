@@ -22,6 +22,8 @@ type Props = {
   setCart: (value: Cart) => void;
   setCustomer: (value: Customer) => void;
   setIsUnvalidInputs: (value: string) => void;
+  setIsPriorityChange: (value: boolean) => void;
+  setIsLoading: (value: boolean) => void;
 };
 
 export default function CustomerCard({
@@ -31,6 +33,8 @@ export default function CustomerCard({
   initialCustomer,
   setCustomer,
   setIsUnvalidInputs,
+  setIsPriorityChange,
+  setIsLoading,
 }: Props) {
   const priorityLevels = [
     { label: 'Minimal', value: 'min' },
@@ -43,6 +47,8 @@ export default function CustomerCard({
   const handlePriorityChange = (
     value: 'max' | 'high' | 'normal' | 'low' | 'min',
   ) => {
+    setIsPriorityChange(true);
+
     const updatedCustomer = { ...customer };
     updatedCustomer.priority = value;
 
@@ -153,19 +159,13 @@ export default function CustomerCard({
               {`Item drop count: ${customer.itemDropCount} items`}
             </Text>
 
-            {isEditing ? (
-              <Select
-                label="Priority"
-                labelInline
-                options={priorityLevels}
-                onChange={handlePriorityChange}
-                value={customer.priority || 'normal'}
-              />
-            ) : (
-              <Text color="subdued" as="span">
-                {`Priority level: ${customer.priority}`}
-              </Text>
-            )}
+            <Select
+              label="Priority"
+              labelInline
+              options={priorityLevels}
+              onChange={handlePriorityChange}
+              value={customer.priority || 'normal'}
+            />
           </LegacyStack>
         </LegacyCard.Section>
       </LegacyCard>
@@ -177,6 +177,7 @@ export default function CustomerCard({
           type={'customer'}
           setCustomer={setCustomer}
           setIsUnvalidInputs={setIsUnvalidInputs}
+          setIsLoading={setIsLoading}
         ></AutocompleteSearch>
       </LegacyCard>
     );

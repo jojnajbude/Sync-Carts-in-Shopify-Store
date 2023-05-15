@@ -74,6 +74,7 @@ export class StorefrontService {
           return true;
         } else {
           const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+          console.log(cart)
 
           if(cart?.customer_id !== user?.id) {
             await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
@@ -188,10 +189,10 @@ export class StorefrontService {
         const session = JSON.parse(store.session);
 
         let cart: Cart | null | undefined = await this.cartRepository.findOneBy({ cart_token: cartData.token })
-
+console.log(cart)
         if (!cart) {
           cart = await this.createCart(shop, cartData)
-
+console.log(cart)
           if (!cart) {
             return false;
           }

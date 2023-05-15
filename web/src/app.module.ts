@@ -19,7 +19,7 @@ import GDPRWebhookHandlers from "./utils/gdpr.js";
 import { ShopModule } from "./modules/shops/shop.module.js";
 import { CartModule } from "./modules/carts/cart.module.js";
 import { StorefrontModule } from "./modules/storefront/storefront.module.js";
-import { ProductModule } from "./product/product.module.js";
+import { ProductModule } from "./modules/product/product.module.js";
 import { CustomerModule } from "./modules/customers/customer.module.js";
 import { ItemsModule } from "./modules/items/item.module.js";
 import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
@@ -57,10 +57,10 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
-      migrations: [migration1683619416755],
-      ssl: {
-        ca: process.env.SSL_CERT,
-      },
+      // migrations: [migration1683619416755],
+      // ssl: {
+      //   ca: process.env.SSL_CERT,
+      // },
     }),
     MongooseModule.forRoot(
       process.env.MONGO_URI!,

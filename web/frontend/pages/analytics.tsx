@@ -103,15 +103,19 @@ export default function EmptyStateExample() {
           <TopChart
             title="Top Sold Products"
             status={status}
-            data={analytics ? analytics.top_sold : []}
+            data={analytics ? [analytics.top_sold] : []}
           ></TopChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
           <TopChart
-            title="Top Abandoned Products"
+            title="Top Abandoned"
             status={status}
-            data={analytics ? analytics.top_abandoned : []}
+            data={
+              analytics
+                ? [analytics.top_abandoned, analytics.top_abandoned_customers]
+                : []
+            }
           ></TopChart>
         </Layout.Section>
       </Layout>

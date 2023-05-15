@@ -20,6 +20,7 @@ import IndexTableFilters from './IndexFilters';
 import CartBadge from './CartBadge';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import Counter from './Counter';
+import formatTime from '../services/timeFormatter';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
@@ -28,7 +29,7 @@ export default function CartsTable() {
   const [currency, setCurrency] = useState(null);
   const [carts, setCarts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortDirection, setSortDirection] = useState<Sort>('descending');
+  const [sortDirection, setSortDirection] = useState<Sort>('ascending');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<Modal>('remove');
   const [activeToast, setActiveToast] = useState(false);
@@ -47,7 +48,7 @@ export default function CartsTable() {
       try {
         if (isLoading) {
           const result = await fetch(
-            `/api/carts/sort?dir=descending&index=0&shop=true`,
+            `/api/carts/sort?dir=descending&index=6&shop=true`,
           );
           const data = await result.json();
 
@@ -227,7 +228,7 @@ export default function CartsTable() {
               onSelectionChange={handleSelectionChange}
               bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
-              sortable={[true, true, true, true, true, true]}
+              sortable={[true, true, true, true, true, true, true]}
               headings={[
                 { title: 'Cart ID' },
                 { title: 'Customer' },
@@ -235,6 +236,7 @@ export default function CartsTable() {
                 { title: 'Reserved Status' },
                 { title: 'Next expiring item' },
                 { title: 'Items' },
+                { title: 'Last action' },
               ]}
             >
               {getCurrentTableData().map(
@@ -246,6 +248,7 @@ export default function CartsTable() {
                     total: cartTotal,
                     reservation_time,
                     reserved_indicator,
+                    last_action,
                   },
                   index,
                 ) => (
@@ -279,6 +282,9 @@ export default function CartsTable() {
                     </IndexTable.Cell>
                     <IndexTable.Cell>
                       {qty > 1 ? `${qty} items` : `${qty} item`}
+                    </IndexTable.Cell>
+                    <IndexTable.Cell>
+                      {formatTime(Date.now() - new Date(last_action).getTime())}
                     </IndexTable.Cell>
                   </IndexTable.Row>
                 ),
