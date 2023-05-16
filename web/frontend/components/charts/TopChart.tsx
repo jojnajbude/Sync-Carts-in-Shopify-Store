@@ -32,47 +32,47 @@ export default function TopChart({ title, status, data }: Props) {
 
   let rows = [];
 
-  if (status !== 'Loading' && isFirstButtonActive) {
-    rows = data[0].map(
-      (product: {
-        domain: string;
-        product_id: string;
-        title: string;
-        sold: string;
-      }) => [
-        <Link
-          removeUnderline
-          external
-          target="_blank"
-          url={`https://${product.domain}/admin/products/${product.product_id}`}
-          key={product.title}
-        >
-          {product.title}
-        </Link>,
-        Number(product.sold),
-      ],
-    );
-  } else if (status !== 'Loading' && !isFirstButtonActive) {
-    rows = data[1].map(
-      (customer: {
-        domain: string;
-        name: string;
-        shopify_user_id: string;
-        sold: string;
-      }) => [
-        <Link
-          removeUnderline
-          external
-          target="_blank"
-          url={`https://${customer.domain}/admin/customers/${customer.shopify_user_id}`}
-          key={customer.name}
-        >
-          {customer.name}
-        </Link>,
-        Number(customer.sold),
-      ],
-    );
-  }
+  // if (status !== 'Loading' && isFirstButtonActive) {
+  //   rows = data[0].map(
+  //     (product: {
+  //       domain: string;
+  //       product_id: string;
+  //       title: string;
+  //       sold: string;
+  //     }) => [
+  //       <Link
+  //         removeUnderline
+  //         external
+  //         target="_blank"
+  //         url={`https://${product.domain}/admin/products/${product.product_id}`}
+  //         key={product.title}
+  //       >
+  //         {product.title}
+  //       </Link>,
+  //       Number(product.sold),
+  //     ],
+  //   );
+  // } else if (status !== 'Loading' && !isFirstButtonActive) {
+  //   rows = data[1].map(
+  //     (customer: {
+  //       domain: string;
+  //       name: string;
+  //       shopify_user_id: string;
+  //       sold: string;
+  //     }) => [
+  //       <Link
+  //         removeUnderline
+  //         external
+  //         target="_blank"
+  //         url={`https://${customer.domain}/admin/customers/${customer.shopify_user_id}`}
+  //         key={customer.name}
+  //       >
+  //         {customer.name}
+  //       </Link>,
+  //       Number(customer.sold),
+  //     ],
+  //   );
+  // }
 
   if (status !== 'Loading' && !rows.length) {
     return (

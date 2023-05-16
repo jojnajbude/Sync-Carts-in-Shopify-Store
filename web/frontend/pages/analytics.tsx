@@ -1,7 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Layout, Page, FooterHelp } from '@shopify/polaris';
+import {
+  Layout,
+  Page,
+  FooterHelp,
+  Button,
+  Popover,
+  DatePicker,
+  LegacyCard,
+} from '@shopify/polaris';
+import { CalendarMinor } from '@shopify/polaris-icons';
 
 import CircleChart from '../components/charts/CircleChart';
 import LinearChart from '../components/charts/LinearChart';
@@ -18,27 +27,57 @@ type Status = 'Loading' | 'Error' | 'Success';
 export default function EmptyStateExample() {
   const [analytics, setAnalytics] = useState(null);
   const [status, setStatus] = useState<Status>('Loading');
+  const [popoverActive, setPopoverActive] = useState(false);
+  const [{ month, year }, setDate] = useState({
+    month: new Date().getMonth(),
+    year: new Date().getFullYear(),
+  });
+  const [selectedDates, setSelectedDates] = useState({
+    start: new Date(),
+    end: new Date(),
+  });
+
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (status === 'Loading') {
-      const fetchData = async () => {
-        const analyticsData = await fetch('/api/analytics');
+    // if (status === 'Loading') {
+    //   const fetchData = async () => {
+    //     const analyticsData = await fetch('/api/analytics');
 
-        if (analyticsData.ok) {
-          const analytics = await analyticsData.json();
+    //     if (analyticsData.ok) {
+    //       const analytics = await analyticsData.json();
 
-          setAnalytics(analytics);
-          setStatus('Success');
-        } else {
-          setStatus('Error');
-        }
-      };
+    //       setAnalytics(analytics);
+    //       setStatus('Success');
+    //     } else {
+    //       setStatus('Error');
+    //     }
+    //   };
 
-      fetchData();
-    }
+    //   fetchData();
+    // }
+
+    setStatus('Error')
   }, [status]);
+
+  const handleMonthChange = useCallback(
+    (month: number, year: number) => setDate({ month, year }),
+    [],
+  );
+
+  const togglePopoverActive = useCallback(
+    () => setPopoverActive(popoverActive => !popoverActive),
+    [],
+  );
+
+  const activator = (
+    <Button icon={CalendarMinor} size="slim" onClick={togglePopoverActive}>
+      {`${selectedDates.start.toDateString().split(' ').slice(1).join(' ')} 
+        - 
+        ${selectedDates.end.toDateString().split(' ').slice(1).join(' ')}`}
+    </Button>
+  );
 
   return (
     <Page
@@ -47,6 +86,34 @@ export default function EmptyStateExample() {
       title="Analytics"
     >
       <Layout>
+        <Layout.Section fullWidth>
+          <Popover
+            active={popoverActive}
+            activator={activator}
+            autofocusTarget="first-node"
+            onClose={togglePopoverActive}
+          >
+            <LegacyCard sectioned>
+              <DatePicker
+                month={month}
+                year={year}
+                onChange={setSelectedDates}
+                onMonthChange={handleMonthChange}
+                selected={selectedDates}
+                multiMonth
+                allowRange
+              />
+            </LegacyCard>
+          </Popover>
+        </Layout.Section>
+
+        <Layout.Section oneHalf>
+          <LinearChart
+            status={status}
+            data={analytics ? analytics.total_sales : []}
+          ></LinearChart>
+        </Layout.Section>
+
         <Layout.Section oneHalf>
           <LinearChart
             status={status}

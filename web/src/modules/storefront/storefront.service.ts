@@ -189,10 +189,8 @@ export class StorefrontService {
         const session = JSON.parse(store.session);
 
         let cart: Cart | null | undefined = await this.cartRepository.findOneBy({ cart_token: cartData.token })
-console.log(cart)
         if (!cart) {
           cart = await this.createCart(shop, cartData)
-console.log(cart)
           if (!cart) {
             return false;
           }
@@ -225,6 +223,7 @@ console.log(cart)
               customer_name: customer?.name,
               product_name: deletedItem.title,
               link_id: `${deletedItem.product_id}`,
+              cart_id: deletedItem.cart_id,
             }
         
             const newLog = await this.logService.createLog(log);
@@ -247,6 +246,7 @@ console.log(cart)
               product_name: item.title,
               link_id: `${item.product_id}`,
               qty: line_item.quantity,
+              cart_id: item.cart_id,
             }
 
             const newLog = await this.logService.createLog(log);
@@ -287,6 +287,7 @@ console.log(cart)
                 customer_name: customer ? customer.name : null,
                 product_name: product.title,
                 link_id: `${variant.product_id}`,
+                cart_id: cart?.id,
               }
 
               const newLog = await this.logService.createLog(log);
@@ -313,6 +314,7 @@ console.log(cart)
                 customer_name: null,
                 product_name: product.title,
                 link_id: `${variant.product_id}`,
+                cart_id: cart?.id,
               }
 
               const newLog = await this.logService.createLog(log);
@@ -422,6 +424,7 @@ console.log(cart)
         domain: cart.domain,
         date: new Date(),
         customer_name: cart.name,
+        cart_id: cart.id,
       }
   
       const newLog = await this.logService.createLog(log);

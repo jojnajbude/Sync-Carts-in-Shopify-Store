@@ -44,6 +44,7 @@ export class ItemsService {
           customer_name: item.name,
           product_name: item.title,
           link_id: `${item.product_id}`,
+          cart_id: item.cart_id,
         }
     
         const newLog = await this.logService.createLog(log);

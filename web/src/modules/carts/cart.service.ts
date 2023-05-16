@@ -69,7 +69,6 @@ export class CartService {
       if (lastCarts.length > 10) {
         lastCarts = lastCarts.slice(0, 10);
       }
-
       return lastCarts
     }
   

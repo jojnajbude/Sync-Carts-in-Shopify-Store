@@ -25,6 +25,9 @@ export class Log {
 
   @Prop()
   qty: string;
+
+  @Prop()
+  cart_id: number;
 }
 
 export const LogSchema = SchemaFactory.createForClass(Log);

@@ -13,30 +13,39 @@ export class Analytics {
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 
-  @Column({ type: 'json', nullable: true})
-  total_sales: string;
+  @Column()
+  type: string;
 
-  @Column({ type: 'json', nullable: true })
-  locations: string;
+  @Column({ type: 'json' })
+  value: string;
 
-  @Column({ type: 'json', nullable: true })
-  average_open_time: string;
+  @Column()
+  date: Date;
 
-  @Column({ type: 'json', nullable: true })
-  average_price: string;
+  // @Column({ type: 'json', nullable: true})
+  // total_sales: string;
 
-  @Column({ type: 'json', nullable: true })
-  conversion_rates: string;
+  // @Column({ type: 'json', nullable: true })
+  // locations: string;
 
-  @Column({ type: 'json', nullable: true })
-  device_statistic: string;
+  // @Column({ type: 'json', nullable: true })
+  // average_open_time: string;
 
-  @Column({ type: 'json', nullable: true })
-  top_sold: string;
+  // @Column({ type: 'json', nullable: true })
+  // average_price: string;
 
-  @Column({ type: 'json', nullable: true })
-  top_abandoned: string;
+  // @Column({ type: 'json', nullable: true })
+  // conversion_rates: string;
 
-  @Column({ type: 'json', nullable: true })
-  top_abandoned_customers: string;
+  // @Column({ type: 'json', nullable: true })
+  // device_statistic: string;
+
+  // @Column({ type: 'json', nullable: true })
+  // top_sold: string;
+
+  // @Column({ type: 'json', nullable: true })
+  // top_abandoned: string;
+
+  // @Column({ type: 'json', nullable: true })
+  // top_abandoned_customers: string;
 }

@@ -8,6 +8,7 @@ import {
   SkeletonBodyText,
   EmptySearchResult,
 } from '@shopify/polaris';
+import { useNavigate } from 'react-router-dom';
 import formatTime from '../services/timeFormatter';
 
 type Props = {
@@ -20,18 +21,30 @@ type Props = {
     product_name: string;
     link_id: string;
     qty: string | number;
+    cart_id: number;
   }[];
   isLoading: boolean;
 };
 
 export default function LogActivity({ logs, isLoading }: Props) {
+  const navigate = useNavigate();
   const emptyStateMarkup = (
     <EmptySearchResult title={''} description={'No logs yet'} />
   );
 
   const rowMarkup = logs.map(
     (
-      { _id, type, domain, date, customer_name, product_name, link_id, qty },
+      {
+        _id,
+        type,
+        domain,
+        date,
+        customer_name,
+        product_name,
+        link_id,
+        qty,
+        cart_id,
+      },
       index,
     ) => {
       let textMarkup = null;
@@ -53,8 +66,16 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 url={`https://${domain}/admin/products/${link_id}`}
                 external={true}
+                target="_blank"
               >
                 {product_name}
+              </Link>{' '}
+              in{' '}
+              <Link
+                removeUnderline
+                onClick={() => navigate(`/cart/${cart_id}`)}
+              >
+                {`Cart ${cart_id}`}
               </Link>{' '}
               just expired
             </Text>
@@ -69,10 +90,17 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 url={`https://${domain}/admin/products/${link_id}`}
                 external={true}
+                target="_blank"
               >
                 {product_name}
               </Link>{' '}
-              to cart
+              to{' '}
+              <Link
+                removeUnderline
+                onClick={() => navigate(`/cart/${cart_id}`)}
+              >
+                {`Cart ${cart_id}`}
+              </Link>
             </Text>
           );
           break;
@@ -85,10 +113,17 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 url={`https://${domain}/admin/products/${link_id}`}
                 external={true}
+                target="_blank"
               >
                 {product_name}
               </Link>{' '}
-              from cart
+              from{' '}
+              <Link
+                removeUnderline
+                onClick={() => navigate(`/cart/${cart_id}`)}
+              >
+                {`Cart ${cart_id}`}
+              </Link>
             </Text>
           );
           break;
@@ -101,6 +136,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 url={`https://${domain}/admin/products/${link_id}`}
                 external={true}
+                target="_blank"
               >
                 {product_name}
               </Link>{' '}
@@ -121,7 +157,13 @@ export default function LogActivity({ logs, isLoading }: Props) {
               >
                 {product_name}
               </Link>{' '}
-              for {qty}
+              for {qty} in{' '}
+              <Link
+                removeUnderline
+                onClick={() => navigate(`/cart/${cart_id}`)}
+              >
+                {`Cart ${cart_id}`}
+              </Link>
             </Text>
           );
           break;
