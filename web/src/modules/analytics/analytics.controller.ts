@@ -1,4 +1,4 @@
-import { Controller, Get, Res } from "@nestjs/common";
+import { Body, Controller, Post, Res } from "@nestjs/common";
 import { Response } from "express";
 import { AnalyticsService } from "./analytics.service.js";
 
@@ -7,12 +7,12 @@ export class AnalyticsController {
   constructor (
     private analyticsService: AnalyticsService) {}
 
-  // @Get()
-  // async getAnalytics(@Res() res: Response) {
-  //   const domain = res.locals.shopify.session.shop;
+  @Post()
+  async getAnalytics(@Body() body: any, @Res() res: Response) {
+    const domain = res.locals.shopify.session.shop;
 
-  //   const analytics = await this.analyticsService.getAnalytics(domain);
+    const analytics = await this.analyticsService.getAnalytics(domain, body);
 
-  //   analytics ? res.status(200).send(analytics) : res.status(500).send('Server error');
-  // }
+    analytics ? res.status(200).send(analytics) : res.status(500).send('Server error');
+  }
 }

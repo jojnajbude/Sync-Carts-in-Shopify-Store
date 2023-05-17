@@ -8,6 +8,10 @@ import { Item } from "../items/item.entity.js";
 import { Shop } from "../shops/shop.entity.js";
 import { Analytics } from "./analytics.entity.js";
 
+interface IAnalytics {
+  sales: { name: string, data: object[] }[]
+}
+
 @Injectable()
 export class AnalyticsService {
   constructor(
@@ -17,6 +21,63 @@ export class AnalyticsService {
     @InjectRepository(Item) private itemRepository: Repository<Item>,
     @InjectRepository(Analytics) private analyticsRepository: Repository<Analytics>,
   ) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) 
+  async updateData() {
+    const shops = await this.shopsRepository.query(`select * from shops`);
+
+    for (const shop of shops) {
+      this.createNewDayEntities(shop.id)
+    }
+  }
+
+  async createNewDayEntities(id: number) {
+    const templates = [
+      { shop_id: id, type: 'sales', value: JSON.stringify({ key: new Date().toDateString(), value: 0 }), date: new Date() }
+    ];
+
+    await this.analyticsRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Analytics)
+      .values(templates)
+      .execute()
+  }
+
+  async getAnalytics(domain: string, body: any) {
+    const startDate = new Date(body.start.split('T')[0])
+    const endDate = new Date(body.end.split('T')[0])
+    endDate.setDate(endDate.getDate() + 1)
+
+    const data = await this.analyticsRepository.query(
+      `select analytics.*, shops.domain
+      from analytics
+      left join shops on shops.id = analytics.shop_id
+      where domain = '${domain}'
+      AND date between timestamp '${startDate.toISOString().slice(0, -1)}' AND timestamp '${endDate.toISOString().slice(0, -1)}'`
+    );
+
+    console.log(startDate.toDateString())
+
+    const analytics: IAnalytics = {
+      sales: [
+        {
+          name: `${startDate.toDateString()} - ${endDate.toDateString()}`,
+          data: []
+        }
+      ]
+    };
+
+    for (const analysis of data) {
+      switch(analysis.type) {
+        case 'sales':
+          analytics.sales[0].data.push(JSON.parse(analysis.value))
+          break;
+      }
+    }
+
+    return analytics;
+  }
 
   // async getAnalytics(domain: string) {
   //   const [analytics] = await this.analyticsRepository.query(

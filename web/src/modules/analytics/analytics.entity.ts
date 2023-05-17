@@ -17,7 +17,7 @@ export class Analytics {
   type: string;
 
   @Column({ type: 'json' })
-  value: string;
+  value: string; 
 
   @Column()
   date: Date;

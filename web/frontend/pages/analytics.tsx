@@ -9,6 +9,9 @@ import {
   Popover,
   DatePicker,
   LegacyCard,
+  Divider,
+  VerticalStack,
+  HorizontalStack,
 } from '@shopify/polaris';
 import { CalendarMinor } from '@shopify/polaris-icons';
 
@@ -41,24 +44,28 @@ export default function EmptyStateExample() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // if (status === 'Loading') {
-    //   const fetchData = async () => {
-    //     const analyticsData = await fetch('/api/analytics');
+    if (status === 'Loading') {
+      const fetchData = async () => {
+        const analyticsData = await fetch(`/api/analytics`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: await JSON.stringify(selectedDates),
+        });
 
-    //     if (analyticsData.ok) {
-    //       const analytics = await analyticsData.json();
+        if (analyticsData.ok) {
+          const analytics = await analyticsData.json();
 
-    //       setAnalytics(analytics);
-    //       setStatus('Success');
-    //     } else {
-    //       setStatus('Error');
-    //     }
-    //   };
+          setAnalytics(analytics);
+          setStatus('Success');
+        } else {
+          setStatus('Error');
+        }
+      };
 
-    //   fetchData();
-    // }
-
-    setStatus('Error')
+      fetchData();
+    }
   }, [status]);
 
   const handleMonthChange = useCallback(
@@ -92,36 +99,42 @@ export default function EmptyStateExample() {
             activator={activator}
             autofocusTarget="first-node"
             onClose={togglePopoverActive}
+            sectioned
           >
-            <LegacyCard sectioned>
+            <VerticalStack gap="4">
               <DatePicker
                 month={month}
                 year={year}
                 onChange={setSelectedDates}
                 onMonthChange={handleMonthChange}
                 selected={selectedDates}
-                multiMonth
                 allowRange
               />
-            </LegacyCard>
+
+              <Divider></Divider>
+              <HorizontalStack align="end" gap="4">
+                <Button onClick={togglePopoverActive}>Cancel</Button>
+                <Button primary onClick={() => setStatus('Loading')}>Apply</Button>
+              </HorizontalStack>
+            </VerticalStack>
           </Popover>
         </Layout.Section>
 
         <Layout.Section oneHalf>
           <LinearChart
             status={status}
-            data={analytics ? analytics.total_sales : []}
+            data={analytics ? analytics.sales : []}
           ></LinearChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
           <LinearChart
             status={status}
-            data={analytics ? analytics.total_sales : []}
+            data={analytics ? analytics.sales : []}
           ></LinearChart>
         </Layout.Section>
 
-        <Layout.Section oneHalf>
+        {/* <Layout.Section oneHalf>
           <AreaChart
             title={'Average cart open time (in minutes)'}
             status={status}
@@ -184,7 +197,7 @@ export default function EmptyStateExample() {
                 : []
             }
           ></TopChart>
-        </Layout.Section>
+        </Layout.Section> */}
       </Layout>
       <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
     </Page>

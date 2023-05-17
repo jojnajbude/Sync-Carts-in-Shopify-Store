@@ -57,6 +57,7 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
+      synchronize: true,
       // migrations: [migration1683619416755],
       // ssl: {
       //   ca: process.env.SSL_CERT,
