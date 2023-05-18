@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Shop } from "../shops/shop.entity.js";
 
 @Entity('analytics')
@@ -9,7 +9,7 @@ export class Analytics {
   @Column()
   shop_id: number;
 
-  @OneToOne(() => Shop,  { onDelete: 'CASCADE' })
+  @ManyToOne(() => Shop,  { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 

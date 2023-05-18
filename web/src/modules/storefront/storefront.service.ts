@@ -7,6 +7,7 @@ import { Shop } from "../shops/shop.entity.js";
 import shopify from "../../utils/shopify.js";
 import { Item } from "../items/item.entity.js";
 import { LogsService } from "../log/logs.service.js";
+import { AnalyticsService } from "../analytics/analytics.service.js";
 
 @Injectable()
 export class StorefrontService {
@@ -15,7 +16,8 @@ export class StorefrontService {
     @InjectRepository(Customer) private customerRepository: Repository<Customer>, 
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
     @InjectRepository(Item) private itemRepository: Repository<Item>,
-    private logService: LogsService
+    private logService: LogsService,
+    private analyticsService: AnalyticsService,
   ) {}
 
   async updateData(cart_id: string, customer_id: string, shop_id: string, os: string) {
@@ -74,7 +76,6 @@ export class StorefrontService {
           return true;
         } else {
           const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
-          console.log(cart)
 
           if(cart?.customer_id !== user?.id) {
             await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
@@ -418,6 +419,8 @@ export class StorefrontService {
         .execute();
   
       await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+
+      await this.analyticsService.addSale(cart.shop_id, totalPrice);
   
       const log = {
         type: 'paid',
@@ -427,7 +430,7 @@ export class StorefrontService {
         cart_id: cart.id,
       }
   
-      const newLog = await this.logService.createLog(log);
+      await this.logService.createLog(log);
   
       return [paidCart, paidItems]
     } catch(err) {

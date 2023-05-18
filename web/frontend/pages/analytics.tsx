@@ -12,6 +12,7 @@ import {
   Divider,
   VerticalStack,
   HorizontalStack,
+  Text,
 } from '@shopify/polaris';
 import { CalendarMinor } from '@shopify/polaris-icons';
 
@@ -86,6 +87,26 @@ export default function EmptyStateExample() {
     </Button>
   );
 
+  const handleAverageTime = (average_open_time: any) => {
+    const averageTime =
+      average_open_time.data.reduce(
+        (acc: any, cur: { value: any }) => acc + cur.value,
+        0,
+      ) / average_open_time.data.length;
+
+    const days = Math.floor(averageTime / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (averageTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
+    const minutes = Math.floor((averageTime % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (!days && !hours && !minutes) return 'Less than a minute';
+
+    return `${days ? days + 'days' : ''} ${hours ? hours + 'hours' : ''} ${
+      minutes ? minutes + 'minutes' : ''
+    }`;
+  };
+
   return (
     <Page
       fullWidth
@@ -114,7 +135,15 @@ export default function EmptyStateExample() {
               <Divider></Divider>
               <HorizontalStack align="end" gap="4">
                 <Button onClick={togglePopoverActive}>Cancel</Button>
-                <Button primary onClick={() => setStatus('Loading')}>Apply</Button>
+                <Button
+                  primary
+                  onClick={() => {
+                    setStatus('Loading');
+                    togglePopoverActive();
+                  }}
+                >
+                  Apply
+                </Button>
               </HorizontalStack>
             </VerticalStack>
           </Popover>
@@ -124,29 +153,47 @@ export default function EmptyStateExample() {
           <LinearChart
             status={status}
             data={analytics ? analytics.sales : []}
+            mainTitle={'Total Sales'}
+            chartTitle={'Sales over time'}
+            mainTitlePopover={'All sales for the specified time period'}
+            chartTitlePopover={
+              'This chart shows total sales through Better Carts for the specified time period.'
+            }
           ></LinearChart>
         </Layout.Section>
 
         <Layout.Section oneHalf>
           <LinearChart
             status={status}
-            data={analytics ? analytics.sales : []}
+            data={analytics ? analytics.drop_rate : []}
+            mainTitle={'Total Drop Rate'}
+            chartTitle={'Drop Rate over time'}
+            mainTitlePopover={'Item Drop Rate for the specified time period'}
+            chartTitlePopover={
+              'This chart shows all items which was dropped for the specified time period.'
+            }
           ></LinearChart>
         </Layout.Section>
 
-        {/* <Layout.Section oneHalf>
-          <AreaChart
-            title={'Average cart open time (in minutes)'}
-            status={status}
-            data={
-              analytics
-                ? analytics.average_open_time
-                : [{ name: 'Time', data: [] }]
-            }
-          ></AreaChart>
+        <Layout.Section oneHalf>
+          <LegacyCard sectioned>
+            <VerticalStack gap="4">
+              <Text fontWeight="bold" variant="headingMd" as="span">
+                {'Average cart open time'}
+              </Text>
+
+              {analytics ? (
+                <Text as="h1" variant="bodyLg">
+                  {handleAverageTime(analytics.average_open_time[0])}
+                </Text>
+              ) : (
+                '-'
+              )}
+            </VerticalStack>
+          </LegacyCard>
         </Layout.Section>
 
-        <Layout.Section oneHalf>
+        {/* <Layout.Section oneHalf>
           <AreaChart
             title={'Average paid carts price (in shop currency)'}
             status={status}

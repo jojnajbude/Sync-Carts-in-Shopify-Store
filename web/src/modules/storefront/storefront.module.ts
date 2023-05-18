@@ -8,13 +8,15 @@ import { StorefrontController } from "./storefront.controller.js";
 import { StorefrontService } from "./storefront.service.js";
 import { ShopModule } from "../shops/shop.module.js";
 import { LogModule } from "../log/logs.module.js";
+import { AnalyticsModule } from "../analytics/analytics.module.js";
 
 @Module({
   controllers: [StorefrontController],
   providers: [StorefrontService],
   imports: [TypeOrmModule.forFeature([Shop, Customer, Cart, Item]), 
     LogModule,
-    ShopModule
+    ShopModule,
+    AnalyticsModule
   ],
   exports: [StorefrontService],
 })

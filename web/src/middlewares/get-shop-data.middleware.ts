@@ -7,12 +7,14 @@ import { Analytics } from "../modules/analytics/analytics.entity.js";
 import { Shop } from "../modules/shops/shop.entity.js";
 import shopify from "../utils/shopify.js";
 import path from "path";
+import { AnalyticsService } from "../modules/analytics/analytics.service.js";
 
 @Injectable()
 export class getShopDataMiddleware implements NestMiddleware {
   constructor(
     @InjectRepository(Shop) private shopsRepository: Repository<Shop>,
-    @InjectRepository(Analytics) private analyticsRepository: Repository<Analytics>
+    @InjectRepository(Analytics) private analyticsRepository: Repository<Analytics>,
+    private analyticsService: AnalyticsService
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -56,7 +58,7 @@ export class getShopDataMiddleware implements NestMiddleware {
           expired_items_json: getTemplate('expired-items', 'json'),
         });
 
-        await this.analyticsRepository.insert({ shop_id: newShop.identifiers[0].id })
+        await this.analyticsService.createNewDayEntities(newShop.identifiers[0].id);
         next();
       }
     } catch (err) {

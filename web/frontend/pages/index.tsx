@@ -137,7 +137,7 @@ export default function HomePage() {
           </Layout.Section>
         ) : null}
 
-        <Layout.Section fullWidth>
+        {/* <Layout.Section fullWidth>
           <LinearChart
             status={state.status}
             data={
@@ -169,7 +169,7 @@ export default function HomePage() {
                 : [{ name: 'Price', data: [] }]
             }
           ></AreaChart>
-        </Layout.Section>
+        </Layout.Section> */}
 
         <Layout.Section>
           <LegacyCard title="Recently active carts" sectioned>

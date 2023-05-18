@@ -214,7 +214,6 @@ export class CartService {
   }
 
   async getFilteredCarts(session: shopifySession, index: string) {
-    console.log(index)
     const table = await this.getShopCarts(session);
 
     let indicator = '';

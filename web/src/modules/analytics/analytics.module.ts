@@ -7,13 +7,12 @@ import { Customer } from "../customers/customer.entity.js";
 import { AnalyticsController } from "./analytics.controller.js";
 import { AnalyticsService } from "./analytics.service.js";
 import { Analytics } from "./analytics.entity.js";
-import { CartModule } from "../carts/cart.module.js";
 import { LogModule } from "../log/logs.module.js";
 
 @Module({
   controllers: [AnalyticsController],
   providers: [AnalyticsService],
-  imports: [TypeOrmModule.forFeature([Cart, Shop, Item, Customer, Analytics]), CartModule, LogModule],
-  exports: [TypeOrmModule]
+  imports: [TypeOrmModule.forFeature([Cart, Shop, Item, Customer, Analytics]), LogModule],
+  exports: [TypeOrmModule, AnalyticsService]
 })
 export class AnalyticsModule {}

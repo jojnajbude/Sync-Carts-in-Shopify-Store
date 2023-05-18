@@ -23,7 +23,7 @@ export class createWebhooks implements NestMiddleware {
 
     if (!cartUpdate) {
       const cartUpdateWebhook = new shopify.api.rest.Webhook({session});
-      cartUpdateWebhook.address = `${process.env.HOST}storefront/cart/update`;
+      cartUpdateWebhook.address = `${process.env.HOST + '/'}storefront/cart/update`;
       cartUpdateWebhook.topic = 'carts/update';
       cartUpdateWebhook.format = 'json';
       await cartUpdateWebhook.save({
@@ -33,7 +33,7 @@ export class createWebhooks implements NestMiddleware {
 
     if (!orderPaid) {
       const customerUpdateWebhook = new shopify.api.rest.Webhook({session});
-      customerUpdateWebhook.address = `${process.env.HOST}storefront/order/paid`;
+      customerUpdateWebhook.address = `${process.env.HOST + '/'}storefront/order/paid`;
       customerUpdateWebhook.topic = 'orders/paid';
       customerUpdateWebhook.format = 'json';
       await customerUpdateWebhook.save({
@@ -43,7 +43,7 @@ export class createWebhooks implements NestMiddleware {
 
     if (!appUninstalled) {
       const appUninstalledWebhook = new shopify.api.rest.Webhook({session});
-      appUninstalledWebhook.address = `${process.env.HOST}storefront/app/uninstalled`;
+      appUninstalledWebhook.address = `${process.env.HOST + '/'}storefront/app/uninstalled`;
       appUninstalledWebhook.topic = 'app/uninstalled';
       appUninstalledWebhook.format = 'json';
       await appUninstalledWebhook.save({

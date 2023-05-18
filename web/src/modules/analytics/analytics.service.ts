@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { LessThan, MoreThanOrEqual, Repository } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Item } from "../items/item.entity.js";
@@ -9,7 +9,9 @@ import { Shop } from "../shops/shop.entity.js";
 import { Analytics } from "./analytics.entity.js";
 
 interface IAnalytics {
-  sales: { name: string, data: object[] }[]
+  sales: { name: string, data: object[] }[];
+  drop_rate: { name: string, data: object[] }[];
+  average_open_time: { name: string, data: object[] }[];
 }
 
 @Injectable()
@@ -20,7 +22,9 @@ export class AnalyticsService {
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
     @InjectRepository(Item) private itemRepository: Repository<Item>,
     @InjectRepository(Analytics) private analyticsRepository: Repository<Analytics>,
-  ) {}
+  ) {
+    // this.createNewDayEntities(61)
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) 
   async updateData() {
@@ -32,8 +36,13 @@ export class AnalyticsService {
   }
 
   async createNewDayEntities(id: number) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const templates = [
-      { shop_id: id, type: 'sales', value: JSON.stringify({ key: new Date().toDateString(), value: 0 }), date: new Date() }
+      // { shop_id: id, type: 'sales', value: JSON.stringify({ key: today.toDateString(), value: 0 }), date: today.toISOString() },
+      // { shop_id: id, type: 'drop_rate', value: JSON.stringify({ key: today.toDateString(), value: await this.countDropRate(id) }), date: today.toISOString() }
+      // { shop_id: id, type: 'average_open_time', value: JSON.stringify({ key: today.toDateString(), value: await this.countAverageOpenTime(id) }), date: today.toISOString() }
+      { shop_id: id, type: 'average_carts_price', value: JSON.stringify({ key: today.toDateString(), value: await this.countAverageCartsPrice(id) }), date: today.toISOString() }
     ];
 
     await this.analyticsRepository
@@ -57,10 +66,20 @@ export class AnalyticsService {
       AND date between timestamp '${startDate.toISOString().slice(0, -1)}' AND timestamp '${endDate.toISOString().slice(0, -1)}'`
     );
 
-    console.log(startDate.toDateString())
-
     const analytics: IAnalytics = {
       sales: [
+        {
+          name: `${startDate.toDateString()} - ${endDate.toDateString()}`,
+          data: []
+        }
+      ],
+      drop_rate: [
+        {
+          name: `${startDate.toDateString()} - ${endDate.toDateString()}`,
+          data: []
+        }
+      ],
+      average_open_time: [
         {
           name: `${startDate.toDateString()} - ${endDate.toDateString()}`,
           data: []
@@ -73,10 +92,87 @@ export class AnalyticsService {
         case 'sales':
           analytics.sales[0].data.push(JSON.parse(analysis.value))
           break;
+
+        case 'drop_rate':
+          analytics.drop_rate[0].data.push(JSON.parse(analysis.value))
+        
+        case 'average_open_time':
+          analytics.average_open_time[0].data.push(JSON.parse(analysis.value))
       }
     }
 
     return analytics;
+  }
+
+  async addSale(shop_id: number, totalPrice: number) {
+    try {
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+      nextDay.setHours(0, 0, 0, 0);
+
+      const analytics = await this.analyticsRepository.createQueryBuilder('analytics')
+        .where({ shop_id })
+        .andWhere({ date: MoreThanOrEqual(currentDate.toISOString())})
+        .andWhere({ date: LessThan(nextDay.toISOString())})
+        .getOne();
+
+      if (analytics) {
+        const sales = JSON.parse(analytics.value);
+        sales.value += totalPrice;
+
+        await this.analyticsRepository.createQueryBuilder('analytics')
+          .update(Analytics)
+          .set({ value: JSON.stringify(sales) })
+          .where({ id: analytics.id })
+          .execute()
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async countDropRate(shop_id: number) {
+    const shopItems = await this.itemRepository.query(
+      `select * from items
+      left join carts on carts.id = items.cart_id
+      where carts.shop_id = ${shop_id}`
+    );
+
+    const droppedItems = shopItems.filter((item: any) => item.status === 'expired');
+
+    return (droppedItems.length / shopItems.length) * 100;
+  }
+
+  async countAverageOpenTime(shop_id: number) {
+    const carts = await this.cartRepository.query(
+      `select * from carts
+      where shop_id = ${shop_id}
+      AND carts.closed_at IS NOT NULL`
+    );
+
+    const totalOpenTime = carts.reduce((acc: number, cart: any) => {
+      const openTime = new Date(cart.closed_at).getTime() - new Date(cart.created_at).getTime();
+      return acc + openTime;
+    }, 0);
+
+    return Math.floor(totalOpenTime / carts.length);
+  }
+
+  async countAverageCartsPrice(shop_id: number) {
+    const carts = await this.cartRepository.query(
+      `select * from carts
+      where shop_id = ${shop_id}
+      AND carts.final_price IS NOT NULL`
+    );
+
+    console.log(carts);
+
+    const totalCartsPrice = carts.reduce((acc: number, cart: any) => {
+      return acc + cart.final_price;
+    }, 0);
+
+    return Math.floor(totalCartsPrice / carts.length);
   }
 
   // async getAnalytics(domain: string) {

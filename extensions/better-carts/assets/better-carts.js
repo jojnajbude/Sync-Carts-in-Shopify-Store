@@ -1,4 +1,5 @@
 const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+const APP_URL_DEV = 'https://better-carts.dev-test.pro';
 
 (function initializeBetterCarts() {
   initializeObserver();
@@ -61,7 +62,7 @@ function getCartCookie() {
 }
 
 async function updateData(id, cart_id, shop_id, os) {
-  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}&os=${os}`);
+  const checkUpdates = await fetch(`${APP_URL_DEV}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}&os=${os}`);
   const response = await checkUpdates.json();
 
   if (response.type === 'New cart') {
@@ -150,7 +151,7 @@ async function addToCart() {
     qty = document.querySelector('input[name="quantity"]').value;
   }
 
-  const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
+  const addCart = await fetch(`${APP_URL_DEV}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
   const resText = await addCart.text();
 
   if (resText === 'All items reserved') {
@@ -195,7 +196,7 @@ class BetterCartsTimer extends HTMLElement {
           const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
     
           const fromServ = async () => {
-            const response = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
+            const response = await fetch(`${APP_URL_DEV}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
     
             if (response.ok) {
               const data = await response.json()
@@ -219,8 +220,6 @@ class BetterCartsTimer extends HTMLElement {
   }
 
   async initializeTimer(cartItemData) {
-    const variantId = Number(this.dataset.timerId);
-    // const text = document.getElementById(`bc-countdown-${variantId}`);
     const text = this.querySelector('span');
     
     if (cartItemData) {
