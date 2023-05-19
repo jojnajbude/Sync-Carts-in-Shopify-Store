@@ -77,8 +77,9 @@ export class StorefrontService {
         } else {
           const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
 
-          if(cart?.customer_id !== user?.id) {
+          if(cart && cart?.customer_id !== user?.id) {
             await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
+            await this.analyticsService.updateLocations(cart.shop_id, user.location)
           }
 
           const items = await this.itemRepository.findBy({ cart_id: cart?.id });
@@ -171,7 +172,8 @@ export class StorefrontService {
 
       if (store) {
         const cart = await this.cartRepository.save({ cart_token: cartData.token, shop_id: store?.id });
-        await this.shopsRepository.update({ id: store.id }, { carts: store.carts + 1 })
+        await this.shopsRepository.update({ id: store.id }, { carts: store.carts + 1 });
+        await this.analyticsService.updateConversionRate(store.id, 'add');
 
         return cart;
       }
@@ -421,6 +423,7 @@ export class StorefrontService {
       await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
       await this.analyticsService.addSale(cart.shop_id, totalPrice);
+      await this.analyticsService.updateConversionRate(cart.shop_id, 'paid');
   
       const log = {
         type: 'paid',

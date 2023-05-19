@@ -72,14 +72,18 @@ export default function LinearChart({
         ) : null}
 
         <HorizontalStack>
-          <Tooltip content={chartTitlePopover} hasUnderline>
+          <Tooltip
+            content={chartTitlePopover}
+            hasUnderline
+            preferredPosition="above"
+          >
             <Text fontWeight="bold" as="span">
               {chartTitle}
             </Text>
           </Tooltip>
         </HorizontalStack>
 
-        <LineChart theme="Light" status={status} data={data}></LineChart>
+        <LineChart theme="Light" state={status} data={data}></LineChart>
       </VerticalStack>
     </LegacyCard>
   );

@@ -23,8 +23,10 @@ import AreaChart from '../components/charts/AreaChart';
 import ConversionChart from '../components/charts/ConversionChart';
 import TopChart from '../components/charts/TopChart';
 
-import '@shopify/polaris-viz/build/esm/styles.css';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
+
+import '@shopify/polaris-viz/build/esm/styles.css';
+import '../styles/styles.css';
 
 type Status = 'Loading' | 'Error' | 'Success';
 
@@ -102,8 +104,8 @@ export default function EmptyStateExample() {
 
     if (!days && !hours && !minutes) return 'Less than a minute';
 
-    return `${days ? days + 'days' : ''} ${hours ? hours + 'hours' : ''} ${
-      minutes ? minutes + 'minutes' : ''
+    return `${days ? days + ' days' : ''} ${hours ? hours + ' hours' : ''} ${
+      minutes ? minutes + ' minutes' : ''
     }`;
   };
 
@@ -129,6 +131,7 @@ export default function EmptyStateExample() {
                 onChange={setSelectedDates}
                 onMonthChange={handleMonthChange}
                 selected={selectedDates}
+                disableDatesAfter={new Date()}
                 allowRange
               />
 
@@ -193,14 +196,18 @@ export default function EmptyStateExample() {
           </LegacyCard>
         </Layout.Section>
 
-        {/* <Layout.Section oneHalf>
+        <Layout.Section oneHalf>
           <AreaChart
-            title={'Average paid carts price (in shop currency)'}
             status={status}
             data={
               analytics
-                ? analytics.average_price
-                : [{ name: 'Price', data: [] }]
+                ? analytics.average_carts_price
+                : [{ name: '-', data: [] }]
+            }
+            mainTitle={'Average paid carts price'}
+            chartTitle={'Carts price over time'}
+            chartTitlePopover={
+              'This chart shows the average carts price for specifit time period.'
             }
           ></AreaChart>
         </Layout.Section>
@@ -208,7 +215,7 @@ export default function EmptyStateExample() {
         <Layout.Section oneHalf>
           <ConversionChart
             status={status}
-            data={analytics ? analytics.conversion_rates : []}
+            rates={analytics ? analytics.conversion_rates : []}
           ></ConversionChart>
         </Layout.Section>
 
@@ -219,7 +226,7 @@ export default function EmptyStateExample() {
           ></RowBarChart>
         </Layout.Section>
 
-        <Layout.Section oneHalf>
+        {/* <Layout.Section oneHalf>
           <CircleChart
             status={status}
             data={analytics ? analytics.device_statistic : []}
@@ -246,6 +253,7 @@ export default function EmptyStateExample() {
           ></TopChart>
         </Layout.Section> */}
       </Layout>
+
       <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
     </Page>
   );
