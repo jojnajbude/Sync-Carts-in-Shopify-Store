@@ -77,7 +77,16 @@ export default function HomePage() {
       try {
         (async () => {
           const [analytics, lastCarts, logs] = await Promise.all([
-            fetch('/api/analytics').then(res => res.json()),
+            fetch('/api/analytics', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: await JSON.stringify({
+                start: new Date(),
+                end: new Date(),
+              }),
+            }).then(res => res.json()),
             fetch('/api/carts/last').then(res => res.json()),
             fetch('/api/logs').then(res => res.json()),
           ]);
@@ -137,13 +146,19 @@ export default function HomePage() {
           </Layout.Section>
         ) : null}
 
-        {/* <Layout.Section fullWidth>
+        <Layout.Section fullWidth>
           <LinearChart
             status={state.status}
             data={
               state.analytics
-                ? state.analytics.total_sales
+                ? state.analytics.sales
                 : [{ name: 'Sales', data: [] }]
+            }
+            mainTitle={'Total Sales'}
+            chartTitle={'Sales over time'}
+            mainTitlePopover={'All sales for the specified time period'}
+            chartTitlePopover={
+              'This chart shows revenue generated through this app for the specified time period.'
             }
           ></LinearChart>
         </Layout.Section>
@@ -151,7 +166,7 @@ export default function HomePage() {
         <Layout.Section oneThird>
           <ConversionChart
             status={state.status}
-            data={
+            rates={
               state.analytics
                 ? state.analytics.conversion_rates
                 : [{ name: 'Rates', data: [] }]
@@ -161,15 +176,19 @@ export default function HomePage() {
 
         <Layout.Section oneThird>
           <AreaChart
-            title={'Average paid carts price'}
             status={state.status}
             data={
               state.analytics
-                ? state.analytics.average_price
+                ? state.analytics.average_carts_price
                 : [{ name: 'Price', data: [] }]
             }
+            mainTitle={'Average paid carts value'}
+            chartTitle={'Carts price over time'}
+            chartTitlePopover={
+              'This chart shows the average carts price for specifit time period.'
+            }
           ></AreaChart>
-        </Layout.Section> */}
+        </Layout.Section>
 
         <Layout.Section>
           <LegacyCard title="Recently active carts" sectioned>

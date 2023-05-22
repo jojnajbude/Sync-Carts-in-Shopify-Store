@@ -25,6 +25,8 @@ import formatTime from '../services/timeFormatter';
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
 
+const tableRowsPerPage = 25;
+
 export default function CartsTable() {
   const [currency, setCurrency] = useState(null);
   const [carts, setCarts] = useState([]);
@@ -34,7 +36,6 @@ export default function CartsTable() {
   const [modalType, setModalType] = useState<Modal>('remove');
   const [activeToast, setActiveToast] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [tableRowsPerPage, setTableRowsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
 
   const context = useContext(SubscribtionContext);
@@ -80,7 +81,7 @@ export default function CartsTable() {
 
   const promotedBulkActions = [
     {
-      content: 'Set Timers',
+      content: 'Set reservation timer',
       onAction: () => openModal('expand'),
     },
     {
@@ -277,7 +278,9 @@ export default function CartsTable() {
                     <IndexTable.Cell>
                       <Counter
                         expireAt={reservation_time}
-                        status={'expiring'}
+                        status={
+                          reserved_indicator === 'paid' ? 'paid' : 'expiring'
+                        }
                       ></Counter>
                     </IndexTable.Cell>
                     <IndexTable.Cell>

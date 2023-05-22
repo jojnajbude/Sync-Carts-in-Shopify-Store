@@ -276,11 +276,11 @@ export default function Settings() {
             <div style={{ marginTop: 'var(--p-space-5)' }}>
               <VerticalStack gap={'4'}>
                 <Text id="storeDetails" variant="headingMd" as="h2">
-                  Email notification
+                  Email notifications
                 </Text>
                 <Text color="subdued" as="p">
-                  You can write your own text for each type of email
-                  notification
+                  Edit our email templates for a more personalized customer
+                  experience.
                 </Text>
               </VerticalStack>
             </div>

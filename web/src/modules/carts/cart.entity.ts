@@ -35,4 +35,7 @@ export class Cart {
 
   @Column({ type: 'numeric', nullable: true })
   final_price: number;
+
+  @Column({ nullable: true })
+  os: string;
 }

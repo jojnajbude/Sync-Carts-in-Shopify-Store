@@ -220,7 +220,7 @@ export default function CartPage() {
       }
     } else {
       if (customer.priority !== initialCustomer.priority) {
-        const newPriority = await fetch(
+        await fetch(
           `/api/customers/update?customerId=${customer.id}&priority=${customer.priority}`,
         );
       }
@@ -229,14 +229,13 @@ export default function CartPage() {
         initialCart.total !== cart.total ||
         initialCart.items.length !== cart.items.length
       ) {
-        const updateCart = await fetch('/api/carts/update', {
+        await fetch('/api/carts/update', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: await JSON.stringify([cart, customer]),
         });
-        const newCart = await updateCart.json();
       }
 
       setIsSaving(false);

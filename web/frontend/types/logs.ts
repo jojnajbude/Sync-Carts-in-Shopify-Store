@@ -6,6 +6,7 @@ export interface Logs {
   product_name: string;
   type: string;
   qty: number;
+  cart_id: number;
   __v: number;
   _id: string;
 }

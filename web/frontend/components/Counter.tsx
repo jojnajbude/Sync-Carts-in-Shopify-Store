@@ -1,4 +1,5 @@
 import { Text } from '@shopify/polaris';
+import { stat } from 'fs';
 import { useCountdown } from '../hooks/useCountdown';
 
 type Props = {
@@ -9,7 +10,13 @@ type Props = {
 export default function Counter({ expireAt, status }: Props) {
   const [days, hours, minutes, seconds] = useCountdown(expireAt);
 
-  if (status === 'removed') {
+  if (status === 'paid') {
+    return (
+      <Text as="p" color="subdued">
+        {`Paid`}
+      </Text>
+    );
+  } else if (status === 'removed') {
     return (
       <Text as="p" color="subdued">
         {`Waiting for remove`}
@@ -42,11 +49,12 @@ export default function Counter({ expireAt, status }: Props) {
   } else {
     return (
       <Text as="p" color={hours >= 2 ? 'success' : 'warning'}>
-        {`Reserve time: ${days < 10 ? '0' + days : days}:${
-          hours < 10 ? '0' + hours : hours
-        }:${minutes < 10 ? '0' + minutes : minutes}:${
-          seconds < 10 ? '0' + seconds : seconds
-        }`}
+        {`Reserve time: 
+          ${days ? (days < 10 ? '0' + days + ':' : days + ':') : ''}${
+          hours ? (hours < 10 ? '0' + hours + ':' : hours + ':') : ''
+        }${
+          minutes ? (minutes < 10 ? '0' + minutes + ':' : minutes + ':') : ''
+        }${seconds ? (seconds < 10 ? '0' + seconds : seconds) : ''}`}
       </Text>
     );
   }

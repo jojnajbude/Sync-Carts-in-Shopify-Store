@@ -16,8 +16,6 @@ const IndexTableFilters: React.FC<Props> = ({
   isLoading,
   setIsLoading,
   setCarts,
-  setIsError,
-  setActiveToast,
 }) => {
   const [itemStrings, setItemStrings] = useState([
     'All carts',

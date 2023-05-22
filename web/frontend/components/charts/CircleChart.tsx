@@ -7,19 +7,31 @@ type Props = {
 };
 
 export default function CircleChart({ status, data }: Props) {
-  data.forEach((os: { name: string; data: { value: any; key: string }[] }) => {
-    if (!os.name) {
-      os.name = 'Other';
-      os.data.key = 'Other';
-    }
+  const finalData: any[] = [];
 
-    os.data[0].value = Number(os.data[0].value);
-  });
+  if (data.length) {
+    data[0].data.forEach((item: any) => {
+      for (const key in item.value) {
+        if (finalData.find(device => device.name === key)) {
+          finalData.find(device => device.name === key).data.value +=
+            item.value[key];
+        } else {
+          finalData.push({
+            name: key,
+            data: {
+              key: key,
+              value: item.value[key],
+            },
+          });
+        }
+      }
+    });
+  }
 
   return (
     <LegacyCard title="Carts opened by device" sectioned>
       <DonutChart
-        data={data}
+        data={finalData}
         legendFullWidth
         legendPosition="left"
         theme="Light"

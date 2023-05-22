@@ -7,7 +7,8 @@ import {
   Button,
   ButtonGroup,
 } from '@shopify/polaris';
-import { useCallback, useEffect, useState } from 'react';
+import { SubscribtionContext } from '../../context/SubscribtionContext';
+import { useCallback, useContext, useState } from 'react';
 
 type Props = {
   title: string;
@@ -17,6 +18,7 @@ type Props = {
 
 export default function TopChart({ title, status, data }: Props) {
   const [isFirstButtonActive, setIsFirstButtonActive] = useState(true);
+  const context = useContext(SubscribtionContext);
 
   const handleFirstButtonClick = useCallback(() => {
     if (isFirstButtonActive) return;
@@ -30,51 +32,66 @@ export default function TopChart({ title, status, data }: Props) {
     setIsFirstButtonActive(false);
   }, [isFirstButtonActive]);
 
-  let rows = [];
+  let rows: any[] = [];
 
-  // if (status !== 'Loading' && isFirstButtonActive) {
-  //   rows = data[0].map(
-  //     (product: {
-  //       domain: string;
-  //       product_id: string;
-  //       title: string;
-  //       sold: string;
-  //     }) => [
-  //       <Link
-  //         removeUnderline
-  //         external
-  //         target="_blank"
-  //         url={`https://${product.domain}/admin/products/${product.product_id}`}
-  //         key={product.title}
-  //       >
-  //         {product.title}
-  //       </Link>,
-  //       Number(product.sold),
-  //     ],
-  //   );
-  // } else if (status !== 'Loading' && !isFirstButtonActive) {
-  //   rows = data[1].map(
-  //     (customer: {
-  //       domain: string;
-  //       name: string;
-  //       shopify_user_id: string;
-  //       sold: string;
-  //     }) => [
-  //       <Link
-  //         removeUnderline
-  //         external
-  //         target="_blank"
-  //         url={`https://${customer.domain}/admin/customers/${customer.shopify_user_id}`}
-  //         key={customer.name}
-  //       >
-  //         {customer.name}
-  //       </Link>,
-  //       Number(customer.sold),
-  //     ],
-  //   );
-  // }
+  if (
+    status !== 'Loading' &&
+    data.length &&
+    context.plan &&
+    isFirstButtonActive
+  ) {
+    data[0][0].data.forEach((day: any) => {
+      day.value.forEach(
+        (product: {
+          product_id: string;
+          product_title: string;
+          value: string;
+        }) =>
+          rows.push([
+            <Link
+              removeUnderline
+              external
+              target="_blank"
+              url={`https://${context.plan.domain}/admin/products/${product.product_id}`}
+              key={product.product_title}
+            >
+              {product.product_title}
+            </Link>,
+            Number(product.value),
+          ]),
+      );
+    });
 
-  if (status !== 'Loading' && !rows.length) {
+    rows = rows.sort((a: any, b: any) => b[1] - a[1]);
+  } else if (status !== 'Loading' && !isFirstButtonActive) {
+    data[1][0].data.forEach((day: any) => {
+      day.value.forEach(
+        (customer: {
+          customer_name: string;
+          shopify_user_id: string;
+          value: string;
+        }) => {
+          console.log(customer)
+          rows.push([
+            <Link
+              removeUnderline
+              external
+              target="_blank"
+              url={`https://${context.plan.domain}/admin/customers/${customer.shopify_user_id}`}
+              key={customer.customer_name}
+            >
+              {customer.customer_name}
+            </Link>,
+            Number(customer.value),
+          ]);
+        },
+      );
+    });
+
+    rows = rows.sort((a: any, b: any) => b[1] - a[1]);
+  }
+
+  if (status !== 'Loading' && !data.length) {
     return (
       <LegacyCard title={title} sectioned>
         <Text as="span" alignment="center" color="subdued">

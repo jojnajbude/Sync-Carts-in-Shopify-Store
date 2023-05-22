@@ -27,7 +27,4 @@ export class Customer {
 
   @Column({ nullable: true })
   location: string;
-
-  @Column({ nullable: true })
-  os: string;
 }

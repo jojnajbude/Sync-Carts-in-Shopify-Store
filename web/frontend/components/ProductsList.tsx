@@ -18,8 +18,6 @@ import { formatter } from '../services/formatter';
 
 import { Cart, Item } from '../types/cart';
 import { useAuthenticatedFetch } from '../hooks';
-import { useContext } from 'react';
-import { SubscribtionContext } from '../context/SubscribtionContext';
 
 type Props = {
   openModal: (value: 'remove' | 'unreserve' | 'expand' | 'update') => void;

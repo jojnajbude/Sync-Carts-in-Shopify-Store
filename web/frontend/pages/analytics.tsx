@@ -160,7 +160,7 @@ export default function EmptyStateExample() {
             chartTitle={'Sales over time'}
             mainTitlePopover={'All sales for the specified time period'}
             chartTitlePopover={
-              'This chart shows total sales through Better Carts for the specified time period.'
+              'This chart shows revenue generated through this app for the specified time period.'
             }
           ></LinearChart>
         </Layout.Section>
@@ -179,10 +179,26 @@ export default function EmptyStateExample() {
         </Layout.Section>
 
         <Layout.Section oneHalf>
+          <AreaChart
+            status={status}
+            data={
+              analytics
+                ? analytics.average_carts_price
+                : [{ name: '-', data: [] }]
+            }
+            mainTitle={'Average paid carts value'}
+            chartTitle={'Carts price over time'}
+            chartTitlePopover={
+              'This chart shows the average carts price for specifit time period.'
+            }
+          ></AreaChart>
+        </Layout.Section>
+
+        <Layout.Section oneHalf>
           <LegacyCard sectioned>
             <VerticalStack gap="4">
               <Text fontWeight="bold" variant="headingMd" as="span">
-                {'Average cart open time'}
+                {'Average cart lifespan'}
               </Text>
 
               {analytics ? (
@@ -194,25 +210,6 @@ export default function EmptyStateExample() {
               )}
             </VerticalStack>
           </LegacyCard>
-        </Layout.Section>
-
-        <Layout.Section oneHalf>
-          <AreaChart
-            status={status}
-            data={
-              analytics
-                ? analytics.average_carts_price
-                : [{ name: '-', data: [] }]
-            }
-            mainTitle={'Average paid carts price'}
-            chartTitle={'Carts price over time'}
-            chartTitlePopover={
-              'This chart shows the average carts price for specifit time period.'
-            }
-          ></AreaChart>
-        </Layout.Section>
-
-        <Layout.Section oneHalf>
           <ConversionChart
             status={status}
             rates={analytics ? analytics.conversion_rates : []}
@@ -226,10 +223,10 @@ export default function EmptyStateExample() {
           ></RowBarChart>
         </Layout.Section>
 
-        {/* <Layout.Section oneHalf>
+        <Layout.Section oneHalf>
           <CircleChart
             status={status}
-            data={analytics ? analytics.device_statistic : []}
+            data={analytics ? analytics.devices : []}
           ></CircleChart>
         </Layout.Section>
 
@@ -247,11 +244,14 @@ export default function EmptyStateExample() {
             status={status}
             data={
               analytics
-                ? [analytics.top_abandoned, analytics.top_abandoned_customers]
+                ? [
+                    analytics.top_abandoned_products,
+                    analytics.top_abandoned_customers,
+                  ]
                 : []
             }
           ></TopChart>
-        </Layout.Section> */}
+        </Layout.Section>
       </Layout>
 
       <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>

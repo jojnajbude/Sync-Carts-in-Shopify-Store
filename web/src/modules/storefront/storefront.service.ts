@@ -27,10 +27,6 @@ export class StorefrontService {
       if (shopData && shopData.carts < shopData.limit) {
         let user = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer_id) });
 
-        if (!user?.os) {
-          await this.customerRepository.update({ id: user?.id }, { os: os });
-        }
-
         if (!user) {
           const session = JSON.parse(shopData?.session);
 
@@ -46,7 +42,6 @@ export class StorefrontService {
             priority: 'normal',
             email: shopifyCustomer.email,
             location: shopifyCustomer.default_address.country_name,
-            os: os,
           }) 
         }
 
@@ -76,6 +71,11 @@ export class StorefrontService {
           return true;
         } else {
           const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+
+          if (cart && !cart.os) {
+            await this.cartRepository.update({ id: cart.id }, { os: os })
+            await this.analyticsService.updateDevices(cart.shop_id, os)
+          }
 
           if(cart && cart?.customer_id !== user?.id) {
             await this.cartRepository.update({ id: cart?.id }, { customer_id: user?.id })
@@ -418,12 +418,14 @@ export class StorefrontService {
         .update()
         .set({ status: 'paid' })
         .where({ cart_id: cart.id })
+        .returning('*')
         .execute();
   
       await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
 
       await this.analyticsService.addSale(cart.shop_id, totalPrice);
       await this.analyticsService.updateConversionRate(cart.shop_id, 'paid');
+      await this.analyticsService.updateTopSold(cart.shop_id, paidItems.raw);
   
       const log = {
         type: 'paid',

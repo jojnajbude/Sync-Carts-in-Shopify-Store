@@ -6,7 +6,6 @@ import {
   Icon,
   LegacyCard,
   List,
-  ProgressBar,
   Text,
   VerticalStack,
 } from '@shopify/polaris';
@@ -15,7 +14,6 @@ import {
   CircleDownMajor,
   ChevronDownMinor,
   ChevronUpMinor,
-  QuestionMarkMajor,
 } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
 import { useNavigate } from '@shopify/app-bridge-react';
@@ -26,8 +24,6 @@ export default function CollapsibleTab() {
   const [secondTabOpen, setSecondTabOpen] = useState(false);
   const [firstChecked, setFirstChecked] = useState(false);
   const [secondChecked, setSecondChecked] = useState(false);
-
-  const tasks = [firstChecked, secondChecked];
 
   const navigate = useNavigate();
 

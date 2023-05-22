@@ -97,7 +97,7 @@ export default function PopupModal({
       case type === 'remove':
         return {
           title: 'Remove all items from carts?',
-          text: 'This action will remove all products from the selected carts. The next time when customer visits the shop, his cart will be updated. This action cannot be undone.',
+          text: 'This action will remove all items from the cart. The next time a customer visits the website, the cart will be updated. This action cannot be undone.',
           primaryButtonText: 'Remove all items',
           primaryAction: removeAllItems,
           destructive: true,
@@ -122,7 +122,7 @@ export default function PopupModal({
 
       case type === 'expand':
         return {
-          title: 'Expand reservation time',
+          title: 'What would you like to set the reservation time to?',
           toastTextOk: 'All items was successfully expend',
           toastTextError: 'An error occurred. Try again later',
         };

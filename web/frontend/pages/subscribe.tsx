@@ -10,7 +10,6 @@ import {
   SkeletonDisplayText,
   SkeletonBodyText,
   Banner,
-  Button,
   Frame,
   Modal,
   Toast,
@@ -42,9 +41,7 @@ export default function Subscribe() {
         if (charge_id) {
           setPlan(null);
 
-          const activePlan = await fetch(
-            `/api/subscribe/active?charge_id=${charge_id}`,
-          );
+          await fetch(`/api/subscribe/active?charge_id=${charge_id}`);
         }
 
         setPlan(context.plan);
@@ -101,7 +98,7 @@ export default function Subscribe() {
 
   return (
     <Page
-      title="Subscribtions"
+      title="Subscriptions"
       backAction={{ onAction: () => navigate('/') }}
       // primaryAction={
       //   plan ? (
