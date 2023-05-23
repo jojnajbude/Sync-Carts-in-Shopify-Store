@@ -1,0 +1,11 @@
+version: "3"
+services:
+  better-carts:
+    container_name: "better-carts"
+    env_file: .env
+    ports:
+      - "9292:9292"
+    build:
+      dockerfile: Dockerfile
+      args:
+        SHOPIFY_API_KEY: "${SHOPIFY_API_KEY}"

@@ -1,7 +1,7 @@
 import { Frame, Layout, Page, Toast } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../../hooks';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import EmailEditor from 'react-email-editor';
+import { EmailEditor } from 'react-email-editor';
 import { useParams } from 'react-router-dom';
 
 export default function EmailCustomizer() {

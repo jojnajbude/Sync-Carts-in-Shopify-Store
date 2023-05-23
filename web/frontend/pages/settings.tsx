@@ -12,10 +12,16 @@ import {
   SkeletonBodyText,
   Toast,
   Frame,
+  Button,
+  Modal,
+  Banner,
+  Link,
+  HorizontalStack,
+  Badge,
 } from '@shopify/polaris';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { DuplicateMinor } from '@shopify/polaris-icons';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SubscribtionContext } from './../context/SubscribtionContext';
 import NotificationsList from '../components/NotificationsList';
 
 type State = {
@@ -126,8 +132,9 @@ export default function Settings() {
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [textFieldValue, setTextFieldValue] = useState('');
+  const [activeModal, setActiveModal] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const context = useContext(SubscribtionContext);
 
   useEffect(() => {
     if (isLoading) {
@@ -163,6 +170,11 @@ export default function Settings() {
       dispatch({ type: 'setToast', value: true });
     }
   };
+
+  const handleTextFieldChange = useCallback(
+    (value: string) => setTextFieldValue(value),
+    [],
+  );
 
   return (
     <Frame>
@@ -300,6 +312,49 @@ export default function Settings() {
               )}
             </LegacyCard>
           </Layout.Section>
+
+          <Layout.Section fullWidth>
+            <Divider></Divider>
+          </Layout.Section>
+
+          <Layout.Section oneThird>
+            <div style={{ marginTop: 'var(--p-space-5)' }}>
+              <VerticalStack gap={'4'}>
+                <Text id="storeDetails" variant="headingMd" as="h2">
+                  Verify domain
+                </Text>
+                <Text color="subdued" as="p">
+                  {
+                    "Improve deliverability by proving to inbox providers that you own the domain you're sending from."
+                  }
+                </Text>
+              </VerticalStack>
+            </div>
+          </Layout.Section>
+
+          <Layout.Section oneHalf>
+            <LegacyCard sectioned title="Verify domain">
+              {isLoading ? (
+                <FormLayout>
+                  <SkeletonBodyText />
+                </FormLayout>
+              ) : (
+                <TextField
+                  label="Domain"
+                  type="text"
+                  placeholder="some-domain.com"
+                  value={textFieldValue}
+                  onChange={handleTextFieldChange}
+                  autoComplete="off"
+                  connectedRight={
+                    <Button primary onClick={() => setActiveModal(true)}>
+                      Verify
+                    </Button>
+                  }
+                />
+              )}
+            </LegacyCard>
+          </Layout.Section>
         </Layout>
 
         {state.activeToast ? (
@@ -308,6 +363,112 @@ export default function Settings() {
             onDismiss={() => dispatch({ type: 'setToast', value: false })}
           />
         ) : null}
+
+        <Modal
+          large
+          open={activeModal}
+          onClose={() => setActiveModal(false)}
+          title="Verify domain"
+          primaryAction={{
+            content: 'Verify domain',
+            onAction: () => {},
+          }}
+          secondaryActions={[
+            {
+              content: 'Cancel',
+              onAction: () => setActiveModal(false),
+            },
+          ]}
+        >
+          <Modal.Section>
+            <Banner>
+              <p>
+                Learn more how to verify domain with your domain service
+                provider.{' '}
+                <Link monochrome onClick={() => navigate('/faq')}>
+                  Learn more
+                </Link>
+              </p>
+            </Banner>
+          </Modal.Section>
+          <Modal.Section>
+            <HorizontalStack gap="4">
+              <div>
+                <p style={{ paddingBottom: '10px' }}>Status</p>
+                <Badge progress="incomplete">Pending</Badge>
+              </div>
+
+              <div>
+                <TextField
+                  autoComplete="off"
+                  label="Type"
+                  type="text"
+                  value="TXT"
+                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                ></TextField>
+              </div>
+
+              <div>
+                <TextField
+                  autoComplete="off"
+                  label="Host/Name/Value"
+                  type="text"
+                  value="@"
+                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                ></TextField>
+              </div>
+
+              <div>
+                <TextField
+                  autoComplete="off"
+                  label="Value/Points To"
+                  type="text"
+                  value="v=spf1 a mx include:_spf.elasticemail.com ~all"
+                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                ></TextField>
+              </div>
+            </HorizontalStack>
+          </Modal.Section>
+
+          <Modal.Section>
+            <HorizontalStack gap="4">
+              <div>
+                <p style={{ paddingBottom: '10px' }}>Status</p>
+                <Badge progress="incomplete">Pending</Badge>
+              </div>
+
+              <div>
+                <TextField
+                  autoComplete="off"
+                  label="Type"
+                  type="text"
+                  value="TXT"
+                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                ></TextField>
+              </div>
+
+              <div>
+                <TextField
+                  autoComplete="off"
+                  label="Host/Name/Value"
+                  type="text"
+                  value="api._domainkey"
+                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                ></TextField>
+              </div>
+
+              <div>
+                <TextField
+                  autoComplete="off"
+                  label="Value/Points To"
+                  type="text"
+                  value="k=rsa;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbmGbQMzYeMvxwtNQoXN0waGYaciuKx8mtMh5czguT4EZlJXuCt6V+l56mmt3t68FEX5JJ0q4ijG71BGoFRkl87uJi7LrQt1ZZmZCvrEII0YO4mp8sDLXC8g1aUAoi8TJgxq2MJqCaMyj5kAm3Fdy2tzftPCV/lbdiJqmBnWKjtwIDAQAB"
+                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                ></TextField>
+              </div>
+            </HorizontalStack>
+          </Modal.Section>
+        </Modal>
 
         <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
       </Page>

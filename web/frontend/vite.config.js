@@ -1,9 +1,7 @@
 import { defineConfig } from 'vite';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import https from 'https';
 import react from '@vitejs/plugin-react';
-import reactRefresh from '@vitejs/plugin-react-refresh';
 
 if (
   process.env.npm_lifecycle_event === 'build' &&
@@ -45,7 +43,7 @@ if (host === 'localhost') {
 
 export default defineConfig({
   root: dirname(fileURLToPath(import.meta.url)),
-  plugins: [reactRefresh(), react()],
+  plugins: [react()],
   define: {
     'process.env.SHOPIFY_API_KEY': JSON.stringify(process.env.SHOPIFY_API_KEY),
   },
