@@ -20,9 +20,16 @@ import {
   Badge,
 } from '@shopify/polaris';
 import { DuplicateMinor } from '@shopify/polaris-icons';
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import NotificationsList from '../components/NotificationsList';
+import { SubscribtionContext } from '../context/SubscribtionContext';
 
 type State = {
   max_priority: number;
@@ -133,8 +140,15 @@ export default function Settings() {
   const navigate = useNavigate();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [textFieldValue, setTextFieldValue] = useState('');
-  const [activeModal, setActiveModal] = useState(true);
+  const [activeModal, setActiveModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState({
+    spfStatus: false,
+    dkimStatus: false,
+  });
+  const [toastText, setToastText] = useState('Settings successfully updated');
+  const context = useContext(SubscribtionContext);
 
   useEffect(() => {
     if (isLoading) {
@@ -148,6 +162,18 @@ export default function Settings() {
           initialState = state;
           dispatch({ type: 'setStates', states: state });
           setIsLoading(false);
+        }
+
+        if (context.plan) {
+          setTextFieldValue(context.plan?.email_domain || '');
+
+          if (context.plan.domain_verified) {
+            const status = JSON.parse(context.plan.domain_verified);
+            setVerificationStatus({
+              spfStatus: status.spfStatus,
+              dkimStatus: status.dkimStatus,
+            });
+          }
         }
       };
 
@@ -167,6 +193,7 @@ export default function Settings() {
     });
 
     if (updateSettings.ok) {
+      setToastText('Settings successfully updated');
       dispatch({ type: 'setToast', value: true });
     }
   };
@@ -175,6 +202,46 @@ export default function Settings() {
     (value: string) => setTextFieldValue(value),
     [],
   );
+
+  const addDomain = async (textFieldValue: string) => {
+    setActiveModal(true);
+
+    if (context.plan?.email_domain) {
+      return;
+    }
+
+    const newDomainData = await fetch(
+      `/api/notifications/domain/add?domain=${textFieldValue}`,
+    );
+
+    if (newDomainData.ok) {
+      const newDomain = await newDomainData.json();
+      setTextFieldValue(newDomain);
+    }
+  };
+
+  const verifyDomain = async () => {
+    setIsVerifying(true);
+    const verificationsStatus = await fetch(
+      `/api/notifications/domain/verify?domain=${textFieldValue}`,
+    );
+
+    if (verificationsStatus.ok) {
+      const status = await verificationsStatus.json();
+
+      if (status.spfStatus && status.dkimStatus) {
+        setIsVerifying(false);
+        setToastText('Settings successfully updated');
+        dispatch({ type: 'setToast', value: true });
+      }
+    }
+  };
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setToastText('Copied to clipboard');
+    dispatch({ type: 'setToast', value: true });
+  };
 
   return (
     <Frame>
@@ -346,8 +413,13 @@ export default function Settings() {
                   value={textFieldValue}
                   onChange={handleTextFieldChange}
                   autoComplete="off"
+                  disabled={context.plan?.email_domain}
                   connectedRight={
-                    <Button primary onClick={() => setActiveModal(true)}>
+                    <Button
+                      primary
+                      onClick={() => addDomain(textFieldValue)}
+                      disabled={!textFieldValue}
+                    >
                       Verify
                     </Button>
                   }
@@ -359,7 +431,7 @@ export default function Settings() {
 
         {state.activeToast ? (
           <Toast
-            content="Settings successfully updated"
+            content={toastText}
             onDismiss={() => dispatch({ type: 'setToast', value: false })}
           />
         ) : null}
@@ -371,7 +443,8 @@ export default function Settings() {
           title="Verify domain"
           primaryAction={{
             content: 'Verify domain',
-            onAction: () => {},
+            loading: isVerifying,
+            onAction: () => verifyDomain(),
           }}
           secondaryActions={[
             {
@@ -395,16 +468,28 @@ export default function Settings() {
             <HorizontalStack gap="4">
               <div>
                 <p style={{ paddingBottom: '10px' }}>Status</p>
-                <Badge progress="incomplete">Pending</Badge>
+                <Badge
+                  progress={
+                    verificationStatus.spfStatus ? 'complete' : 'incomplete'
+                  }
+                  status={verificationStatus.spfStatus ? 'success' : 'info'}
+                >
+                  {verificationStatus.spfStatus ? 'Verified' : 'Pending'}
+                </Badge>
               </div>
 
-              <div>
+              <div style={{ width: '100px' }}>
                 <TextField
                   autoComplete="off"
                   label="Type"
                   type="text"
                   value="TXT"
-                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                  connectedRight={
+                    <Button
+                      icon={DuplicateMinor}
+                      onClick={() => copyText('TXT')}
+                    ></Button>
+                  }
                 ></TextField>
               </div>
 
@@ -414,17 +499,31 @@ export default function Settings() {
                   label="Host/Name/Value"
                   type="text"
                   value="@"
-                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                  connectedRight={
+                    <Button
+                      icon={DuplicateMinor}
+                      onClick={() => copyText('@')}
+                    ></Button>
+                  }
                 ></TextField>
               </div>
 
-              <div>
+              <div style={{ flexGrow: 1 }}>
                 <TextField
                   autoComplete="off"
                   label="Value/Points To"
                   type="text"
                   value="v=spf1 a mx include:_spf.elasticemail.com ~all"
-                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                  connectedRight={
+                    <Button
+                      icon={DuplicateMinor}
+                      onClick={() =>
+                        copyText(
+                          'v=spf1 a mx include:_spf.elasticemail.com ~all',
+                        )
+                      }
+                    ></Button>
+                  }
                 ></TextField>
               </div>
             </HorizontalStack>
@@ -434,16 +533,28 @@ export default function Settings() {
             <HorizontalStack gap="4">
               <div>
                 <p style={{ paddingBottom: '10px' }}>Status</p>
-                <Badge progress="incomplete">Pending</Badge>
+                <Badge
+                  progress={
+                    verificationStatus.dkimStatus ? 'complete' : 'incomplete'
+                  }
+                  status={verificationStatus.dkimStatus ? 'success' : 'info'}
+                >
+                  {verificationStatus.dkimStatus ? 'Verified' : 'Pending'}
+                </Badge>
               </div>
 
-              <div>
+              <div style={{ width: '100px' }}>
                 <TextField
                   autoComplete="off"
                   label="Type"
                   type="text"
                   value="TXT"
-                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                  connectedRight={
+                    <Button
+                      icon={DuplicateMinor}
+                      onClick={() => copyText('TXT')}
+                    ></Button>
+                  }
                 ></TextField>
               </div>
 
@@ -453,17 +564,31 @@ export default function Settings() {
                   label="Host/Name/Value"
                   type="text"
                   value="api._domainkey"
-                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                  connectedRight={
+                    <Button
+                      icon={DuplicateMinor}
+                      onClick={() => copyText('api._domainkey')}
+                    ></Button>
+                  }
                 ></TextField>
               </div>
 
-              <div>
+              <div style={{ flexGrow: 1 }}>
                 <TextField
                   autoComplete="off"
                   label="Value/Points To"
                   type="text"
                   value="k=rsa;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbmGbQMzYeMvxwtNQoXN0waGYaciuKx8mtMh5czguT4EZlJXuCt6V+l56mmt3t68FEX5JJ0q4ijG71BGoFRkl87uJi7LrQt1ZZmZCvrEII0YO4mp8sDLXC8g1aUAoi8TJgxq2MJqCaMyj5kAm3Fdy2tzftPCV/lbdiJqmBnWKjtwIDAQAB"
-                  connectedRight={<Button icon={DuplicateMinor}></Button>}
+                  connectedRight={
+                    <Button
+                      icon={DuplicateMinor}
+                      onClick={() =>
+                        copyText(
+                          'k=rsa;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbmGbQMzYeMvxwtNQoXN0waGYaciuKx8mtMh5czguT4EZlJXuCt6V+l56mmt3t68FEX5JJ0q4ijG71BGoFRkl87uJi7LrQt1ZZmZCvrEII0YO4mp8sDLXC8g1aUAoi8TJgxq2MJqCaMyj5kAm3Fdy2tzftPCV/lbdiJqmBnWKjtwIDAQAB',
+                        )
+                      }
+                    ></Button>
+                  }
                 ></TextField>
               </div>
             </HorizontalStack>

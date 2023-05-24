@@ -266,6 +266,10 @@ export default function CartPage() {
     setActiveToast(true);
   };
 
+  console.log(isEditing)
+  console.log(isPriorityChange)
+  console.log(isEditing && isPriorityChange);
+
   if (cartId === 'create' && context.plan.carts >= context.plan.limit) {
     return (
       <Page backAction={{ onAction: () => navigate('/summary') }}>
@@ -380,7 +384,6 @@ export default function CartPage() {
                 primaryAction={{
                   content: 'Save',
                   disabled:
-                    !isPriorityChange ||
                     (!isEditing && !isPriorityChange) ||
                     isUnvalidInputs !== 'none',
                   loading: isSaving,
@@ -389,8 +392,7 @@ export default function CartPage() {
                 secondaryActions={[
                   {
                     content: 'Discard',
-                    disabled:
-                      !isPriorityChange || (!isEditing && !isPriorityChange),
+                    disabled: !isEditing && !isPriorityChange,
                     onAction: () => cancelChanges(),
                   },
                 ]}

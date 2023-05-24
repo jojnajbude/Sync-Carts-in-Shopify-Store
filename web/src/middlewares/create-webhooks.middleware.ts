@@ -17,6 +17,8 @@ export class createWebhooks implements NestMiddleware {
       session
     })
 
+    console.log(webhooks)
+
     const cartUpdate = webhooks.find(webhook => webhook.topic.includes('carts/update'));
     const orderPaid = webhooks.find(webhook => webhook.topic.includes('orders/paid'));
     const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled'));

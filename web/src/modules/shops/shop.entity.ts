@@ -65,4 +65,10 @@ export class Shop {
 
   @Column({ type: 'json', nullable: true })
   expired_items_json: string;
+
+  @Column({ nullable: true })
+  email_domain: string;
+
+  @Column({ type: 'json', nullable: true })
+  domain_verified: string;
 }

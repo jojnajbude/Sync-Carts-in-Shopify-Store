@@ -39,4 +39,18 @@ export class NotificationsController {
 
     await this.notificationService.sendEmail(type, shop, [customer.email]);
   }
+
+  @Get('domain/add')
+  async addDomain(@Query() query: { domain: string }, @Res() res: Response) {
+    const domain = await this.notificationService.addNewDomain(query.domain, res.locals.shopify.session.shop);
+
+    domain ? res.status(200).send(domain) : res.status(500).send('Server error')
+  }
+
+  @Get('domain/verify')
+  async verifyDomain(@Query() query: { domain: string }, @Res() res: Response) {
+    const verificationStatus = await this.notificationService.verifyDomain(query.domain, res.locals.shopify.session.shop);
+
+    verificationStatus ? res.status(200).send(verificationStatus) : res.status(500).send('Server error')
+  }
 }

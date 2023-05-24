@@ -34,6 +34,17 @@ export default function Counter({ expireAt, status }: Props) {
         {`This item isn't reserved`}
       </Text>
     );
+  } else if (status === 'unsynced') {
+    return (
+      <Text as="p" color="subdued">
+        {`Waiting for sync: 
+          ${days ? (days < 10 ? '0' + days + ':' : days + ':') : ''}${
+          hours ? (hours < 10 ? '0' + hours + ':' : hours + ':') : ''
+        }${
+          minutes ? (minutes < 10 ? '0' + minutes + ':' : minutes + ':') : ''
+        }${seconds ? (seconds < 10 ? '0' + seconds : seconds) : ''}`}
+      </Text>
+    );
   } else if (status === 'expiring') {
     return (
       <Text as="p" color={days || hours >= 2 ? 'success' : 'warning'}>

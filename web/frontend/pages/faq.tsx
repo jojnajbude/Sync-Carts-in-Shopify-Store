@@ -10,16 +10,7 @@ export default function NotFound() {
         </Layout.Section>
       </Layout>
 
-      <FooterHelp>
-        © Blake Rogers. All rights reserved.{' '}
-        <a
-          target="_blank"
-          href="mailto:demigod177712@gmail.com"
-          rel="noreferrer"
-        >
-          Contact us
-        </a>
-      </FooterHelp>
+      <FooterHelp>© Blake Rogers. All rights reserved. </FooterHelp>
     </Page>
   );
 }

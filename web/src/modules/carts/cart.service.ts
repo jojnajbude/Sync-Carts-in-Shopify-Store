@@ -163,20 +163,13 @@ export class CartService {
         }
       }
 
-      // if (oldItems.length > cart.items.length) {
-      //   for (const oldItem of oldItems) {
-      //     if (!cart.items.find((item: { variant_id: number; }) => item.variant_id === oldItem.variant_id)) {
-            
-      //     }
-      //   }
-      // }
-
       for (const item of cart.items) {
         const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);
 
         if (existItemIndex !== -1) {
           if (oldItems[existItemIndex].qty !== item.qty) {
-            await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced' })
+            const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
+            await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced', expire_at: await expireTime })
           }
         } else {
           const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))

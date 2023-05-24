@@ -140,6 +140,8 @@ export class StorefrontService {
       if (store && store.carts < store.limit) {
         if (store && store.session) {
           const session = JSON.parse(store?.session);
+
+          console.log('here');
     
           const variantRes = await shopify.api.rest.Variant.find({
             session,
@@ -192,7 +194,9 @@ export class StorefrontService {
         const session = JSON.parse(store.session);
 
         let cart: Cart | null | undefined = await this.cartRepository.findOneBy({ cart_token: cartData.token })
+        console.log(cart)
         if (!cart) {
+          console.log('here')
           cart = await this.createCart(shop, cartData)
           if (!cart) {
             return false;

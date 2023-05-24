@@ -15,15 +15,21 @@ import {
   ChevronDownMinor,
   ChevronUpMinor,
 } from '@shopify/polaris-icons';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useContext } from 'react';
 import { useNavigate } from '@shopify/app-bridge-react';
+import { SubscribtionContext } from '../context/SubscribtionContext';
 
 export default function CollapsibleTab() {
+  const context = useContext(SubscribtionContext);
   const [open, setOpen] = useState(true);
   const [firstTabOpen, setFirstTabOpen] = useState(false);
   const [secondTabOpen, setSecondTabOpen] = useState(false);
+  const [thirdTabOpen, setThirdTabOpen] = useState(false);
   const [firstChecked, setFirstChecked] = useState(false);
   const [secondChecked, setSecondChecked] = useState(false);
+  const [thirdChecked, setThirdChecked] = useState(
+    context.plan?.domain ? true : false,
+  );
 
   const navigate = useNavigate();
 
@@ -54,23 +60,6 @@ export default function CollapsibleTab() {
           <Text as="span">
             Use this step by step guide to get started with Better Carts
           </Text>
-
-          {/* <HorizontalStack blockAlign="center" gap="2">
-            <Text as="span" color="subdued">
-              {`${tasks.reduce((sum, curr) => sum + (curr ? 1 : 0), 0)} of ${
-                tasks.length
-              } tasks complete`}
-            </Text>
-
-            <ProgressBar
-              progress={
-                (tasks.reduce((sum, curr) => sum + (curr ? 1 : 0), 0) /
-                  tasks.length) *
-                100
-              }
-              size="small"
-            />
-          </HorizontalStack> */}
         </VerticalStack>
       </LegacyCard.Section>
 
@@ -217,6 +206,72 @@ export default function CollapsibleTab() {
                     }}
                   >
                     Add Reservation Timer
+                  </Button>
+                </div>
+              </VerticalStack>
+            </Collapsible>
+          </VerticalStack>
+        </LegacyCard.Section>
+
+        <LegacyCard.Section>
+          <VerticalStack gap="4">
+            <HorizontalStack gap="2">
+              <HorizontalStack gap="2">
+                <Icon
+                  source={thirdChecked ? CircleTickMajor : CircleDownMajor}
+                  color={thirdChecked ? 'success' : 'subdued'}
+                ></Icon>
+                <Button
+                  removeUnderline
+                  plain
+                  onClick={() => setThirdTabOpen(!secondTabOpen)}
+                >
+                  <Text
+                    as="h1"
+                    fontWeight="bold"
+                    color={thirdChecked ? 'success' : 'subdued'}
+                  >
+                    Verify your custom domain for email notifications.
+                  </Text>
+                </Button>
+              </HorizontalStack>
+            </HorizontalStack>
+
+            <Collapsible
+              open={thirdTabOpen}
+              id="basic-collapsible"
+              transition={{ duration: '500ms', timingFunction: 'ease-in-out' }}
+              expandOnPrint
+            >
+              <VerticalStack gap="4">
+                <List type="number">
+                  <List.Item>
+                    Go to <b>Settings</b>, then find <b>Verify domain</b>
+                    section.
+                  </List.Item>
+                  <List.Item>
+                    Inside section, enter your domain and click on the{' '}
+                    <b>Verify</b> button.
+                  </List.Item>
+                  <List.Item>
+                    Go to your domain provider and add a 2 TXT records with the{' '}
+                    given values.
+                  </List.Item>
+                  <List.Item>
+                    Click <b>Verify domain</b> button. If all good, status
+                    badges will change for <b>Verified</b>. Note: it can take up
+                    to 24 hours to verify your domain.
+                  </List.Item>
+                </List>
+
+                <div style={{ maxWidth: 250 }}>
+                  <Button
+                    primary
+                    onClick={() => {
+                      navigate('/settings');
+                    }}
+                  >
+                    Add Custom Domain
                   </Button>
                 </div>
               </VerticalStack>

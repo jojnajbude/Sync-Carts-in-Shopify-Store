@@ -106,7 +106,7 @@ export class NotificationsService {
             Content: content
           },
         ],
-        From: "better-carts.com",
+        From: shop.email_domain ? shop.email_domain : "better-carts.com",
         Subject: subject
       }
     }
@@ -196,5 +196,30 @@ export class NotificationsService {
     template = template.replace('{{shop_email}}', `${shop.email}`);
 
     return template;
+  }
+
+  async addNewDomain(domain: string, shop: string) {
+    const newDomain = await fetch(`https://api.elasticemail.com/v2/domain/add?apikey=${process.env.ELASTIC_TOKEN}&domain=${domain}`);
+    const response = await newDomain.json()
+    
+    if (response.success) {
+      await this.shopRepository.update({ domain: shop }, { email_domain: domain });
+    }
+
+    return response
+  }
+
+  async verifyDomain(domain: string, shop: string) {
+    const verifySpf = await fetch(`https://api.elasticemail.com/v2/domain/verifyspf?apikey=${process.env.ELASTIC_TOKEN}&domain=${domain}`);
+    const spfStatus = await verifySpf.json();
+
+    const verifyDkim = await fetch(`https://api.elasticemail.com/v2/domain/verifydkim?apikey=${process.env.ELASTIC_TOKEN}&domain=${domain}`)
+    const dkimStatus = await verifyDkim.json();
+
+    if (spfStatus.success && dkimStatus.success) {
+      await this.shopRepository.update({ domain: shop }, { domain_verified: JSON.stringify({ spfStatus: true, dkimStatus: true }) });
+    }
+
+    return { spfStatus: spfStatus.success, dkimStatus: dkimStatus.success }
   }
 }
