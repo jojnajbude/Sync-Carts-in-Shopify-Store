@@ -10,7 +10,10 @@ import {
   LegacyCard,
   SkeletonBodyText,
   Banner,
+  HorizontalStack,
+  VerticalStack,
 } from '@shopify/polaris';
+import { useMediaQuery } from 'react-responsive';
 
 import { useAuthenticatedFetch } from '../hooks';
 
@@ -41,6 +44,7 @@ export default function CartsTable() {
   const context = useContext(SubscribtionContext);
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
   useEffect(() => {
     let ignore = false;
@@ -59,8 +63,8 @@ export default function CartsTable() {
             setIsLoading(false);
           }
         }
-      } catch (error) {
-        console.log(error);
+      } catch (err) {
+        console.log(err);
       }
     };
 
@@ -230,6 +234,7 @@ export default function CartsTable() {
               bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
               sortable={[true, true, true, true, true, true, true]}
+              condensed={isMobile}
               headings={[
                 { title: 'Cart ID' },
                 { title: 'Customer' },
@@ -240,58 +245,125 @@ export default function CartsTable() {
                 { title: 'Last action' },
               ]}
             >
-              {getCurrentTableData().map(
-                (
-                  {
-                    id,
-                    customer_name,
-                    qty,
-                    total: cartTotal,
-                    reservation_time,
-                    reserved_indicator,
-                    last_action,
-                  },
-                  index,
-                ) => (
-                  <IndexTable.Row
-                    id={id}
-                    key={id}
-                    selected={selectedResources.includes(id)}
-                    position={index}
-                    onClick={() => navigate(`/cart/${id}`)}
-                  >
-                    <IndexTable.Cell>
-                      <Text fontWeight="semibold" as="span">
-                        {id}
-                      </Text>
-                    </IndexTable.Cell>
-                    <IndexTable.Cell>{customer_name}</IndexTable.Cell>
-                    <IndexTable.Cell>
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: currency,
-                      }).format(cartTotal)}
-                    </IndexTable.Cell>
-                    <IndexTable.Cell>
-                      <CartBadge indicator={reserved_indicator}></CartBadge>
-                    </IndexTable.Cell>
-                    <IndexTable.Cell>
-                      <Counter
-                        expireAt={reservation_time}
-                        status={
-                          reserved_indicator === 'paid' ? 'paid' : 'expiring'
-                        }
-                      ></Counter>
-                    </IndexTable.Cell>
-                    <IndexTable.Cell>
-                      {qty > 1 ? `${qty} items` : `${qty} item`}
-                    </IndexTable.Cell>
-                    <IndexTable.Cell>
-                      {formatTime(Date.now() - new Date(last_action).getTime())}
-                    </IndexTable.Cell>
-                  </IndexTable.Row>
-                ),
-              )}
+              {isMobile
+                ? getCurrentTableData().map(
+                    (
+                      {
+                        id,
+                        customer_name,
+                        qty,
+                        total: cartTotal,
+                        reservation_time,
+                        reserved_indicator,
+                        last_action,
+                      },
+                      index,
+                    ) => {
+                      return (
+                        <IndexTable.Row
+                          id={id}
+                          key={id}
+                          selected={selectedResources.includes(id)}
+                          position={index}
+                        >
+                          <div style={{ padding: '12px 16px', width: '100%' }}>
+                            <VerticalStack gap="1">
+                              <Text as="span" variant="bodySm" color="subdued">
+                                {'#' + id} •{' '}
+                                {formatTime(
+                                  Date.now() - new Date(last_action).getTime(),
+                                )}
+                              </Text>
+                              <HorizontalStack align="space-between">
+                                <Text
+                                  as="span"
+                                  variant="bodyMd"
+                                  fontWeight="semibold"
+                                >
+                                  {customer_name}
+                                </Text>
+                                <Text as="span" variant="bodyMd">
+                                  {new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: currency,
+                                  }).format(cartTotal)}
+                                </Text>
+                              </HorizontalStack>
+                              <HorizontalStack align="start" gap="1">
+                                <CartBadge
+                                  indicator={reserved_indicator}
+                                ></CartBadge>
+                                <Counter
+                                  expireAt={reservation_time}
+                                  status={reserved_indicator === 'paid'
+                                    ? 'paid'
+                                    : 'expiring'}
+                                ></Counter>
+                              </HorizontalStack>
+                            </VerticalStack>
+                          </div>
+                        </IndexTable.Row>
+                      );
+                    },
+                  )
+                : getCurrentTableData().map(
+                    (
+                      {
+                        id,
+                        customer_name,
+                        qty,
+                        total: cartTotal,
+                        reservation_time,
+                        reserved_indicator,
+                        last_action,
+                      },
+                      index,
+                    ) => (
+                      <IndexTable.Row
+                        id={id}
+                        key={id}
+                        selected={selectedResources.includes(id)}
+                        position={index}
+                        onClick={() => navigate(`/cart/${id}`)}
+                      >
+                        <IndexTable.Cell>
+                          <Text fontWeight="semibold" as="span">
+                            {id}
+                          </Text>
+                        </IndexTable.Cell>
+                        <IndexTable.Cell>
+                          {customer_name || 'Unlogged user'}
+                        </IndexTable.Cell>
+                        <IndexTable.Cell>
+                          {new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: currency,
+                          }).format(cartTotal)}
+                        </IndexTable.Cell>
+                        <IndexTable.Cell>
+                          <CartBadge indicator={reserved_indicator}></CartBadge>
+                        </IndexTable.Cell>
+                        <IndexTable.Cell>
+                          <Counter
+                            expireAt={reservation_time}
+                            status={
+                              reserved_indicator === 'paid'
+                                ? 'paid'
+                                : 'expiring'
+                            }
+                          ></Counter>
+                        </IndexTable.Cell>
+                        <IndexTable.Cell>
+                          {qty > 1 ? `${qty} items` : `${qty} item`}
+                        </IndexTable.Cell>
+                        <IndexTable.Cell>
+                          {formatTime(
+                            Date.now() - new Date(last_action).getTime(),
+                          )}
+                        </IndexTable.Cell>
+                      </IndexTable.Row>
+                    ),
+                  )}
             </IndexTable>
           ) : (
             <LegacyCard.Section>

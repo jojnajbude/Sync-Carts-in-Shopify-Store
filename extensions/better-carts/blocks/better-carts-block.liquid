@@ -1,10 +1,10 @@
 <script>
-  {% if customer %}
-    window.customer = {
+  window.better_carts = {
+    {% if customer %}
       id: {{ customer.id }},
+    {% endif %}
       shop: '{{ shop.id }}',
     };
-  {% endif %}
 </script>
 
 <script

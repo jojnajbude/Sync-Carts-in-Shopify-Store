@@ -20,6 +20,18 @@ export class StorefrontController {
     result ? res.status(200).send(result) : res.status(500).send('Server error');
   }
 
+  @Post('cart/create')
+  async createCart(@Req() req: Request, @Res() res: Response) {
+    const shopDomain = req.get('x-shopify-shop-domain');
+
+    if (shopDomain) {
+      const cart = await this.storefrontService.updateCart(req.body, shopDomain);
+      cart ? res.status(200).send(cart) : res.status(500).send('Server error');
+    } else {
+      res.status(404).send('Unable to identify the store');
+    }
+  }
+
   @Post('cart/update')
   async updateCart(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');

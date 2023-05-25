@@ -316,7 +316,7 @@ export class CartService {
       cart.reservation_time = new Date(shortestDate).toString();
     }
 
-    return table;
+    return table.filter(cart => cart.customer_name !== null);
   }
 
   sortCarts(carts: TableRow[], index: number, direction: 'ascending' | 'descending') {

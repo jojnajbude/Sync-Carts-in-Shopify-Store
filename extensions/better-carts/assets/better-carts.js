@@ -5,15 +5,12 @@ const APP_URL_DEV = 'https://better-carts.dev-test.pro';
   initializeObserver();
   swapAddToCartBtn();
 
-  if (window.customer) {
-    const cookie = getCartCookie();  
-    const os = getOS()
-
+  if (window.better_carts.hasOwnProperty('id')) {
     setInterval(() => {
       const cookie = getCartCookie();  
       const os = getOS()
 
-      updateData(window.customer.id, cookie, window.customer.shop, os)
+      updateData(window.better_carts.id, cookie, window.better_carts.shop, os)
     }, 10000)
   }
 })()
@@ -62,7 +59,7 @@ function getCartCookie() {
 }
 
 async function updateData(id, cart_id, shop_id, os) {
-  const checkUpdates = await fetch(`${APP_URL_DEV}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}&os=${os}`);
+  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}&os=${os}`);
   const response = await checkUpdates.json();
 
   if (response.type === 'New cart') {
@@ -151,7 +148,7 @@ async function addToCart() {
     qty = document.querySelector('input[name="quantity"]').value;
   }
 
-  const addCart = await fetch(`${APP_URL_DEV}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
+  const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
   const resText = await addCart.text();
 
   if (resText === 'All items reserved') {
@@ -168,7 +165,11 @@ async function addToCart() {
       const cookie = getCartCookie();
       const os = getOS();
 
-      updateData(window.customer.id, cookie, window.customer.shop, os);
+      const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
+
+      if (customer) {
+        updateData(customer, cookie, window.better_carts.shop, os);
+      }
     }, 1000)
   }
 }
@@ -186,17 +187,17 @@ class BetterCartsTimer extends HTMLElement {
   }
 
   getData() {
-    if (window.customer) {
+    if (window.better_carts.hasOwnProperty('id')) {
       return new Promise(async (res, rej) => {
         setTimeout(async () => {
           let retryCount = 0;
           const variantId = Number(this.dataset.timerId);
-          const userId = window.customer.id;
-          const shopId = window.customer.shop;
+          const userId = window.better_carts.id;
+          const shopId = window.better_carts.shop;
           const cartId = document.cookie.split('; ').find((row) => row.startsWith('cart='))?.split('=')[1];
     
           const fromServ = async () => {
-            const response = await fetch(`${APP_URL_DEV}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
+            const response = await fetch(`${APP_URL}/storefront/time?item=${variantId}&cart=${cartId}&user=${userId}&shop=${shopId}`);
     
             if (response.ok) {
               const data = await response.json()

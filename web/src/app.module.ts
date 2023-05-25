@@ -37,7 +37,7 @@ import { injectSnippet } from "./middlewares/inject-snippet.middleware.js";
 import { createWebhooks } from "./middlewares/create-webhooks.middleware.js";
 import { getShopDataMiddleware } from "./middlewares/get-shop-data.middleware.js";
 
-import { migration1683619416755 } from "../migrations/1683619416755-migration.js";
+import { migrations1685025094041 } from "../migrations/1685025094041-migrations.js";
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -57,11 +57,10 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
-      synchronize: true,
-      // migrations: [migration1683619416755],
-      // ssl: {
-      //   ca: process.env.SSL_CERT,
-      // },
+      migrations: [migrations1685025094041],
+      ssl: {
+        ca: process.env.SSL_CERT,
+      },
     }),
     MongooseModule.forRoot(
       process.env.MONGO_URI!,

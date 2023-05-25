@@ -190,7 +190,6 @@ export default function ProductsList({
               product_id,
               status,
             } = item;
-            console.log(status)
 
             return (
               <ResourceList.Item

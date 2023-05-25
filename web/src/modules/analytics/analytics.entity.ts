@@ -13,7 +13,7 @@ export class Analytics {
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 
-  @Column()
+  @Column({ nullable: true })
   type: string;
 
   @Column({ type: 'json' })

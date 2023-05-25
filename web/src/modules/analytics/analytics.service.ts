@@ -215,8 +215,8 @@ export class AnalyticsService {
           .where({ id: analytics.id })
           .execute()
       }
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -380,8 +380,6 @@ export class AnalyticsService {
     const nextDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
     nextDay.setHours(0, 0, 0, 0);
 
-    console.log('expiredItems', expiredItems)
-
     for (const item of expiredItems) {
       const analytics = await this.analyticsRepository.createQueryBuilder('analytics')
         .where({ shop_id: item.shop_id })
@@ -392,8 +390,6 @@ export class AnalyticsService {
 
       if (analytics) {
         const abandoned_products = JSON.parse(analytics.value);
-
-        console.log('abandoned_products', abandoned_products)
 
         const product = abandoned_products.value.find((product: any) => product.product_id === item.product_id);
 
@@ -418,8 +414,6 @@ export class AnalyticsService {
     const nextDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
     nextDay.setHours(0, 0, 0, 0);
 
-    console.log('expiredItems', expiredItems)
-
     for (const item of expiredItems) {
       const analytics = await this.analyticsRepository.createQueryBuilder('analytics')
         .where({ shop_id: item.shop_id })
@@ -430,8 +424,6 @@ export class AnalyticsService {
 
       if (analytics) {
         const abandoned_customers = JSON.parse(analytics.value);
-
-        console.log('abandoned_customers', abandoned_customers)
 
         const customer = abandoned_customers.value.find((customer: any) => customer.customer_id === item.customer_id);
 

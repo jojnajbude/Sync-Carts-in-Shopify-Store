@@ -71,7 +71,6 @@ export default function TopChart({ title, status, data }: Props) {
           shopify_user_id: string;
           value: string;
         }) => {
-          console.log(customer)
           rows.push([
             <Link
               removeUnderline

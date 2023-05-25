@@ -79,6 +79,7 @@ const IndexTableFilters: React.FC<Props> = ({
 
   return (
     <IndexFilters
+      disableStickyMode
       hideFilters
       hideQueryField
       queryValue={queryValue}

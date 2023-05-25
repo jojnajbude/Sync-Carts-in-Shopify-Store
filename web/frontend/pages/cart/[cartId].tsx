@@ -266,10 +266,6 @@ export default function CartPage() {
     setActiveToast(true);
   };
 
-  console.log(isEditing)
-  console.log(isPriorityChange)
-  console.log(isEditing && isPriorityChange);
-
   if (cartId === 'create' && context.plan.carts >= context.plan.limit) {
     return (
       <Page backAction={{ onAction: () => navigate('/summary') }}>

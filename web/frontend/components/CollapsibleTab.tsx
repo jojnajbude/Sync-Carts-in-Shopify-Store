@@ -28,7 +28,7 @@ export default function CollapsibleTab() {
   const [firstChecked, setFirstChecked] = useState(false);
   const [secondChecked, setSecondChecked] = useState(false);
   const [thirdChecked, setThirdChecked] = useState(
-    context.plan?.domain ? true : false,
+    context.plan?.email_domain ? true : false,
   );
 
   const navigate = useNavigate();
@@ -224,7 +224,7 @@ export default function CollapsibleTab() {
                 <Button
                   removeUnderline
                   plain
-                  onClick={() => setThirdTabOpen(!secondTabOpen)}
+                  onClick={() => setThirdTabOpen(!thirdTabOpen)}
                 >
                   <Text
                     as="h1"
