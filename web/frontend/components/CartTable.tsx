@@ -265,6 +265,7 @@ export default function CartsTable() {
                           key={id}
                           selected={selectedResources.includes(id)}
                           position={index}
+                          onClick={() => navigate(`/cart/${id}`)}
                         >
                           <div style={{ padding: '12px 16px', width: '100%' }}>
                             <VerticalStack gap="1">

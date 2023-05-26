@@ -140,37 +140,73 @@ function swapAddToCartBtn() {
 }
 
 async function addToCart() {
-  const variantId = document.querySelector('input[name="id"]').value;
-  const qtyInput = document.querySelector('input[name="quantity"]');
-  let qty= 1;
+  const variantTag = document.querySelector('[name="id"]');
+  if (variantTag.tagName === 'SELECT' || variantTag.tagName === 'select') {
+    const selectedOption = variantTag.querySelector('option[selected="selected"]').value;
+    const qtyInput = document.querySelector('[name="quantity"]');
+    let qty = 1;
 
-  if (qtyInput) {
-    qty = document.querySelector('input[name="quantity"]').value;
-  }
+    if (qtyInput) {
+      qty = document.querySelector('[name="quantity"]').value;
+    }
 
-  const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
-  const resText = await addCart.text();
+    const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${selectedOption}&qty=${qty}`)
+    const resText = await addCart.text();
 
-  if (resText === 'All items reserved') {
-    this.setAttribute('disabled', true)
-    const reservedText = document.createElement('span')
-    reservedText.textContent = 'All items already reserved!'
-    const parent = this.parentNode
-    parent.insertBefore(reservedText, this.nextSibling)
+    if (resText === 'All items reserved') {
+      this.setAttribute('disabled', true)
+      const reservedText = document.createElement('span')
+      reservedText.textContent = 'All items already reserved!'
+      const parent = this.parentNode
+      parent.insertBefore(reservedText, this.nextSibling)
+    } else {
+      const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
+      button.click()
+
+      setTimeout(() => {
+        const cookie = getCartCookie();
+        const os = getOS();
+
+        const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
+
+        if (customer) {
+          updateData(customer, cookie, window.better_carts.shop, os);
+        }
+      }, 1000)
+    }
   } else {
-    const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
-    button.click()
+    const variantId = document.querySelector('input[name="id"]').value;
+    const qtyInput = document.querySelector('input[name="quantity"]');
+    let qty = 1;
 
-    setTimeout(() => {
-      const cookie = getCartCookie();
-      const os = getOS();
+    if (qtyInput) {
+      qty = document.querySelector('input[name="quantity"]').value;
+    }
 
-      const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
+    const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
+    const resText = await addCart.text();
 
-      if (customer) {
-        updateData(customer, cookie, window.better_carts.shop, os);
-      }
-    }, 1000)
+    if (resText === 'All items reserved') {
+      this.setAttribute('disabled', true)
+      const reservedText = document.createElement('span')
+      reservedText.textContent = 'All items already reserved!'
+      const parent = this.parentNode
+      parent.insertBefore(reservedText, this.nextSibling)
+    } else {
+      const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
+      button.click()
+
+      setTimeout(() => {
+        const cookie = getCartCookie();
+        const os = getOS();
+
+        const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
+
+        if (customer) {
+          updateData(customer, cookie, window.better_carts.shop, os);
+        }
+      }, 1000)
+    }
   }
 }
 
