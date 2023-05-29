@@ -15,7 +15,7 @@ import { Item } from '../types/cart';
 
 type Props = {
   product: Product;
-  addItemToCart: (value: Item | Variant) => void;
+  addItemToCart: (value: Item | Variant, product: any) => void;
   currency: string;
 };
 
@@ -61,7 +61,7 @@ export default function VariantsList({
           return (
             <ResourceItem
               id={String(id)}
-              onClick={() => addItemToCart(variant)}
+              onClick={() => addItemToCart(variant, product)}
               media={
                 <Thumbnail
                   size="small"

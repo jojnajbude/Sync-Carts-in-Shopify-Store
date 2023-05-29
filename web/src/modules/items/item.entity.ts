@@ -40,4 +40,7 @@ export class Item {
 
   @Column({ type: 'bigint', nullable: true })
   product_id: number;
+
+  @Column({ nullable: true })
+  variant_title: string;
 }

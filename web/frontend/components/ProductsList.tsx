@@ -189,6 +189,7 @@ export default function ProductsList({
               title,
               product_id,
               status,
+              variant_title,
             } = item;
 
             return (
@@ -205,6 +206,12 @@ export default function ProductsList({
                       <Text variant="bodyMd" fontWeight="bold" as="h3">
                         {title}
                       </Text>
+
+                      {variant_title && variant_title !== 'Default Title' ? (
+                        <Text variant="bodySm" as="span" color="subdued">
+                          {`Variant: ${variant_title}`}
+                        </Text>
+                      ) : null}
 
                       <Counter expireAt={expire_at} status={status}></Counter>
 

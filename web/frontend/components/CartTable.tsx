@@ -86,6 +86,7 @@ export default function CartsTable() {
   const promotedBulkActions = [
     {
       content: 'Set reservation timer',
+      // disabled: selectedResources
       onAction: () => openModal('expand'),
     },
     {

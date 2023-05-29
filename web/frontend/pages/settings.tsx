@@ -456,8 +456,8 @@ export default function Settings() {
           <Modal.Section>
             <Banner>
               <p>
-                Learn more how to verify domain with your domain service
-                provider.{' '}
+                Learn more about how to verify domains with your domain service
+                provider{' '}
                 <Link monochrome onClick={() => navigate('/faq')}>
                   Learn more
                 </Link>

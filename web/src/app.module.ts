@@ -57,10 +57,11 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
-      migrations: [migrations1685025094041],
-      ssl: {
-        ca: process.env.SSL_CERT,
-      },
+      synchronize: true,
+      // migrations: [migrations1685025094041],
+      // ssl: {
+      //   ca: process.env.SSL_CERT,
+      // },
     }),
     MongooseModule.forRoot(
       process.env.MONGO_URI!,

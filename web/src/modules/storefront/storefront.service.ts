@@ -297,7 +297,8 @@ export class StorefrontService {
             } else {
               expireTime = this.countExpireDate(new Date(), 'unknown', JSON.parse(store.priorities));
               const newItem = { 
-                variant_id: line_item.variant_id, 
+                variant_id: line_item.variant_id,
+                variant_title: line_item.variant.title,
                 qty: line_item.quantity, 
                 cart_id: cart?.id, 
                 price: line_item.price, 

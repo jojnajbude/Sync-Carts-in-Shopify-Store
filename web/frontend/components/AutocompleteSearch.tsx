@@ -224,7 +224,7 @@ export default function AutocompleteSearch({
     }
   };
 
-  const addItemToCart = async (variant: Item) => {
+  const addItemToCart = async (variant: Item, product: any) => {
     variant.qty = 1;
     const changedCart = { ...cart };
 
@@ -240,6 +240,8 @@ export default function AutocompleteSearch({
     } else {
       variant.variant_id = variant.id;
       variant.reserved_indicator = 'added';
+      variant.variant_title = variant.title;
+      variant.title = product.title;
       changedCart.items = [...changedCart.items, variant];
     }
 
@@ -331,11 +333,6 @@ export default function AutocompleteSearch({
               {email}
             </Text>
             {hasCart && (
-              // <Text variant="bodySm" as="span" color="success">
-              //   <Button size="slim" plain monochrome>
-              //     Already has а cart
-              //   </Button>
-              // </Text>
               <Link onClick={() => openCart(hasCart)}>Already has а cart</Link>
             )}
           </VerticalStack>

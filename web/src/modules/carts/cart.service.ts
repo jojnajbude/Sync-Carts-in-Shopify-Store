@@ -183,6 +183,7 @@ export class CartService {
             image_link: item.image_link, 
             product_id: item.product_id,
             expire_at: await expireTime,
+            variant_title: item.variant_title,
           })
         }
       }
