@@ -48,7 +48,6 @@ export default function CartsTable() {
 
   useEffect(() => {
     let ignore = false;
-
     const getCarts = async () => {
       try {
         if (isLoading) {
@@ -86,17 +85,25 @@ export default function CartsTable() {
   const promotedBulkActions = [
     {
       content: 'Set reservation timer',
-      // disabled: selectedResources
+      disabled: !selectedResources.find(
+        cart => cart.reserved_indicator === 'paid',
+      ),
       onAction: () => openModal('expand'),
     },
     {
       content: 'Un-reserve all items',
+      disabled: !selectedResources.find(
+        cart => cart.reserved_indicator === 'paid',
+      ),
       onAction: () => openModal('unreserve'),
     },
   ];
   const bulkActions = [
     {
       content: 'Remove all items',
+      disabled: !selectedResources.find(
+        cart => cart.reserved_indicator === 'paid',
+      ),
       onAction: () => openModal('remove'),
     },
   ];
@@ -297,9 +304,11 @@ export default function CartsTable() {
                                 ></CartBadge>
                                 <Counter
                                   expireAt={reservation_time}
-                                  status={reserved_indicator === 'paid'
-                                    ? 'paid'
-                                    : 'expiring'}
+                                  status={
+                                    reserved_indicator === 'paid'
+                                      ? 'paid'
+                                      : 'expiring'
+                                  }
                                 ></Counter>
                               </HorizontalStack>
                             </VerticalStack>
