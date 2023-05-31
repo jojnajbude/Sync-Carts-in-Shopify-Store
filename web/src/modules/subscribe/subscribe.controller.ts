@@ -8,6 +8,7 @@ export class SubscribeController {
 
   @Get('get')
   async getSubscription(@Res() res: Response) {
+    console.log("here")
     const session = res.locals.shopify.session;
 
     const plan = await this.subscribeService.getSubscription(session);

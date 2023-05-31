@@ -13,6 +13,7 @@ import {
   Frame,
   Modal,
   Toast,
+  Button,
 } from '@shopify/polaris';
 import { useNavigate } from '@shopify/app-bridge-react';
 import { useAuthenticatedFetch } from '../hooks';
@@ -100,20 +101,20 @@ export default function Subscribe() {
     <Page
       title="Subscriptions"
       backAction={{ onAction: () => navigate('/') }}
-      // primaryAction={
-      //   plan ? (
-      //     <div style={{ color: '#bf0711' }}>
-      //       <Button
-      //         disabled={plan.plan === 'free'}
-      //         monochrome
-      //         outline
-      //         onClick={handleModal}
-      //       >
-      //         Cancel subscription
-      //       </Button>
-      //     </div>
-      //   ) : null
-      // }
+      primaryAction={
+        plan ? (
+          <div style={{ color: '#bf0711' }}>
+            <Button
+              disabled={plan.plan === 'free'}
+              monochrome
+              outline
+              onClick={handleModal}
+            >
+              Cancel subscription
+            </Button>
+          </div>
+        ) : null
+      }
     >
       <Frame>
         {plan ? (
@@ -186,14 +187,14 @@ export default function Subscribe() {
 
             <Layout.Section oneThird>
               <BillingCard
-                title="Basic"
+                title="Starter"
                 currentPlan={plan.plan}
                 limit={500}
-                info="Take your first step in managing your shopping carts with our Basic plan! Control up to 500 baskets and see how our subscription can improve your store's performance."
+                info="The perfect plan to get started with! The starter plan allows you to manage up to 500 carts. Experience all of our powerful features while handling a larger customer base, ideal for businesses that are beginning to really take off."
                 price={30}
-                description="Choose Basic"
+                description="Choose Starter"
                 onClick={() => {
-                  createSubscribe('Basic');
+                  createSubscribe('Starter');
                 }}
                 selectedPlan={selectedPlan}
               />
@@ -201,14 +202,14 @@ export default function Subscribe() {
 
             <Layout.Section oneThird>
               <BillingCard
-                title="Premium"
+                title="Growth"
                 currentPlan={plan.plan}
                 limit={1000}
-                info="Upgrade to our Premium plan and take your business to the next level! With the ability to manage up to 1000 shopping carts, you'll have greater control and flexibility to optimize your sales strategy."
+                info="Tailored for medium-sized businesses experiencing rapid growth. With the ability to manage up to 1,000 carts, the Growth Plan ensures you can keep up with your expanding customer base while taking full advantage of all Better Carts' features."
                 price={60}
-                description="Choose Premium"
+                description="Choose Growth"
                 onClick={() => {
-                  createSubscribe('Premium');
+                  createSubscribe('Growth');
                 }}
                 selectedPlan={selectedPlan}
               />
@@ -216,14 +217,14 @@ export default function Subscribe() {
 
             <Layout.Section oneThird>
               <BillingCard
-                title="Elite"
+                title="Pro"
                 currentPlan={plan.plan}
                 limit={2000}
-                info="Get the ultimate control over your store's shopping carts with our Elite plan! Enjoy unlimited access to our powerful subscription features and manage as many baskets as you need to take your business to new heights."
+                info="The Pro Plan is designed for established businesses with large customer bases. With the capability to manage up to 3,000 carts, this plan gives you the scale needed to handle extensive product lines and large volumes of customers."
                 price={100}
-                description="Choose Elite"
+                description="Choose Pro"
                 onClick={() => {
-                  createSubscribe('Elite');
+                  createSubscribe('Pro');
                 }}
                 selectedPlan={selectedPlan}
               />

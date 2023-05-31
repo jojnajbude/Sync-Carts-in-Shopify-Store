@@ -133,7 +133,6 @@ export default function ProductsList({
           label=""
           type="number"
           min={1}
-          // max={item.inventory_quantity}
           error={item.qty > item.inventory_quantity}
           value={String(item.qty)}
           onChange={newValue => handleChange(newValue, item)}

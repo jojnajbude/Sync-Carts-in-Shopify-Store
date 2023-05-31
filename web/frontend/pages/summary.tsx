@@ -10,13 +10,13 @@ export default function cartsSummary() {
 
   return (
     <Page
-      title="Carts summary"
+      title="Carts"
       fullWidth
       primaryAction={
         <Button
           primary
           onClick={() => navigate('/cart/create')}
-          disabled={!context.plan || context.plan.carts >= context.plan.limit}
+          // disabled={!context.plan || context.plan.carts >= context.plan.limit}
         >
           Create new cart
         </Button>

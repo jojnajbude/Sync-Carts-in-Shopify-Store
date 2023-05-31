@@ -245,8 +245,6 @@ export default function CartPage() {
     }
   };
 
-  console.log(cart)
-
   const cancelChanges = () => {
     setIsUnvalidInputs('none');
     setCart(initialCart);
@@ -376,6 +374,7 @@ export default function CartPage() {
                 setIsUnvalidInputs={setIsUnvalidInputs}
                 setIsPriorityChange={setIsPriorityChange}
                 setIsLoading={setIsLoading}
+                setIsEditing={setIsEditing}
               ></CustomerCard>
 
               <PageActions

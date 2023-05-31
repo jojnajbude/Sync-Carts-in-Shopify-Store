@@ -321,10 +321,20 @@ export class CartService {
   }
 
   sortCarts(carts: TableRow[], index: number, direction: 'ascending' | 'descending') {
-    const ind = index === 6 ? 10 : index;
+    if (index === 6) {
+      return [...carts].sort((rowA: TableRow, rowB: TableRow) => {
+        const dateA = new Date(rowA['last_action']);
+        const dateB = new Date(rowB['last_action']);
+
+        return direction === 'descending'
+          ? dateB.getTime() - dateA.getTime()
+          : dateA.getTime() - dateB.getTime();
+      });
+    }
+
     return [...carts].sort((rowA: TableRow, rowB: TableRow) => {
-      const amountA = rowA[Object.keys(rowA)[ind] as keyof TableRow];
-      const amountB = rowB[Object.keys(rowB)[ind] as keyof TableRow];
+      const amountA = rowA[Object.keys(rowA)[index] as keyof TableRow];
+      const amountB = rowB[Object.keys(rowB)[index] as keyof TableRow];
 
       if (typeof amountA === 'number' && typeof amountB === 'number') {
         return direction === 'descending'

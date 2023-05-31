@@ -22,6 +22,7 @@ import { Analytics } from '../types/analytics';
 import { Logs } from '../types/logs';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import MediaCardBanner from '../components/MediaCard';
+import formatTime from '../services/timeFormatter';
 
 type State = {
   isLoading: boolean;
@@ -182,7 +183,7 @@ export default function HomePage() {
                 ? state.analytics.average_carts_price
                 : [{ name: 'Price', data: [] }]
             }
-            mainTitle={'Average paid carts value'}
+            mainTitle={'Average paid cart value'}
             chartTitle={'Carts price over time'}
             chartTitlePopover={
               'This chart shows the average carts price for specifit time period.'
@@ -227,7 +228,11 @@ export default function HomePage() {
                       <IndexTable.Cell>
                         <CartBadge indicator={reserved_indicator}></CartBadge>
                       </IndexTable.Cell>
-                      <IndexTable.Cell>{last_action}</IndexTable.Cell>
+                      <IndexTable.Cell>
+                        {formatTime(
+                          Date.now() - new Date(last_action).getTime(),
+                        )}
+                      </IndexTable.Cell>
                     </IndexTable.Row>
                   ),
                 )}

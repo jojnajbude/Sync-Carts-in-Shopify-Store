@@ -150,14 +150,14 @@ export class StorefrontService {
             `select sum(qty)
             from items
             where variant_id = ${variant}
-            AND status = 'reserved'`
+            AND status IN ('reserved', 'recount', 'added', 'unsynced')`
           );
     
           if (Number(variantsReserved.sum) + Number(qty) > variantRes.inventory_quantity) {
             return 'All items reserved';
           }
         }
-      }  
+      }
       
       return 'Can reserve';
     } catch(err) {

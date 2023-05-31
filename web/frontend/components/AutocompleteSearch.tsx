@@ -26,7 +26,8 @@ type Props = {
   setCart?: (value: Cart) => void;
   setCustomer?: (value: Customer) => void;
   setIsUnvalidInputs: (value: string) => void;
-  setIsLoading: (value: boolean) => void;
+  setIsLoading?: (value: boolean) => void;
+  setIsEditing?: (value: boolean) => void;
 };
 
 type State = {
@@ -124,6 +125,7 @@ export default function AutocompleteSearch({
   setCustomer,
   setIsUnvalidInputs,
   setIsLoading,
+  setIsEditing,
 }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -268,6 +270,7 @@ export default function AutocompleteSearch({
   };
 
   const openCart = (cartId: number | boolean) => {
+    setIsEditing(false);
     setIsLoading(true);
     navigate(`/cart/${cartId}`);
   };

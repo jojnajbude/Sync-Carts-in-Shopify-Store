@@ -186,7 +186,7 @@ export default function EmptyStateExample() {
                 ? analytics.average_carts_price
                 : [{ name: '-', data: [] }]
             }
-            mainTitle={'Average paid carts value'}
+            mainTitle={'Average paid cart value'}
             chartTitle={'Carts price over time'}
             chartTitlePopover={
               'This chart shows the average carts price for specifit time period.'

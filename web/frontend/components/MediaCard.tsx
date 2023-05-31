@@ -13,10 +13,10 @@ export default function MediaCardBanner({ plan }: any) {
       <MediaCard
         title="Getting Started"
         primaryAction={{
-          content: 'Learn about getting started',
+          content: 'Start setup',
           onAction: () => navigate('/faq'),
         }}
-        description="Discover how to set up Better Carts functionality."
+        description="Learn how to setup Better Carts so you can start using your new app!"
         popoverActions={[
           {
             content: 'Dont show this again',

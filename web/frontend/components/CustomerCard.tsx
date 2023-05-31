@@ -24,6 +24,7 @@ type Props = {
   setIsUnvalidInputs: (value: string) => void;
   setIsPriorityChange: (value: boolean) => void;
   setIsLoading: (value: boolean) => void;
+  setIsEditing: (value: boolean) => void;
 };
 
 export default function CustomerCard({
@@ -35,6 +36,7 @@ export default function CustomerCard({
   setIsUnvalidInputs,
   setIsPriorityChange,
   setIsLoading,
+  setIsEditing,
 }: Props) {
   const priorityLevels = [
     { label: 'Minimal', value: 'min' },
@@ -178,6 +180,7 @@ export default function CustomerCard({
           setCustomer={setCustomer}
           setIsUnvalidInputs={setIsUnvalidInputs}
           setIsLoading={setIsLoading}
+          setIsEditing={setIsEditing}
         ></AutocompleteSearch>
       </LegacyCard>
     );

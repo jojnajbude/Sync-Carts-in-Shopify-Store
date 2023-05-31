@@ -6,6 +6,7 @@ import {
   Icon,
   LegacyCard,
   List,
+  Select,
   Text,
   VerticalStack,
 } from '@shopify/polaris';
@@ -18,6 +19,7 @@ import {
 import { useState, useCallback, useContext } from 'react';
 import { useNavigate } from '@shopify/app-bridge-react';
 import { SubscribtionContext } from '../context/SubscribtionContext';
+import { themes } from '../constants/themes';
 
 export default function CollapsibleTab() {
   const context = useContext(SubscribtionContext);
@@ -29,6 +31,12 @@ export default function CollapsibleTab() {
   const [secondChecked, setSecondChecked] = useState(false);
   const [thirdChecked, setThirdChecked] = useState(
     context.plan?.email_domain ? true : false,
+  );
+  const [selectedTheme, setSelectedTheme] = useState(themes[0].value);
+
+  const handleSelectChange = useCallback(
+    (value: string) => setSelectedTheme(value),
+    [],
   );
 
   const navigate = useNavigate();
@@ -167,31 +175,21 @@ export default function CollapsibleTab() {
               expandOnPrint
             >
               <VerticalStack gap="4">
+                <div style={{ maxWidth: '200px' }}>
+                  <Select
+                    label="Theme"
+                    options={themes}
+                    onChange={handleSelectChange}
+                    value={selectedTheme}
+                  />
+                </div>
+                {themes.find(theme => theme.value === selectedTheme).video}
                 <List type="number">
-                  <List.Item>
-                    Go to <b>Online Store</b> sales channel
-                  </List.Item>
-                  <List.Item>
-                    Open theme code editor by clicking dots button in your
-                    current theme and select <b>Edit code</b>
-                  </List.Item>
-                  <List.Item>
-                    Select your cart section or snippet file
-                  </List.Item>
-                  <List.Item>
-                    Insert the following code in cart line item:
-                    <br></br>
-                    <i>
-                      {
-                        "{%  render 'reserve-timer', variant_id: item.variant_id, color: 'red' %}"
-                      }
-                    </i>
-                  </List.Item>
-                  <List.Item>
-                    {
-                      "Optional: you can set any color your want by replacing 'red' to another color ('purple', 'yellow' etc.) or hex-code"
-                    }
-                  </List.Item>
+                  {themes
+                    .find(theme => theme.value === selectedTheme)
+                    .steps.map((step, index) => (
+                      <List.Item key={index}>{step}</List.Item>
+                    ))}
                 </List>
 
                 <div style={{ maxWidth: 250 }}>

@@ -25,23 +25,23 @@ export class SubscribeService {
       let plan_config = null;
 
       switch (plan) {
-        case 'Basic':
+        case 'Starter':
           plan_config = {
-            name: 'Basic plan',
+            name: 'Starter plan',
             price: 30.0,
           }
           break;
 
-        case 'Premium':
+        case 'Growth':
           plan_config = {
-            name: 'Premium plan',
+            name: 'Growth plan',
             price: 60.0,
           }
           break;
 
-        case 'Elite':
+        case 'Pro':
           plan_config = {
-            name: 'Elite plan',
+            name: 'Pro plan',
             price: 100.0,
           }
           break;
@@ -74,24 +74,24 @@ export class SubscribeService {
         let plan_config = null;
   
         switch (plan.name) {
-          case 'Basic plan':
+          case 'Starter plan':
             plan_config = {
-              name: 'Basic',
+              name: 'Starter',
               limit: 500,
             }
             break;
   
-          case 'Premium plan':
+          case 'Growth plan':
             plan_config = {
-              name: 'Premium',
+              name: 'Growth',
               limit: 1000,
             }
             break;
   
-          case 'Elite plan':
+          case 'Pro plan':
             plan_config = {
-              name: 'Elite',
-              limit: 2000,
+              name: 'Pro',
+              limit: 3000,
             }
             break;
         }

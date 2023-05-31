@@ -85,14 +85,14 @@ export default function CartsTable() {
   const promotedBulkActions = [
     {
       content: 'Set reservation timer',
-      disabled: !selectedResources.find(
+      disabled: selectedResources.find(
         cart => cart.reserved_indicator === 'paid',
       ),
       onAction: () => openModal('expand'),
     },
     {
       content: 'Un-reserve all items',
-      disabled: !selectedResources.find(
+      disabled: selectedResources.find(
         cart => cart.reserved_indicator === 'paid',
       ),
       onAction: () => openModal('unreserve'),
@@ -101,7 +101,7 @@ export default function CartsTable() {
   const bulkActions = [
     {
       content: 'Remove all items',
-      disabled: !selectedResources.find(
+      disabled: selectedResources.find(
         cart => cart.reserved_indicator === 'paid',
       ),
       onAction: () => openModal('remove'),
@@ -241,8 +241,8 @@ export default function CartsTable() {
               onSelectionChange={handleSelectionChange}
               bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
-              sortable={[true, true, true, true, true, true, true]}
               condensed={isMobile}
+              sortable={[true, true, true, true, true, true, true]}
               headings={[
                 { title: 'Cart ID' },
                 { title: 'Customer' },
@@ -329,51 +329,55 @@ export default function CartsTable() {
                         last_action,
                       },
                       index,
-                    ) => (
-                      <IndexTable.Row
-                        id={id}
-                        key={id}
-                        selected={selectedResources.includes(id)}
-                        position={index}
-                        onClick={() => navigate(`/cart/${id}`)}
-                      >
-                        <IndexTable.Cell>
-                          <Text fontWeight="semibold" as="span">
-                            {id}
-                          </Text>
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                          {customer_name || 'Unlogged user'}
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                          {new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: currency,
-                          }).format(cartTotal)}
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                          <CartBadge indicator={reserved_indicator}></CartBadge>
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                          <Counter
-                            expireAt={reservation_time}
-                            status={
-                              reserved_indicator === 'paid'
-                                ? 'paid'
-                                : 'expiring'
-                            }
-                          ></Counter>
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                          {qty > 1 ? `${qty} items` : `${qty} item`}
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                          {formatTime(
-                            Date.now() - new Date(last_action).getTime(),
-                          )}
-                        </IndexTable.Cell>
-                      </IndexTable.Row>
-                    ),
+                    ) => {
+                      return (
+                        <IndexTable.Row
+                          id={id}
+                          key={id}
+                          selected={selectedResources.includes(id)}
+                          position={index}
+                          onClick={() => navigate(`/cart/${id}`)}
+                        >
+                          <IndexTable.Cell>
+                            <Text fontWeight="semibold" as="span">
+                              {id}
+                            </Text>
+                          </IndexTable.Cell>
+                          <IndexTable.Cell>
+                            {customer_name || 'Unlogged user'}
+                          </IndexTable.Cell>
+                          <IndexTable.Cell>
+                            {new Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: currency,
+                            }).format(cartTotal)}
+                          </IndexTable.Cell>
+                          <IndexTable.Cell>
+                            <CartBadge
+                              indicator={reserved_indicator}
+                            ></CartBadge>
+                          </IndexTable.Cell>
+                          <IndexTable.Cell>
+                            <Counter
+                              expireAt={reservation_time}
+                              status={
+                                reserved_indicator === 'paid'
+                                  ? 'paid'
+                                  : 'expiring'
+                              }
+                            ></Counter>
+                          </IndexTable.Cell>
+                          <IndexTable.Cell>
+                            {qty > 1 ? `${qty} items` : `${qty} item`}
+                          </IndexTable.Cell>
+                          <IndexTable.Cell>
+                            {formatTime(
+                              Date.now() - new Date(last_action).getTime(),
+                            )}
+                          </IndexTable.Cell>
+                        </IndexTable.Row>
+                      );
+                    },
                   )}
             </IndexTable>
           ) : (

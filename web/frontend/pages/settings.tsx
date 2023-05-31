@@ -269,8 +269,9 @@ export default function Settings() {
                   Reservation time
                 </Text>
                 <Text color="subdued" as="p">
-                  You can set the time for which customers can reserve products
-                  depending on their priority level
+                  You can set how long customers items are reserved for
+                  depending on their priority level. A customers priority level
+                  can be changed from within a customers cart.
                 </Text>
               </VerticalStack>
             </div>
@@ -392,7 +393,7 @@ export default function Settings() {
                 </Text>
                 <Text color="subdued" as="p">
                   {
-                    "Improve deliverability by proving to inbox providers that you own the domain you're sending from."
+                    'This is where you can configure the app to send emails from your own custom domain.'
                   }
                 </Text>
               </VerticalStack>
