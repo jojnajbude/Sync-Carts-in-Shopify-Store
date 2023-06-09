@@ -16,7 +16,7 @@ export default function MediaCardBanner({ plan }: any) {
           content: 'Start setup',
           onAction: () => navigate('/faq'),
         }}
-        description="Learn how to setup Better Carts so you can start using your new app!"
+        description="Learn how to setup Smart Carts so you can start using your new app!"
         popoverActions={[
           {
             content: 'Dont show this again',

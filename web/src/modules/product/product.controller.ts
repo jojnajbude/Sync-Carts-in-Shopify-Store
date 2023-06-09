@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Req, Res } from "@nestjs/common";
 import { LATEST_API_VERSION } from "@shopify/shopify-api";
-import { query, Request, Response } from "express";
+import { Request, Response } from "express";
 import shopify from "../../utils/shopify.js";
 import { ProductService } from "./product.service.js";
 

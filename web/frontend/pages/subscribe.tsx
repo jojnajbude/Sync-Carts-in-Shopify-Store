@@ -14,6 +14,7 @@ import {
   Modal,
   Toast,
   Button,
+  FooterHelp,
 } from '@shopify/polaris';
 import { useNavigate } from '@shopify/app-bridge-react';
 import { useAuthenticatedFetch } from '../hooks';
@@ -205,7 +206,7 @@ export default function Subscribe() {
                 title="Growth"
                 currentPlan={plan.plan}
                 limit={1000}
-                info="Tailored for medium-sized businesses experiencing rapid growth. With the ability to manage up to 1,000 carts, the Growth Plan ensures you can keep up with your expanding customer base while taking full advantage of all Better Carts' features."
+                info="Tailored for medium-sized businesses experiencing rapid growth. With the ability to manage up to 1,000 carts, the Growth Plan ensures you can keep up with your expanding customer base while taking full advantage of all Smart Carts' features."
                 price={60}
                 description="Choose Growth"
                 onClick={() => {
@@ -306,6 +307,8 @@ export default function Subscribe() {
           </Layout>
         )}
       </Frame>
+
+      <FooterHelp>© Simplify Apps. All rights reserved.</FooterHelp>
     </Page>
   );
 }

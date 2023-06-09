@@ -4,8 +4,6 @@ import ElasticEmail from '@elasticemail/elasticemail-client';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Shop } from "../shops/shop.entity.js";
-import { Customer } from "../customers/customer.entity.js";
-import { Cart } from "../carts/cart.entity.js";
 import { Item } from "../items/item.entity.js";
 
 import { config } from 'dotenv';
@@ -20,8 +18,6 @@ const emailsApi = new ElasticEmail.EmailsApi();
 export class NotificationsService {
   constructor(
     @InjectRepository(Shop) private shopRepository: Repository<Shop>,
-    @InjectRepository(Customer) private customerRepository: Repository<Customer>,
-    @InjectRepository(Cart) private cartRepository: Repository<Cart>,
     @InjectRepository(Item) private itemRepository: Repository<Item>,
     ) {}
 
@@ -106,7 +102,7 @@ export class NotificationsService {
             Content: content
           },
         ],
-        From: shop.email_domain ? shop.email_domain : "better-carts.com",
+        From: shop.email_domain ? shop.email_domain : "YourCart@smartcartsapp.com",
         Subject: subject
       }
     }
@@ -175,22 +171,21 @@ export class NotificationsService {
 
     switch (type) {
       case 'reminder':
-        template = await JSON.parse(shop.cart_reminder_html)
+        template = shop.cart_reminder_html
         break;
 
       case 'update':
-        template = await JSON.parse(shop.cart_updated_html)
+        template = shop.cart_updated_html
         break;
 
       case 'soon':
-        template = await JSON.parse(shop.expiring_soon_html)
+        template = shop.expiring_soon_html
         break;
 
       case 'expired':
-        template = await JSON.parse(shop.expired_items_html)
+        template = shop.expired_items_html
         break;
     }
-
     
     template = template.replace('{{link}}', `https://${shop.domain}/cart`);
     template = template.replace('{{shop_email}}', `${shop.email}`);

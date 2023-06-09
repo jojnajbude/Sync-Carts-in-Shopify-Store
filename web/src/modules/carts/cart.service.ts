@@ -1,6 +1,6 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, IsNull, Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Item } from "../items/item.entity.js";
 import { shopifySession } from "../../types/session.js";
 import { Shop } from "../shops/shop.entity.js";

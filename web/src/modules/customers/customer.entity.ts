@@ -9,7 +9,7 @@ export class Customer {
   @Column({ type: 'bigint' })
   shop_id: number;
 
-  @ManyToOne((type) => Shop, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Shop, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 

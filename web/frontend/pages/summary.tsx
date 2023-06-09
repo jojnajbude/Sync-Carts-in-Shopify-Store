@@ -25,7 +25,7 @@ export default function cartsSummary() {
     >
       <Frame>
         <CartsTable></CartsTable>
-        <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
+        <FooterHelp>© Simplify Apps. All rights reserved.</FooterHelp>
       </Frame>
     </Page>
   );

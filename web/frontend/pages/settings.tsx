@@ -596,7 +596,7 @@ export default function Settings() {
           </Modal.Section>
         </Modal>
 
-        <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
+        <FooterHelp>© Simplify Apps. All rights reserved.</FooterHelp>
       </Page>
     </Frame>
   );

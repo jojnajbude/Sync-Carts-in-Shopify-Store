@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
+import { Controller, Get, Query, Res } from "@nestjs/common";
 import { Response } from "express";
 import { SubscribeService } from "./subscribe.service.js";
 
@@ -8,7 +8,6 @@ export class SubscribeController {
 
   @Get('get')
   async getSubscription(@Res() res: Response) {
-    console.log("here")
     const session = res.locals.shopify.session;
 
     const plan = await this.subscribeService.getSubscription(session);

@@ -33,8 +33,8 @@ export class ItemsService {
     const soonExpiredItemsIds: any[] = [];
 
     for (const item of reservedItems) {
-      if ((item.expire_at.getTime() - actualDate) / 3600000 <= 2 && (item.expire_at.getTime() - actualDate) / 3600000 > 2) {
-        soonExpiredItemsIds.push(item);
+      if ((item.expire_at.getTime() - actualDate) / 3600000 <= 2 && (item.expire_at.getTime() - actualDate) / 3600000 > 1.9) {
+        soonExpiredItemsIds.push(item.id);
       }
 
       if (item.expire_at === null || item.expire_at.getTime() - actualDate <= 0) {
@@ -51,7 +51,7 @@ export class ItemsService {
           cart_id: item.cart_id,
         }
     
-        const newLog = await this.logService.createLog(log);
+        await this.logService.createLog(log);
       }
     }
 

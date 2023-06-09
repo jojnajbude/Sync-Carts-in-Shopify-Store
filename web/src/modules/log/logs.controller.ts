@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
+import { Controller, Get, Res } from "@nestjs/common";
 import { Response } from "express";
-import { CreateLogDto } from "./dto/create-log.dto";
 import { LogsService } from "./logs.service.js";
 
 @Controller('/api/logs')

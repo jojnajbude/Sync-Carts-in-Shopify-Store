@@ -44,16 +44,9 @@ export class StorefrontController {
     }
   }
 
-  @Post('customer/update')
-  async updateCustomer(@Req() req: Request, @Res() res: Response) {
-    const user = await this.storefrontService.updateUser(req.body);
-
-    user ? res.status(200).send(user) : res.status(500).send('Server error');
-  }
-
   @Get('time')
   async getReserveTime(@Query() query: { item: string, cart: string, user: string, shop: number }, @Res() res: Response) {
-    const time = await this.storefrontService.getReserveTime(query.item, query.cart, query.user, query.shop)
+    const time = await this.storefrontService.getReserveTime(query.item, query.cart, query.shop)
 
     time ? res.status(200).send(time) : res.status(404).send(false);
   }
@@ -72,12 +65,6 @@ export class StorefrontController {
   async handleTimeUpdate(@Body() body: any, @Res() res: Response) {
     const [ oldItems, cart_token ] = body;
 
-    const newExpireDates = await this.storefrontService.updateTime(oldItems, cart_token)
+    await this.storefrontService.updateTime(oldItems, cart_token)
   }
-
-  @Post('app/uninstalled')
-  async removeShopData(@Body() body: any, @Res() res: Response) {
-    const shopify_id = body.id;
-    const removedShop = await this.storefrontService.removeShop(shopify_id);
-  } 
 }

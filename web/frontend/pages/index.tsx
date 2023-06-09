@@ -252,7 +252,7 @@ export default function HomePage() {
           </LegacyCard>
         </Layout.Section>
       </Layout>
-      <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
+      <FooterHelp>© Simplify Apps. All rights reserved.</FooterHelp>
     </Page>
   );
 }

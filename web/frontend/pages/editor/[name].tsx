@@ -41,7 +41,11 @@ export default function EmailCustomizer() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: await JSON.stringify({ name, html, design }),
+      body: await JSON.stringify({
+        name,
+        html,
+        design,
+      }),
     });
 
     setIsLoading(false);

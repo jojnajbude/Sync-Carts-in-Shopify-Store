@@ -50,7 +50,7 @@ export const themes = [
         <iframe
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/YO-N2M7I4EY"
+          src="https://www.youtube.com/embed/mb3bv9_RdOU"
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -102,7 +102,7 @@ export const themes = [
         <iframe
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/rWuNZ9Ek87I"
+          src="https://www.youtube.com/embed/_paStWTunEk"
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -154,7 +154,7 @@ export const themes = [
         <iframe
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/xqLNnZB7emg"
+          src="https://www.youtube.com/embed/oLGXxzH-4YU"
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -179,7 +179,7 @@ export const themes = [
         <pre>
           <code>
             {
-              '{%  render "reserve-timer", variant_id: item.variant_id, color: "red" %}'
+              '{% render "reserve-timer", variant_id: product.variant_id, color: "red" %}'
             }
           </code>
         </pre>
@@ -231,7 +231,7 @@ export const themes = [
         <pre>
           <code>
             {
-              '{%  render "reserve-timer", variant_id: item.variant_id, color: "red" %}'
+              '{% render "reserve-timer", variant_id: line_item.variant_id, color: "red" %}'
             }
           </code>
         </pre>
@@ -258,7 +258,7 @@ export const themes = [
         <iframe
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/aiHB4ijhzFs"
+          src="https://www.youtube.com/embed/DAiidAAF86Q"
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -310,7 +310,7 @@ export const themes = [
         <iframe
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/ZMavqsRiTAQ"
+          src="https://www.youtube.com/embed/0X0FV7534iQ"
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

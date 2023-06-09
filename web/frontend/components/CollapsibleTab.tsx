@@ -66,7 +66,7 @@ export default function CollapsibleTab() {
       <LegacyCard.Section>
         <VerticalStack gap="2">
           <Text as="span">
-            Use this step by step guide to get started with Better Carts
+            Use this step by step guide to get started with Smart Carts
           </Text>
         </VerticalStack>
       </LegacyCard.Section>
@@ -97,7 +97,7 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={firstChecked ? 'success' : 'subdued'}
                   >
-                    Add Better Carts embed block to your shopify theme.
+                    Add Smart Carts embed block to your shopify theme.
                   </Text>
                 </Button>
               </HorizontalStack>
@@ -121,7 +121,7 @@ export default function CollapsibleTab() {
                     Go to <b>App embeds</b> section in the aside bar
                   </List.Item>
                   <List.Item>
-                    Switch on <b>Better Carts</b> embed section
+                    Switch on <b>Smart Carts</b> embed section
                   </List.Item>
                 </List>
 
@@ -242,9 +242,18 @@ export default function CollapsibleTab() {
               expandOnPrint
             >
               <VerticalStack gap="4">
+                <iframe
+                  width="560"
+                  height="315"
+                  src="https://www.youtube.com/embed/sXi915qhkj4"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
                 <List type="number">
                   <List.Item>
-                    Go to <b>Settings</b>, then find <b>Verify domain</b>
+                    Go to <b>Settings</b>, then find <b>Verify domain</b>{' '}
                     section.
                   </List.Item>
                   <List.Item>
@@ -257,8 +266,10 @@ export default function CollapsibleTab() {
                   </List.Item>
                   <List.Item>
                     Click <b>Verify domain</b> button. If all good, status
-                    badges will change for <b>Verified</b>. Note: it can take up
-                    to 24 hours to verify your domain.
+                    badges will change for <b>Verified</b>.{' '}
+                    <i>
+                      Note: it can take up to 24 hours to verify your domain.
+                    </i>
                   </List.Item>
                 </List>
 

@@ -69,5 +69,5 @@ export class getShopDataMiddleware implements NestMiddleware {
 }
 
 function getTemplate(type: string, format: string) {
-  return JSON.stringify(fs.readFileSync(path.resolve(process.cwd(), `src/templates/${type}.${format}`), { encoding: 'utf8' }));
+  return fs.readFileSync(path.resolve(process.cwd(), `src/templates/${type}.${format}`), { encoding: 'utf8' });
 }

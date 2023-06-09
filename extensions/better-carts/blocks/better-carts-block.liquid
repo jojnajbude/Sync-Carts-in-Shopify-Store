@@ -1,21 +1,18 @@
 <script>
   window.better_carts = {
     {% if customer %}
-      id: {{ customer.id }},
-    {% endif %}
-      shop: '{{ shop.id }}',
-    };
+      id : {{ customer.id }},{% endif %}shop: '{{ shop.id }}'
+  };
 </script>
 
 <script
   src="{{ 'better-carts.js' | asset_url }}"
   type="module"
-  defer>
-</script>
+  defer></script>
 
 {% schema %}
   {
-    "name": "Better Carts",
+    "name": "Smart Carts",
     "target": "head"
   }
 {% endschema %}

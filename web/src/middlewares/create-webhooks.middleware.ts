@@ -20,7 +20,6 @@ export class createWebhooks implements NestMiddleware {
     const cartCreate = webhooks.find(webhook => webhook.topic.includes('carts/create'));
     const cartUpdate = webhooks.find(webhook => webhook.topic.includes('carts/update'));
     const orderPaid = webhooks.find(webhook => webhook.topic.includes('orders/paid'));
-    const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled'));
 
     if (!cartCreate) {
       const cartCreateWebhook = new shopify.api.rest.Webhook({session});
@@ -48,16 +47,6 @@ export class createWebhooks implements NestMiddleware {
       customerUpdateWebhook.topic = 'orders/paid';
       customerUpdateWebhook.format = 'json';
       await customerUpdateWebhook.save({
-        update: true
-      })
-    }
-
-    if (!appUninstalled) {
-      const appUninstalledWebhook = new shopify.api.rest.Webhook({session});
-      appUninstalledWebhook.address = `${process.env.HOST}storefront/app/uninstalled`;
-      appUninstalledWebhook.topic = 'app/uninstalled';
-      appUninstalledWebhook.format = 'json';
-      await appUninstalledWebhook.save({
         update: true
       })
     }

@@ -6,17 +6,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Item } from "../items/item.entity.js";
 
-export const DEFAULT_PRODUCTS_COUNT = 5;
-const CREATE_PRODUCTS_MUTATION = `
-  mutation populateProduct($input: ProductInput!) {
-    productCreate(input: $input) {
-      product {
-        id
-      }
-    }
-  }
-`;
-
 @Injectable()
 export class ProductService {
   constructor(

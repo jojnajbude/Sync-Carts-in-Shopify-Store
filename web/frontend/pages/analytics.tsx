@@ -254,7 +254,7 @@ export default function EmptyStateExample() {
         </Layout.Section>
       </Layout>
 
-      <FooterHelp>© Blake Rogers. All rights reserved.</FooterHelp>
+      <FooterHelp>© Simplify Apps. All rights reserved.</FooterHelp>
     </Page>
   );
 }

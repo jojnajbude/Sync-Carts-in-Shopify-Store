@@ -1,5 +1,4 @@
-import { timestamp } from "rxjs";
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 
 @Entity('items')

@@ -10,14 +10,14 @@ export class Cart {
   @Column({ type: 'bigint', nullable: true})
   customer_id: number;
 
-  @ManyToOne((type) => Customer, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Customer, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'customer_id', referencedColumnName: 'id'})
   customer: Customer;
 
   @Column({ type: 'bigint' })
   shop_id: number;
 
-  @ManyToOne((type) => Shop, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Shop, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'shop_id', referencedColumnName: 'id'})
   shop: Shop;
 

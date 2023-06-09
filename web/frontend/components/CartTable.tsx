@@ -268,52 +268,65 @@ export default function CartsTable() {
                       index,
                     ) => {
                       return (
-                        <IndexTable.Row
-                          id={id}
+                        <div
                           key={id}
-                          selected={selectedResources.includes(id)}
-                          position={index}
                           onClick={() => navigate(`/cart/${id}`)}
+                          style={{ cursor: 'pointer' }}
                         >
-                          <div style={{ padding: '12px 16px', width: '100%' }}>
-                            <VerticalStack gap="1">
-                              <Text as="span" variant="bodySm" color="subdued">
-                                {'#' + id} •{' '}
-                                {formatTime(
-                                  Date.now() - new Date(last_action).getTime(),
-                                )}
-                              </Text>
-                              <HorizontalStack align="space-between">
+                          <IndexTable.Row
+                            id={id}
+                            key={id}
+                            selected={selectedResources.includes(id)}
+                            position={index}
+                            onClick={() => navigate(`/cart/${id}`)}
+                          >
+                            <div
+                              style={{ padding: '12px 16px', width: '100%' }}
+                            >
+                              <VerticalStack gap="1">
                                 <Text
                                   as="span"
-                                  variant="bodyMd"
-                                  fontWeight="semibold"
+                                  variant="bodySm"
+                                  color="subdued"
                                 >
-                                  {customer_name}
+                                  {'#' + id} •{' '}
+                                  {formatTime(
+                                    Date.now() -
+                                      new Date(last_action).getTime(),
+                                  )}
                                 </Text>
-                                <Text as="span" variant="bodyMd">
-                                  {new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: currency,
-                                  }).format(cartTotal)}
-                                </Text>
-                              </HorizontalStack>
-                              <HorizontalStack align="start" gap="1">
-                                <CartBadge
-                                  indicator={reserved_indicator}
-                                ></CartBadge>
-                                <Counter
-                                  expireAt={reservation_time}
-                                  status={
-                                    reserved_indicator === 'paid'
-                                      ? 'paid'
-                                      : 'expiring'
-                                  }
-                                ></Counter>
-                              </HorizontalStack>
-                            </VerticalStack>
-                          </div>
-                        </IndexTable.Row>
+                                <HorizontalStack align="space-between">
+                                  <Text
+                                    as="span"
+                                    variant="bodyMd"
+                                    fontWeight="semibold"
+                                  >
+                                    {customer_name}
+                                  </Text>
+                                  <Text as="span" variant="bodyMd">
+                                    {new Intl.NumberFormat('en-US', {
+                                      style: 'currency',
+                                      currency: currency,
+                                    }).format(cartTotal)}
+                                  </Text>
+                                </HorizontalStack>
+                                <HorizontalStack align="start" gap="1">
+                                  <CartBadge
+                                    indicator={reserved_indicator}
+                                  ></CartBadge>
+                                  <Counter
+                                    expireAt={reservation_time}
+                                    status={
+                                      reserved_indicator === 'paid'
+                                        ? 'paid'
+                                        : 'expiring'
+                                    }
+                                  ></Counter>
+                                </HorizontalStack>
+                              </VerticalStack>
+                            </div>
+                          </IndexTable.Row>
+                        </div>
                       );
                     },
                   )

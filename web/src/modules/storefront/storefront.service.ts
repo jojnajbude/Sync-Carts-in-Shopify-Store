@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
@@ -229,7 +229,7 @@ export class StorefrontService {
               cart_id: deletedItem.cart_id,
             }
         
-            const newLog = await this.logService.createLog(log);
+            await this.logService.createLog(log);
 
             return removeItem
           }
@@ -252,7 +252,7 @@ export class StorefrontService {
               cart_id: item.cart_id,
             }
 
-            const newLog = await this.logService.createLog(log);
+            await this.logService.createLog(log);
           } else if (!item) {
             const product = await shopify.api.rest.Product.find({
               session,
@@ -293,7 +293,7 @@ export class StorefrontService {
                 cart_id: cart?.id,
               }
 
-              const newLog = await this.logService.createLog(log);
+              await this.logService.createLog(log);
             } else {
               expireTime = this.countExpireDate(new Date(), 'unknown', JSON.parse(store.priorities));
               const newItem = { 
@@ -321,7 +321,7 @@ export class StorefrontService {
                 cart_id: cart?.id,
               }
 
-              const newLog = await this.logService.createLog(log);
+              await this.logService.createLog(log);
             }
           }
         }
@@ -337,22 +337,7 @@ export class StorefrontService {
     }
   }
 
-  async updateUser(user: any) {
-    try {
-      const customer = await this.customerRepository.findOneBy({ shopify_user_id: user.id });
-
-      // logic of updating name or email or phone
-      // add when receive access
-
-      return customer
-    } catch(err) {
-      console.log(err);
-      return false;
-    }
-    
-  }
-
-  async getReserveTime(variant: string, cart_token: string, user: string, shop: number) {
+  async getReserveTime(variant: string, cart_token: string, shop: number) {
     try {
       const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop })
 
@@ -439,14 +424,6 @@ export class StorefrontService {
       await this.logService.createLog(log);
   
       return [paidCart, paidItems]
-    } catch(err) {
-      console.log(err);
-    }
-  }
-
-  async removeShop(shopify_id: number) {
-    try {
-      const removedShop = await this.shopsRepository.delete({ shopify_id });
     } catch(err) {
       console.log(err);
     }

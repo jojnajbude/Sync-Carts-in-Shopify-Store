@@ -1,134 +1,134 @@
 {
-    "counters": {
-        "u_column": 1,
-        "u_row": 1,
-        "u_content_html": 1
-    },
-    "body": {
-        "id": "OaIhM1Jki1",
-        "rows": [
-            {
-                "id": "1v9_JvJRaa",
-                "cells": [
-                    1
-                ],
-                "columns": [
-                    {
-                        "id": "RR1cQ5_d5A",
-                        "contents": [
-                            {
-                                "id": "Vp9xpCo9GR",
-                                "type": "html",
-                                "values": {
-                                    "html": "<div style='font-size:16px;font-family:\"montserrat\"'>\n  <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>\n     <div style='font-weight: normal;font-size:1.2em;color:black;max-width:560px;margin:0 auto;padding:2em 0;'>\n        Items expired\n     </div>\n     Uh, oh... Item in your cart have expired! These item are no longer reserved for you, and may now be reserved and purchased by others. Checkout now to make sure you don't lose these items!\n     <br />\n     <div style=\"padding: 1em 0px; text-align: center;\">\n        <a style=\"text-decoration: none; display: inline-block; border-radius: 4px; color: #ffffff; padding: 20.0px 100.0px; background: #687361;\" href=\"{{link}}\">\n        View cart\n        </a>\n     </div>\n  </div>\n  <div style='border-top:1px solid rgb(229,229,229);padding:2em 0;'>\n     <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>\n        If you have any questions, contact us at {{shop_email}}.\n     </div>\n     <br />\n  </div>\n</div>",
-                                    "hideDesktop": false,
-                                    "displayCondition": null,
-                                    "containerPadding": "10px",
-                                    "anchor": "",
-                                    "_meta": {
-                                        "htmlID": "u_content_html_1",
-                                        "htmlClassNames": "u_content_html"
-                                    },
-                                    "selectable": true,
-                                    "draggable": true,
-                                    "duplicatable": true,
-                                    "deletable": true,
-                                    "hideable": true
-                                }
-                            }
-                        ],
-                        "values": {
-                            "backgroundColor": "",
-                            "padding": "0px",
-                            "border": {},
-                            "_meta": {
-                                "htmlID": "u_column_1",
-                                "htmlClassNames": "u_column"
-                            }
-                        }
-                    }
-                ],
-                "values": {
-                    "displayCondition": null,
-                    "columns": false,
-                    "backgroundColor": "",
-                    "columnsBackgroundColor": "",
-                    "backgroundImage": {
-                        "url": "",
-                        "fullWidth": true,
-                        "repeat": "no-repeat",
-                        "size": "custom",
-                        "position": "center"
-                    },
-                    "padding": "0px",
-                    "anchor": "",
-                    "hideDesktop": false,
-                    "_meta": {
-                        "htmlID": "u_row_1",
-                        "htmlClassNames": "u_row"
-                    },
-                    "selectable": true,
-                    "draggable": true,
-                    "duplicatable": true,
-                    "deletable": true,
-                    "hideable": true
-                }
-            }
-        ],
-        "values": {
-            "popupPosition": "center",
-            "popupWidth": "600px",
-            "popupHeight": "auto",
-            "borderRadius": "10px",
-            "contentAlign": "center",
-            "contentVerticalAlign": "center",
-            "contentWidth": "500px",
-            "fontFamily": {
-                "label": "Arial",
-                "value": "arial,helvetica,sans-serif"
-            },
-            "textColor": "#000000",
-            "popupBackgroundColor": "#FFFFFF",
-            "popupBackgroundImage": {
-                "url": "",
-                "fullWidth": true,
-                "repeat": "no-repeat",
-                "size": "cover",
-                "position": "center"
-            },
-            "popupOverlay_backgroundColor": "rgba(0, 0, 0, 0.1)",
-            "popupCloseButton_position": "top-right",
-            "popupCloseButton_backgroundColor": "#DDDDDD",
-            "popupCloseButton_iconColor": "#000000",
-            "popupCloseButton_borderRadius": "0px",
-            "popupCloseButton_margin": "0px",
-            "popupCloseButton_action": {
-                "name": "close_popup",
-                "attrs": {
-                    "onClick": "document.querySelector('.u-popup-container').style.display = 'none';"
-                }
-            },
-            "backgroundColor": "#e7e7e7",
-            "backgroundImage": {
-                "url": "",
-                "fullWidth": true,
-                "repeat": "no-repeat",
-                "size": "custom",
-                "position": "center"
-            },
-            "preheaderText": "",
-            "linkStyle": {
-                "body": true,
-                "linkColor": "#0000ee",
-                "linkHoverColor": "#0000ee",
-                "linkUnderline": true,
-                "linkHoverUnderline": true
-            },
-            "_meta": {
-                "htmlID": "u_body",
-                "htmlClassNames": "u_body"
-            }
-        }
-    },
-    "schemaVersion": 14
+  "counters": {
+      "u_column": 1,
+      "u_row": 1,
+      "u_content_html": 1
+  },
+  "body": {
+      "id": "OaIhM1Jki1",
+      "rows": [
+          {
+              "id": "1v9_JvJRaa",
+              "cells": [
+                  1
+              ],
+              "columns": [
+                  {
+                      "id": "RR1cQ5_d5A",
+                      "contents": [
+                          {
+                              "id": "Vp9xpCo9GR",
+                              "type": "html",
+                              "values": {
+                                  "html": "<div style='font-size:16px;font-family:\"montserrat\"'>\n  <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>\n     <div style='font-weight: normal;font-size:1.2em;color:black;max-width:560px;margin:0 auto;padding:2em 0;'>\n        Items in your cart are no longer reserved! These items are no longer exclusively yours, and may now be reserved and purchased by others. Don't miss out - checkout now to ensure these items remain yours!\n     </div>\n     Items in your cart are no longer reserved! These items are no longer exclusively yours, and may now be reserved and purchased by others. Don't miss out - checkout now to ensure these items remain yours!\n     <br />\n     <div style=\"padding: 1em 0px; text-align: center;\">\n        <a style=\"text-decoration: none; display: inline-block; border-radius: 4px; color: #ffffff; padding: 20.0px 100.0px; background: #687361;\" href=\"{{link}}\">\n        View cart\n        </a>\n     </div>\n  </div>\n  <div style='border-top:1px solid rgb(229,229,229);padding:2em 0;'>\n     <div style='max-width:560px;margin:0 auto;color:rgb(119,119,119);'>\n        If you have any questions, please contact us at {{shop_email}}.\n     </div>\n     <br />\n  </div>\n</div>",
+                                  "hideDesktop": false,
+                                  "displayCondition": null,
+                                  "containerPadding": "10px",
+                                  "anchor": "",
+                                  "_meta": {
+                                      "htmlID": "u_content_html_1",
+                                      "htmlClassNames": "u_content_html"
+                                  },
+                                  "selectable": true,
+                                  "draggable": true,
+                                  "duplicatable": true,
+                                  "deletable": true,
+                                  "hideable": true
+                              }
+                          }
+                      ],
+                      "values": {
+                          "backgroundColor": "",
+                          "padding": "0px",
+                          "border": {},
+                          "_meta": {
+                              "htmlID": "u_column_1",
+                              "htmlClassNames": "u_column"
+                          }
+                      }
+                  }
+              ],
+              "values": {
+                  "displayCondition": null,
+                  "columns": false,
+                  "backgroundColor": "",
+                  "columnsBackgroundColor": "",
+                  "backgroundImage": {
+                      "url": "",
+                      "fullWidth": true,
+                      "repeat": "no-repeat",
+                      "size": "custom",
+                      "position": "center"
+                  },
+                  "padding": "0px",
+                  "anchor": "",
+                  "hideDesktop": false,
+                  "_meta": {
+                      "htmlID": "u_row_1",
+                      "htmlClassNames": "u_row"
+                  },
+                  "selectable": true,
+                  "draggable": true,
+                  "duplicatable": true,
+                  "deletable": true,
+                  "hideable": true
+              }
+          }
+      ],
+      "values": {
+          "popupPosition": "center",
+          "popupWidth": "600px",
+          "popupHeight": "auto",
+          "borderRadius": "10px",
+          "contentAlign": "center",
+          "contentVerticalAlign": "center",
+          "contentWidth": "500px",
+          "fontFamily": {
+              "label": "Arial",
+              "value": "arial,helvetica,sans-serif"
+          },
+          "textColor": "#000000",
+          "popupBackgroundColor": "#FFFFFF",
+          "popupBackgroundImage": {
+              "url": "",
+              "fullWidth": true,
+              "repeat": "no-repeat",
+              "size": "cover",
+              "position": "center"
+          },
+          "popupOverlay_backgroundColor": "rgba(0, 0, 0, 0.1)",
+          "popupCloseButton_position": "top-right",
+          "popupCloseButton_backgroundColor": "#DDDDDD",
+          "popupCloseButton_iconColor": "#000000",
+          "popupCloseButton_borderRadius": "0px",
+          "popupCloseButton_margin": "0px",
+          "popupCloseButton_action": {
+              "name": "close_popup",
+              "attrs": {
+                  "onClick": "document.querySelector('.u-popup-container').style.display = 'none';"
+              }
+          },
+          "backgroundColor": "#e7e7e7",
+          "backgroundImage": {
+              "url": "",
+              "fullWidth": true,
+              "repeat": "no-repeat",
+              "size": "custom",
+              "position": "center"
+          },
+          "preheaderText": "",
+          "linkStyle": {
+              "body": true,
+              "linkColor": "#0000ee",
+              "linkHoverColor": "#0000ee",
+              "linkUnderline": true,
+              "linkHoverUnderline": true
+          },
+          "_meta": {
+              "htmlID": "u_body",
+              "htmlClassNames": "u_body"
+          }
+      }
+  },
+  "schemaVersion": 14
 }

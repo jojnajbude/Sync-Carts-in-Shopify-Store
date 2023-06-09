@@ -26,6 +26,7 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { LogModule } from "./modules/log/logs.module.js";
 import { SubscribeModule } from "./modules/subscribe/subscribe.module.js";
 import { NotificationsModule } from "./modules/notifications/notifications.module.js";
+import { MandatoryModule } from "./modules/mandatory/mandatory.module.js";
 
 import { Shop } from "./modules/shops/shop.entity.js";
 import { Item } from "./modules/items/item.entity.js";
@@ -57,11 +58,11 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
-      synchronize: true,
-      // migrations: [migrations1685455045580],
-      // ssl: {
-      //   ca: process.env.SSL_CERT,
-      // },
+      // synchronize: true,
+      migrations: [migrations1685455045580],
+      ssl: {
+        ca: process.env.SSL_CERT,
+      },
     }),
     MongooseModule.forRoot(
       process.env.MONGO_URI!,
@@ -77,6 +78,7 @@ const STATIC_PATH =
     LogModule,
     SubscribeModule,
     NotificationsModule,
+    MandatoryModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -93,6 +95,10 @@ export class AppModule implements NestModule {
       path: shopify.config.auth.callbackPath,
       method: RequestMethod.GET,
     });
+    consumer.apply(shopify.redirectToShopifyOrAppRoot()).forRoutes({
+      path: shopify.config.auth.callbackPath,
+      method: RequestMethod.GET,
+    })
 
     // Validate Authenticated Session Middleware for Backend Routes
     consumer
@@ -123,27 +129,29 @@ export class AppModule implements NestModule {
       )
       .exclude(
         { path: "/api/(.*)", method: RequestMethod.ALL },
-        { path: "/storefront/(.*)", method: RequestMethod.ALL }
+        { path: "/storefront/(.*)", method: RequestMethod.ALL },
       )
       .forRoutes({ path: "/*", method: RequestMethod.ALL });
 
     consumer
       .apply(getShopDataMiddleware)
-      .exclude({ path: "/storefront/(.*)", method: RequestMethod.ALL })
+      .exclude(
+        { path: "/storefront/(.*)", method: RequestMethod.ALL },
+      )
       .forRoutes({ path: "/api/subscribe/get", method: RequestMethod.ALL})
 
     consumer
       .apply(injectSnippet)
       .exclude(
         // { path: "/api/(.*)", method: RequestMethod.ALL },
-        { path: "/storefront/(.*)", method: RequestMethod.ALL }
+        { path: "/storefront/(.*)", method: RequestMethod.ALL },
       )
       .forRoutes({ path: "/api/subscribe/get", method: RequestMethod.ALL })
 
     consumer
       .apply(createWebhooks)
       .exclude(
-        { path: "/storefront/(.*)", method: RequestMethod.ALL }
+        { path: "/storefront/(.*)", method: RequestMethod.ALL },
       )
       .forRoutes({ path: "/api/subscribe/get", method: RequestMethod.ALL })
   }

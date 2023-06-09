@@ -1,4 +1,3 @@
-import { json } from "stream/consumers";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('shops')

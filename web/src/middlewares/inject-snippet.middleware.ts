@@ -10,6 +10,7 @@ export class injectSnippet implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
+    console.log(session)
 
     const snippet = fs.readFileSync(path.resolve(process.cwd(), './src/snippet/reserve-timer.liquid')).toString('utf8');
 
@@ -32,6 +33,7 @@ export class injectSnippet implements NestMiddleware {
       next()
     } catch (err) {
       console.log(err)
+      next()
     }
   }
 }
