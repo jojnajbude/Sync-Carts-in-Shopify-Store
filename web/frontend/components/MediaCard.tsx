@@ -1,4 +1,4 @@
-import { MediaCard } from '@shopify/polaris';
+import { MediaCard, VideoThumbnail } from '@shopify/polaris';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthenticatedFetch } from '../hooks';
@@ -11,6 +11,7 @@ export default function MediaCardBanner({ plan }: any) {
   return (
     <div style={{ display: !isOpen ? 'none' : 'block' }}>
       <MediaCard
+        portrait={true}
         title="Getting Started"
         primaryAction={{
           content: 'Start setup',
@@ -26,18 +27,16 @@ export default function MediaCardBanner({ plan }: any) {
             },
           },
         ]}
-        size="small"
       >
-        <img
-          alt=""
+        <iframe
           width="100%"
-          height="100%"
-          style={{
-            objectFit: 'cover',
-            objectPosition: 'center',
-          }}
-          src="https://thumbs.dreamstime.com/b/shopping-cart-fire-fast-shopping-concept-shopping-cart-fire-fast-shopping-concept-184933462.jpg"
-        />
+          height="350"
+          src="https://www.youtube.com/embed/y6Qy67hOnhc"
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        ></iframe>
       </MediaCard>
     </div>
   );

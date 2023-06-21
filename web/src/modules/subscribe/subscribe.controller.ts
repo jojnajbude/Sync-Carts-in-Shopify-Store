@@ -18,9 +18,16 @@ export class SubscribeController {
   @Get()
   async createRecurringApplicationCharge(@Query() query: { plan: string }, @Res() res: Response) {
     const session = res.locals.shopify.session;
-    const charge = await this.subscribeService.createRecurringApplicationCharge(session, query.plan);
+
+    let result = null;
+
+    if (query.plan === 'Free') {
+      result = await this.subscribeService.setFreePlan(session);
+    } else {
+      result = await this.subscribeService.createRecurringApplicationCharge(session, query.plan);
+    }
   
-    charge ? res.status(200).send(charge) : res.status(500).send('Server error')
+    result ? res.status(200).send(result) : res.status(500).send('Server error')
   }
 
   @Get('active')

@@ -15,6 +15,7 @@ import {
   CircleDownMajor,
   ChevronDownMinor,
   ChevronUpMinor,
+  CircleAlertMajor,
 } from '@shopify/polaris-icons';
 import { useState, useCallback, useContext } from 'react';
 import { useNavigate } from '@shopify/app-bridge-react';
@@ -206,6 +207,20 @@ export default function CollapsibleTab() {
                     Add Reservation Timer
                   </Button>
                 </div>
+
+                <Divider></Divider>
+
+                <HorizontalStack gap="2">
+                  <Icon source={CircleAlertMajor} color="subdued"></Icon>
+                  <div style={{ width: '95%' }}>
+                    <Text as="h1" fontWeight="bold" color="subdued">
+                      Before deleting the app, make sure you remove the
+                      &apos;reserve-timer.liquid&apos; snippet from your Shopify
+                      Theme, and all added custom code (see &quot;Add
+                      Reservation Timer snippet your shop cart&quot; section)
+                    </Text>
+                  </div>
+                </HorizontalStack>
               </VerticalStack>
             </Collapsible>
           </VerticalStack>

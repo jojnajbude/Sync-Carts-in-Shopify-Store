@@ -75,6 +75,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (state.isLoading) {
+      const date = new Date();
       try {
         (async () => {
           const [analytics, lastCarts, logs] = await Promise.all([
@@ -84,8 +85,8 @@ export default function HomePage() {
                 'Content-Type': 'application/json',
               },
               body: await JSON.stringify({
-                start: new Date(),
-                end: new Date(),
+                start: new Date(date.getFullYear(), date.getMonth(), 2),
+                end: date,
               }),
             }).then(res => res.json()),
             fetch('/api/carts/last').then(res => res.json()),

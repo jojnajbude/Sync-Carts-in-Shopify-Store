@@ -22,6 +22,7 @@ import { BillingCard } from '../components/BillingCard';
 import { useLocation } from 'react-router-dom';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { SubscribtionContext } from '../context/SubscribtionContext';
+import { plansFeatures } from '../constants/plans';
 
 export default function Subscribe() {
   const context = useContext(SubscribtionContext);
@@ -41,9 +42,19 @@ export default function Subscribe() {
     if (context.plan !== null) {
       const checkCharge = async () => {
         if (charge_id) {
-          setPlan(null);
+          // setPlan(null);
 
-          await fetch(`/api/subscribe/active?charge_id=${charge_id}`);
+          const newPlan = await fetch(
+            `/api/subscribe/active?charge_id=${charge_id}`,
+          );
+          const newPlanConfig = await newPlan.json();
+          const newContext = { ...context.plan };
+
+          newContext.plan = newPlanConfig.name;
+          newContext.limit = newPlanConfig.limit;
+
+          setPlan(newContext);
+          return;
         }
 
         setPlan(context.plan);
@@ -59,6 +70,17 @@ export default function Subscribe() {
     const createSubscribe = await fetch(`/api/subscribe?plan=${plan}`);
 
     if (createSubscribe.ok) {
+      if (plan === 'Free') {
+        const newContext = { ...context.plan };
+
+        newContext.plan = 'Free';
+        newContext.limit = 25;
+
+        setPlan(newContext);
+        setSelectedPlan(null);
+        return;
+      }
+
       const subscribe = await createSubscribe.json();
 
       navigate(subscribe.confirmation_url);
@@ -102,20 +124,20 @@ export default function Subscribe() {
     <Page
       title="Subscriptions"
       backAction={{ onAction: () => navigate('/') }}
-      primaryAction={
-        plan ? (
-          <div style={{ color: '#bf0711' }}>
-            <Button
-              disabled={plan.plan === 'free'}
-              monochrome
-              outline
-              onClick={handleModal}
-            >
-              Cancel subscription
-            </Button>
-          </div>
-        ) : null
-      }
+      // primaryAction={
+      //   plan ? (
+      //     <div style={{ color: '#bf0711' }}>
+      //       <Button
+      //         disabled={plan.plan === 'Free'}
+      //         monochrome
+      //         outline
+      //         onClick={handleModal}
+      //       >
+      //         Cancel subscription
+      //       </Button>
+      //     </div>
+      //   ) : null
+      // }
     >
       <Frame>
         {plan ? (
@@ -188,10 +210,25 @@ export default function Subscribe() {
 
             <Layout.Section oneThird>
               <BillingCard
+                title="Free"
+                currentPlan={plan.plan}
+                limit={50}
+                info={plansFeatures.free}
+                price={0}
+                description="Choose Free"
+                onClick={() => {
+                  createSubscribe('Free');
+                }}
+                selectedPlan={selectedPlan}
+              />
+            </Layout.Section>
+
+            <Layout.Section oneThird>
+              <BillingCard
                 title="Starter"
                 currentPlan={plan.plan}
                 limit={500}
-                info="The perfect plan to get started with! The starter plan allows you to manage up to 500 carts. Experience all of our powerful features while handling a larger customer base, ideal for businesses that are beginning to really take off."
+                info={plansFeatures.starter}
                 price={30}
                 description="Choose Starter"
                 onClick={() => {
@@ -201,12 +238,12 @@ export default function Subscribe() {
               />
             </Layout.Section>
 
-            <Layout.Section oneThird>
+            <Layout.Section oneHalf>
               <BillingCard
                 title="Growth"
                 currentPlan={plan.plan}
                 limit={1000}
-                info="Tailored for medium-sized businesses experiencing rapid growth. With the ability to manage up to 1,000 carts, the Growth Plan ensures you can keep up with your expanding customer base while taking full advantage of all Smart Carts' features."
+                info={plansFeatures.growth}
                 price={60}
                 description="Choose Growth"
                 onClick={() => {
@@ -216,12 +253,12 @@ export default function Subscribe() {
               />
             </Layout.Section>
 
-            <Layout.Section oneThird>
+            <Layout.Section oneHalf>
               <BillingCard
                 title="Pro"
                 currentPlan={plan.plan}
                 limit={2000}
-                info="The Pro Plan is designed for established businesses with large customer bases. With the capability to manage up to 3,000 carts, this plan gives you the scale needed to handle extensive product lines and large volumes of customers."
+                info={plansFeatures.pro}
                 price={100}
                 description="Choose Pro"
                 onClick={() => {

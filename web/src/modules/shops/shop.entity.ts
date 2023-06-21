@@ -20,7 +20,7 @@ export class Shop {
   @Column({ nullable: true })
   currency: string;
 
-  @Column({ default: 'free' })
+  @Column({ default: 'Free' })
   plan: string;
 
   @Column({ nullable: true, type: 'bigint' })
@@ -29,7 +29,7 @@ export class Shop {
   @Column({ default: 0 })
   carts: number;
 
-  @Column({ default: 50 })
+  @Column({ default: 25 })
   limit: number;
 
   @Column({ default: 'active' })

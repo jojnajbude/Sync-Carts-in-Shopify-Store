@@ -78,14 +78,20 @@ export default function ProductsList({
         updatedCart.items[index].inventory_quantity =
           productData.inventory_quantity;
 
-        if (newValue > productData.inventory_quantity) {
+        if (
+          newValue > productData.inventory_quantity &&
+          item.inventory_policy === 'deny'
+        ) {
           setIsUnvalidInputs('more');
           return;
         }
       }
     }
 
-    if (Number(newValue) > 10000 || +newValue > item.inventory_quantity) {
+    if (
+      (Number(newValue) > 10000 || +newValue > item.inventory_quantity) &&
+      item.inventory_policy === 'deny'
+    ) {
       setIsUnvalidInputs('more');
       return;
     }
@@ -133,7 +139,10 @@ export default function ProductsList({
           label=""
           type="number"
           min={1}
-          error={item.qty > item.inventory_quantity}
+          error={
+            item.qty > item.inventory_quantity &&
+            item.inventory_policy === 'deny'
+          }
           value={String(item.qty)}
           onChange={newValue => handleChange(newValue, item)}
           autoComplete="off"

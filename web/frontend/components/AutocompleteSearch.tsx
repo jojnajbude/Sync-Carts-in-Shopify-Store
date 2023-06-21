@@ -173,6 +173,13 @@ export default function AutocompleteSearch({
         const data = await fetch(`/api/products/find?input=${value}`);
         const products = await data.json();
 
+        console.log(products);
+
+        // const filteredProducts = products.filter(
+        //   (product: { node: { totalInventory: number } }) =>
+        //     product.node.totalInventory > 0,
+        // );
+
         results = products.map((product: GraphQlProduct) => ({
           label: createProductOption(
             product.node.title,
@@ -207,12 +214,32 @@ export default function AutocompleteSearch({
   const handleSelect = async ([selected]: string[]) => {
     setIsUnvalidInputs('none');
     if (type === 'products') {
-      dispatch({ type: 'setVariantModal', value: null });
+      dispatch({ type: 'setVariantModal', value: false });
 
       const productId = selected.split('/').slice(-1)[0];
 
       const data = await fetch(`/api/products/get?id=${productId}`);
       const productWithVariants = await data.json();
+
+      if (
+        productWithVariants.variants.length === 1 &&
+        productWithVariants.variants[0].inventory_policy !== 'continue'
+      ) {
+        const variant = productWithVariants.variants[0];
+        const product = productWithVariants;
+
+        if (!variant.image_id) {
+          variant.image_link = product.image.src;
+        } else {
+          variant.image_link = product.images.find(
+            (image: { id: number }) => image.id === variant.image_id,
+          ).src;
+        }
+
+        addItemToCart(variant, product);
+        dispatch({ type: 'closeModal' });
+        return;
+      }
 
       dispatch({ type: 'setVariantModal', value: productWithVariants });
     } else {
@@ -266,7 +293,13 @@ export default function AutocompleteSearch({
     }
 
     setCart(changedCart);
-    dispatch({ type: 'closeModal' });
+
+    if (
+      product.variants.length !== 1 ||
+      product.variants[0].inventory_policy === 'continue'
+    ) {
+      dispatch({ type: 'closeModal' });
+    }
   };
 
   const openCart = (cartId: number | boolean) => {

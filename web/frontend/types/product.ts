@@ -11,6 +11,7 @@ export interface Variant {
   price: string;
   image_id: number;
   image_link: string;
+  inventory_policy?: string;
 }
 
 export interface Image {

@@ -6,6 +6,7 @@ import {
   LegacyStack,
   Thumbnail,
   Icon,
+  VerticalStack,
 } from '@shopify/polaris';
 import { ProductsMajor } from '@shopify/polaris-icons';
 import { Product, Variant } from '../types/product';
@@ -25,7 +26,9 @@ export default function VariantsList({
   currency,
 }: Props) {
   const filterOutOfStock = product.variants.filter(
-    variant => variant.inventory_quantity !== 0,
+    variant =>
+      variant.inventory_quantity !== 0 ||
+      variant.inventory_policy === 'continue',
   );
 
   const emptyStateMarkup = (
@@ -71,9 +74,17 @@ export default function VariantsList({
               }
             >
               <LegacyStack distribution="fillEvenly">
-                <Text variant="bodyMd" fontWeight="bold" as="h3">
-                  {title}
-                </Text>
+                <VerticalStack>
+                  <Text variant="bodyMd" fontWeight="bold" as="h3">
+                    {title}
+                  </Text>
+
+                  <Text as="span" color="subdued" variant="bodySm">
+                    {variant.inventory_policy === 'continue' &&
+                      'continue selling when out of stock'}
+                  </Text>
+                </VerticalStack>
+
                 <Text variant="bodyMd" as="h3" alignment="end">
                   {`${inventory_quantity} available`}
                 </Text>

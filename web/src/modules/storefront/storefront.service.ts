@@ -429,6 +429,14 @@ export class StorefrontService {
     }
   }
 
+  handleAppUninstalled(shop: string) {
+    try {
+      return this.shopsRepository.update({ domain: shop }, { plan: 'Free', limit: 25 });
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
   async updateTime(oldItems: any[], cart_token: string) {
     try {
       const items = await this.itemRepository.query(

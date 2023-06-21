@@ -28,4 +28,5 @@ export interface Item {
   reserved_indicator: string;
   inventory_quantity?: number;
   variant_title?: string;
+  inventory_policy?: string;
 }

@@ -44,6 +44,19 @@ export class StorefrontController {
     }
   }
 
+  @Post('app/uninstalled')
+  async handleAppUninstalled(@Req() req: Request, @Res() res: Response) {
+    const shopDomain = req.get('x-shopify-shop-domain');
+    console.log('here')
+
+    if (shopDomain) {
+      await this.storefrontService.handleAppUninstalled(shopDomain);
+      res.status(200).send('OK');
+    } else {
+      res.status(404).send('Unable to identify the store');
+    }
+  }
+
   @Get('time')
   async getReserveTime(@Query() query: { item: string, cart: string, user: string, shop: number }, @Res() res: Response) {
     const time = await this.storefrontService.getReserveTime(query.item, query.cart, query.shop)

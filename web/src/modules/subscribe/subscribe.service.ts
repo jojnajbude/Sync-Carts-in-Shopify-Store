@@ -51,12 +51,32 @@ export class SubscribeService {
         const recurring_application_charge = new shopify.api.rest.RecurringApplicationCharge({session: session});
         recurring_application_charge.name = plan_config.name;
         recurring_application_charge.price = plan_config.price;
-        recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts-1/subscribe`;
+        recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts-dev/subscribe`;
+        // recurring_application_charge.test = true;
         await recurring_application_charge.save({
           update: true,
         });
 
         return recurring_application_charge;
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  async setFreePlan(session: shopifySession) {
+    try {
+      const shop = await this.shopRepository.findOneBy({ domain: session.shop });
+
+      if (shop?.plan !== 'Free') {
+        const cancelledPlan = await shopify.api.rest.RecurringApplicationCharge.delete({
+          session,
+          id: shop?.charge_id,
+        });
+
+        const freePlan = await this.shopRepository.update({ domain: session.shop }, { plan: 'Free', limit: 25, charge_id: 0, status: 'active' });
+
+        return freePlan ? true : false;
       }
     } catch(err) {
       console.log(err);
@@ -99,7 +119,7 @@ export class SubscribeService {
         if (plan_config) {
           const activatePlan = await this.shopRepository.update({ domain: session.shop }, { plan: plan_config.name, limit: plan_config.limit, charge_id: Number(charge_id), status: 'active' })
   
-          return activatePlan ? activatePlan : false;
+          return activatePlan ? plan_config : false;
         }      
       }
   
