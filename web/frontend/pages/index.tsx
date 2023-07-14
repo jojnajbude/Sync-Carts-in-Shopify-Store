@@ -9,6 +9,8 @@ import {
   SkeletonBodyText,
   Banner,
   EmptySearchResult,
+  Button,
+  VerticalStack,
 } from '@shopify/polaris';
 
 import AreaChart from '../components/charts/AreaChart';
@@ -147,6 +149,20 @@ export default function HomePage() {
             <MediaCardBanner plan={context.plan}></MediaCardBanner>
           </Layout.Section>
         ) : null}
+
+        <Layout.Section fullWidth>
+          <LegacyCard
+            sectioned
+            title="Inject timer snippet to your Shopify Theme"
+            primaryFooterAction={{
+              content: 'Inject snippet',
+              onAction: () => navigate('/settings'),
+            }}
+          >
+            To allow users to see reservation timers in their carts, inject the
+            timer snippet into your current Shopify theme.
+          </LegacyCard>
+        </Layout.Section>
 
         <Layout.Section fullWidth>
           <LinearChart

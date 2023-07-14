@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import { Response } from "express";
 import { ShopService } from "./shop.service.js";
 
@@ -30,5 +30,23 @@ export class ShopController {
   async disableTutorial(@Res() res: Response) {
     const domain = res.locals.shopify.session.shop;
     this.shopService.disableTutorial(domain);
+  }
+
+  @Get('themes')
+  async getThemes(@Res() res: Response) {
+    const session = res.locals.shopify.session;
+
+    const themes = await this.shopService.getThemes(session);
+
+    themes ? res.status(200).send(themes) : res.status(500).send('Server error')  
+  }
+
+  @Get('theme/edit')
+  async injectSnippet(@Query() query: { name: string }, @Res() res: Response) {
+    const session = res.locals.shopify.session;
+
+    const editedTheme = await this.shopService.injectSnippet(session, query.name);
+
+    editedTheme ? res.status(200).send(editedTheme) : res.status(500).send('Server error')  
   }
 }

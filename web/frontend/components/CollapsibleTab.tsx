@@ -22,6 +22,8 @@ import { useNavigate } from '@shopify/app-bridge-react';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import { themes } from '../constants/themes';
 
+import { useMediaQuery } from 'react-responsive';
+
 export default function CollapsibleTab() {
   const context = useContext(SubscribtionContext);
   const [open, setOpen] = useState(true);
@@ -41,6 +43,8 @@ export default function CollapsibleTab() {
   );
 
   const navigate = useNavigate();
+
+  const isMobile = useMediaQuery({ query: '(max-width: 640px)' });
 
   const handleToggle = useCallback(() => setOpen(open => !open), []);
 
@@ -163,7 +167,8 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={secondChecked ? 'success' : 'subdued'}
                   >
-                    Add Reservation Timer snippet to your shop cart.
+                    Why does the reservation timer not show up after
+                    installation?
                   </Text>
                 </Button>
               </HorizontalStack>
@@ -184,7 +189,19 @@ export default function CollapsibleTab() {
                     value={selectedTheme}
                   />
                 </div>
-                {themes.find(theme => theme.value === selectedTheme).video}
+
+                <iframe
+                  width={isMobile ? '380' : '560'}
+                  height={isMobile ? '250' : '315'}
+                  src={
+                    themes.find(theme => theme.value === selectedTheme).video
+                  }
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+
                 <List type="number">
                   {themes
                     .find(theme => theme.value === selectedTheme)

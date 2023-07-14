@@ -18,6 +18,7 @@ import {
   Link,
   HorizontalStack,
   Badge,
+  Select,
 } from '@shopify/polaris';
 import { DuplicateMinor } from '@shopify/polaris-icons';
 import {
@@ -148,11 +149,15 @@ export default function Settings() {
     dkimStatus: false,
   });
   const [toastText, setToastText] = useState('Settings successfully updated');
+  const [themes, setThemes] = useState([]);
+  const [selectedTheme, setSelectedTheme] = useState(null);
   const context = useContext(SubscribtionContext);
 
   useEffect(() => {
     if (isLoading) {
       const getSettings = async () => {
+        const themes = await fetch('/api/shop/themes');
+        const themeData = await themes.json();
         const settingsData = await fetch('/api/shop/settings');
 
         if (settingsData.ok) {
@@ -161,6 +166,8 @@ export default function Settings() {
 
           initialState = state;
           dispatch({ type: 'setStates', states: state });
+          setThemes(themeData);
+          setSelectedTheme(themeData[0].name);
           setIsLoading(false);
         }
 
@@ -243,6 +250,13 @@ export default function Settings() {
     dispatch({ type: 'setToast', value: true });
   };
 
+  const injectSnippet = async (theme: string) => {
+    const editTheme = await fetch(`/api/shop/theme/edit?name=${theme}`);
+
+    setToastText('Timer successfully injected');
+    dispatch({ type: 'setToast', value: true });
+  };
+
   return (
     <Frame>
       <Page
@@ -262,6 +276,41 @@ export default function Settings() {
         backAction={{ onAction: () => navigate(-1) }}
       >
         <Layout>
+        <Layout.Section oneThird>
+            <div style={{ marginTop: 'var(--p-space-5)' }}>
+              <VerticalStack gap={'4'}>
+                <Text id="storeDetails" variant="headingMd" as="h2">
+                  Inject timer in Shopify theme.
+                </Text>
+                <Text color="subdued" as="p">
+                  To allow users to see reservation timers in their carts,
+                  inject the timer snippet into your current Shopify theme.
+                </Text>
+              </VerticalStack>
+            </div>
+          </Layout.Section>
+
+          <Layout.Section oneHalf>
+            <LegacyCard sectioned title="Inject snippet">
+              <Select
+                label="Theme"
+                options={themes.map(theme => theme.name)}
+                onChange={setSelectedTheme}
+                value={selectedTheme}
+              />
+
+              <div style={{ marginTop: '10px' }}>
+                <Button primary onClick={() => injectSnippet(selectedTheme)}>
+                  Inject
+                </Button>
+              </div>
+            </LegacyCard>
+          </Layout.Section>
+
+          <Layout.Section fullWidth>
+            <Divider></Divider>
+          </Layout.Section>
+
           <Layout.Section oneThird>
             <div style={{ marginTop: 'var(--p-space-5)' }}>
               <VerticalStack gap={'4'}>

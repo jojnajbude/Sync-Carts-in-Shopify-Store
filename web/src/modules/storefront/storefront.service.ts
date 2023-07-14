@@ -429,9 +429,19 @@ export class StorefrontService {
     }
   }
 
-  handleAppUninstalled(shop: string) {
+  async handleAppUninstalled(shop: string) {
     try {
-      return this.shopsRepository.update({ domain: shop }, { plan: 'Free', limit: 25 });
+      const shopEntity = await this.shopsRepository.findOneBy({ domain: shop });
+
+      if (shopEntity) {
+        console.log('uninstalled hook')
+        const session = JSON.parse(shopEntity.session);
+        console.log(session)
+
+        return await this.shopsRepository.update({ domain: shop }, { plan: 'Free', limit: 25, charge_id: undefined, session: undefined });
+      } else {
+        return false;
+      }
     } catch(err) {
       console.log(err);
     }

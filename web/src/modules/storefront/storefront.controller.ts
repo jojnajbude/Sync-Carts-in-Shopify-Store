@@ -47,6 +47,7 @@ export class StorefrontController {
   @Post('app/uninstalled')
   async handleAppUninstalled(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
+    console.log(shopDomain)
     console.log('here')
 
     if (shopDomain) {

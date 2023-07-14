@@ -173,8 +173,6 @@ export default function AutocompleteSearch({
         const data = await fetch(`/api/products/find?input=${value}`);
         const products = await data.json();
 
-        console.log(products);
-
         // const filteredProducts = products.filter(
         //   (product: { node: { totalInventory: number } }) =>
         //     product.node.totalInventory > 0,
@@ -378,7 +376,6 @@ export default function AutocompleteSearch({
   };
 
   const optionList = state.options.slice(0, state.visibleOptionIndex);
-
   const textField = (
     <Autocomplete.TextField
       prefix={<Icon source={SearchMinor} color="base" />}

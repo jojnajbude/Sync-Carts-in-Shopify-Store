@@ -3,6 +3,12 @@ export const themes = [
     label: 'Free themes',
     value: 'free',
     steps: [
+      <>Confirm that you have the Smart Carts embed block turned on</>,
+      <>
+        Make sure you are signed in to an account when you add items to your
+        cart. If the reservation timer still does not show up, please follow the
+        steps below:
+      </>,
       <>
         Go to <b>Online Store </b>sales channel
       </>,
@@ -12,13 +18,13 @@ export const themes = [
       </>,
       <>
         Copy this code
-        <pre>
+        <p>
           <code>
             {
               '{%  render "reserve-timer", variant_id: item.variant_id, color: "red" %}'
             }
           </code>
-        </pre>
+        </p>
       </>,
       <>
         Open <b>cart-drawer.liquid</b> under the snippets section, insert the
@@ -45,24 +51,18 @@ export const themes = [
       </>,
       <>Make sure and save your changes!</>,
     ],
-    video: (
-      <>
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/mb3bv9_RdOU"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
-      </>
-    ),
+    video: 'https://www.youtube.com/embed/mb3bv9_RdOU',
   },
   {
     label: 'Capital',
     value: 'capital',
     steps: [
+      <>Confirm that you have the Smart Carts embed block turned on</>,
+      <>
+        Make sure you are signed in to an account when you add items to your
+        cart. If the reservation timer still does not show up, please follow the
+        steps below:
+      </>,
       <>
         Go to <b>Online Store </b>sales channel
       </>,
@@ -97,24 +97,18 @@ export const themes = [
       </>,
       <>Make sure and save your changes!</>,
     ],
-    video: (
-      <>
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/_paStWTunEk"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
-      </>
-    ),
+    video: 'https://www.youtube.com/embed/_paStWTunEk',
   },
   {
     label: 'Icon',
     value: 'icon',
     steps: [
+      <>Confirm that you have the Smart Carts embed block turned on</>,
+      <>
+        Make sure you are signed in to an account when you add items to your
+        cart. If the reservation timer still does not show up, please follow the
+        steps below:
+      </>,
       <>
         Go to <b>Online Store </b>sales channel
       </>,
@@ -149,24 +143,18 @@ export const themes = [
       </>,
       <>Make sure and save your changes!</>,
     ],
-    video: (
-      <>
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/oLGXxzH-4YU"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
-      </>
-    ),
+    video: 'https://www.youtube.com/embed/oLGXxzH-4YU',
   },
   {
     label: 'Impulse',
     value: 'impulse',
     steps: [
+      <>Confirm that you have the Smart Carts embed block turned on</>,
+      <>
+        Make sure you are signed in to an account when you add items to your
+        cart. If the reservation timer still does not show up, please follow the
+        steps below:
+      </>,
       <>
         Go to <b>Online Store </b>sales channel
       </>,
@@ -201,24 +189,18 @@ export const themes = [
       </>,
       <>Make sure and save your changes!</>,
     ],
-    video: (
-      <>
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/P43Ng-G5LYQ"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
-      </>
-    ),
+    video: 'https://www.youtube.com/embed/P43Ng-G5LYQ',
   },
   {
     label: 'Story',
     value: 'story',
     steps: [
+      <>Confirm that you have the Smart Carts embed block turned on</>,
+      <>
+        Make sure you are signed in to an account when you add items to your
+        cart. If the reservation timer still does not show up, please follow the
+        steps below:
+      </>,
       <>
         Go to <b>Online Store </b>sales channel
       </>,
@@ -253,24 +235,18 @@ export const themes = [
       </>,
       <>Make sure and save your changes!</>,
     ],
-    video: (
-      <>
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/DAiidAAF86Q"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
-      </>
-    ),
+    video: 'https://www.youtube.com/embed/DAiidAAF86Q',
   },
   {
     label: 'Testament',
     value: 'testament',
     steps: [
+      <>Confirm that you have the Smart Carts embed block turned on</>,
+      <>
+        Make sure you are signed in to an account when you add items to your
+        cart. If the reservation timer still does not show up, please follow the
+        steps below:
+      </>,
       <>
         Go to <b>Online Store </b>sales channel
       </>,
@@ -305,18 +281,6 @@ export const themes = [
       </>,
       <>Make sure and save your changes!</>,
     ],
-    video: (
-      <>
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/0X0FV7534iQ"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
-      </>
-    ),
+    video: 'https://www.youtube.com/embed/0X0FV7534iQ',
   },
 ];

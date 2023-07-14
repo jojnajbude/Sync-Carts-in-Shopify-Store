@@ -51,7 +51,7 @@ export class SubscribeService {
         const recurring_application_charge = new shopify.api.rest.RecurringApplicationCharge({session: session});
         recurring_application_charge.name = plan_config.name;
         recurring_application_charge.price = plan_config.price;
-        recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts-dev/subscribe`;
+        recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts-1/subscribe`;
         // recurring_application_charge.test = true;
         await recurring_application_charge.save({
           update: true,

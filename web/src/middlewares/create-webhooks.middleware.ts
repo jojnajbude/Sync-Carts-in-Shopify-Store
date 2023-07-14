@@ -16,16 +16,18 @@ export class createWebhooks implements NestMiddleware {
 
       const webhooks: Webhook[] = await shopify.api.rest.Webhook.all({
         session
-      })
+      });
+
+      console.log(webhooks)
 
       const cartCreate = webhooks.find(webhook => webhook.topic.includes('carts/create'));
       const cartUpdate = webhooks.find(webhook => webhook.topic.includes('carts/update'));
       const orderPaid = webhooks.find(webhook => webhook.topic.includes('orders/paid'));
-      const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled'));
+      const appUninstalled = webhooks.find(webhook => webhook.topic.includes('app/uninstalled') && webhook.address.includes('storefront'));
 
       if (!cartCreate) {
         const cartCreateWebhook = new shopify.api.rest.Webhook({session});
-        cartCreateWebhook.address = `${process.env.HOST}storefront/cart/create`;
+        cartCreateWebhook.address = `${process.env.HOST}/storefront/cart/create`;
         cartCreateWebhook.topic = 'carts/create';
         cartCreateWebhook.format = 'json';
         await cartCreateWebhook.save({
@@ -35,7 +37,7 @@ export class createWebhooks implements NestMiddleware {
 
       if (!cartUpdate) {
         const cartUpdateWebhook = new shopify.api.rest.Webhook({session});
-        cartUpdateWebhook.address = `${process.env.HOST}storefront/cart/update`;
+        cartUpdateWebhook.address = `${process.env.HOST}/storefront/cart/update`;
         cartUpdateWebhook.topic = 'carts/update';
         cartUpdateWebhook.format = 'json';
         await cartUpdateWebhook.save({
@@ -45,7 +47,7 @@ export class createWebhooks implements NestMiddleware {
 
       if (!orderPaid) {
         const customerUpdateWebhook = new shopify.api.rest.Webhook({session});
-        customerUpdateWebhook.address = `${process.env.HOST}storefront/order/paid`;
+        customerUpdateWebhook.address = `${process.env.HOST}/storefront/order/paid`;
         customerUpdateWebhook.topic = 'orders/paid';
         customerUpdateWebhook.format = 'json';
         await customerUpdateWebhook.save({
@@ -54,9 +56,8 @@ export class createWebhooks implements NestMiddleware {
       }
 
       if (!appUninstalled) {
-        console.log('here')
         const appUninstalledWebhook = new shopify.api.rest.Webhook({session});
-        appUninstalledWebhook.address = `${process.env.HOST}storefront/app/uninstalled`;
+        appUninstalledWebhook.address = `${process.env.HOST}/storefront/app/uninstalled`;
         appUninstalledWebhook.topic = 'app/uninstalled';
         appUninstalledWebhook.format = 'json';
         await appUninstalledWebhook.save({
