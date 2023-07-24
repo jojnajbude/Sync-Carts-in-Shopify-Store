@@ -103,6 +103,7 @@ export class NotificationsService {
           },
         ],
         From: shop.email_domain ? shop.email_domain : "YourCart@smartcartsapp.com",
+        FromName: shop.email_from_name || '',
         Subject: subject
       }
     }

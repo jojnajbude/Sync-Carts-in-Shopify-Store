@@ -144,11 +144,19 @@ export default function HomePage() {
           </Layout.Section>
         )}
 
-        {context.plan ? (
-          <Layout.Section>
-            <MediaCardBanner plan={context.plan}></MediaCardBanner>
-          </Layout.Section>
-        ) : null}
+        <Layout.Section fullWidth>
+          <LegacyCard
+            sectioned
+            title="Getting Started"
+            primaryFooterAction={{
+              content: 'Start setup',
+              onAction: () => navigate('/settings'),
+            }}
+            footerActionAlignment="left"
+          >
+            Learn how to setup Smart Carts so you can start using your new app!
+          </LegacyCard>
+        </Layout.Section>
 
         <Layout.Section fullWidth>
           <LegacyCard

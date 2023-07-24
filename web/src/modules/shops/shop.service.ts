@@ -23,7 +23,10 @@ export class ShopService {
     if (shopData) {
       const priorities = JSON.parse(shopData.priorities)
 
-      return [priorities]
+      return {
+        priorities,
+        email_from_name: shopData.email_from_name
+      }
     }
 
     return false
@@ -36,6 +39,7 @@ export class ShopService {
       normal_priority, 
       low_priority, 
       min_priority, 
+      email_from_name, 
       add_email,
       expire_soon_email,
       expired_email,
@@ -48,8 +52,12 @@ export class ShopService {
 
     const templates = { add_email, expire_soon_email, expired_email, reminder_email }
 
-    const updateSettings = await this.shopRepository.update({ domain }, { priorities: JSON.stringify(updatedPriorities), 
-    })
+    const updateSettings = await this.shopRepository.update(
+      { domain }, 
+      { 
+        priorities: JSON.stringify(updatedPriorities),
+        email_from_name, 
+      })
 
     return updateSettings;
   }
@@ -61,7 +69,7 @@ export class ShopService {
   async getThemes(session: shopifySession) {
     const themes = await shopify.api.rest.Theme.all({
       session,
-      fields: 'name'
+      fields: 'name,id,role'
     })
 
     return themes;

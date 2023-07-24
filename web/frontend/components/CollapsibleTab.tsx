@@ -17,15 +17,17 @@ import {
   ChevronUpMinor,
   CircleAlertMajor,
 } from '@shopify/polaris-icons';
-import { useState, useCallback, useContext } from 'react';
-import { useNavigate } from '@shopify/app-bridge-react';
+import { useState, useCallback, useContext, useEffect, useMemo } from 'react';
+import { Toast, useAuthenticatedFetch, useNavigate } from '@shopify/app-bridge-react';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import { themes } from '../constants/themes';
 
 import { useMediaQuery } from 'react-responsive';
 
 export default function CollapsibleTab() {
+  const fetch = useAuthenticatedFetch();
   const context = useContext(SubscribtionContext);
+  const [toastText, setToastText] = useState(null);
   const [open, setOpen] = useState(true);
   const [firstTabOpen, setFirstTabOpen] = useState(false);
   const [secondTabOpen, setSecondTabOpen] = useState(false);
@@ -36,6 +38,18 @@ export default function CollapsibleTab() {
     context.plan?.email_domain ? true : false,
   );
   const [selectedTheme, setSelectedTheme] = useState(themes[0].value);
+  const [shopThemes, setShopThemes] = useState<{
+      id: number;
+      name: string;
+      role: string;
+    }[]
+  >([]);
+  const mainShopTheme = useMemo(() => {
+    return shopThemes.find(theme => theme.role === 'main');
+  }, [shopThemes]);
+
+  console.log('mainShopTheme', mainShopTheme);
+  
 
   const handleSelectChange = useCallback(
     (value: string) => setSelectedTheme(value),
@@ -48,9 +62,23 @@ export default function CollapsibleTab() {
 
   const handleToggle = useCallback(() => setOpen(open => !open), []);
 
+  const injectSnippet = async (theme: string) => {
+    const editTheme = await fetch(`/api/shop/theme/edit?name=${theme}`);
+
+    setToastText('Timer successfully injected');
+  };
+
+  useEffect(() => {
+    fetch('api/shop/themes')
+      .then(res => res.json())
+      .then((data: { id: number; name: string; role: string }[]) => {
+        setShopThemes(data);
+      });
+  }, []);
+
   return (
     <LegacyCard
-      title="Setup guide"
+      title="Setup is as easy as 1-2-3!"
       actions={[
         {
           content: (
@@ -68,10 +96,16 @@ export default function CollapsibleTab() {
         },
       ]}
     >
+      {toastText ? (
+        <Toast content={toastText} onDismiss={() => setToastText(null)} />
+      ) : null}
       <LegacyCard.Section>
         <VerticalStack gap="2">
           <Text as="span">
-            Use this step by step guide to get started with Smart Carts
+            There are only two simple steps needed to get your app running! Then
+            a third optional step to make the shopping experience just that much
+            better for your customers. If you ever need help, please contact
+            support and we can set it up for you!
           </Text>
         </VerticalStack>
       </LegacyCard.Section>
@@ -102,7 +136,7 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={firstChecked ? 'success' : 'subdued'}
                   >
-                    Add Smart Carts embed block to your shopify theme.
+                    1. Add Smart Carts embed block to your shopify theme.
                   </Text>
                 </Button>
               </HorizontalStack>
@@ -135,13 +169,16 @@ export default function CollapsibleTab() {
                     primary
                     onClick={() => {
                       setFirstChecked(true);
-                      navigate(
-                        `${window.location.ancestorOrigins[0]}/admin/themes`,
-                        { target: 'new' },
-                      );
+                      let url = `${window.location.ancestorOrigins[0]}/admin/themes`;
+
+                      if (mainShopTheme) {
+                        url += `/${mainShopTheme.id}/editor?context=apps`;
+                      }
+
+                      navigate(url, { target: 'new' });
                     }}
                   >
-                    Add embed block
+                    Take me there
                   </Button>
                 </div>
               </VerticalStack>
@@ -167,8 +204,7 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={secondChecked ? 'success' : 'subdued'}
                   >
-                    Why does the reservation timer not show up after
-                    installation?
+                    2. Istall reserve timer into your theme
                   </Text>
                 </Button>
               </HorizontalStack>
@@ -188,6 +224,14 @@ export default function CollapsibleTab() {
                     onChange={handleSelectChange}
                     value={selectedTheme}
                   />
+                  <div style={{ marginTop: '10px' }}>
+                    <Button
+                      primary
+                      onClick={() => injectSnippet(selectedTheme)}
+                    >
+                      Inject
+                    </Button>
+                  </div>
                 </div>
 
                 <iframe
@@ -261,7 +305,7 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={thirdChecked ? 'success' : 'subdued'}
                   >
-                    Verify your custom domain for email notifications.
+                    3. Verify your custom domain for email notifications.
                   </Text>
                 </Button>
               </HorizontalStack>

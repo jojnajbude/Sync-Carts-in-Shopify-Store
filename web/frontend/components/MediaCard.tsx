@@ -12,12 +12,8 @@ export default function MediaCardBanner({ plan }: any) {
     <div style={{ display: !isOpen ? 'none' : 'block' }}>
       <MediaCard
         portrait={true}
-        title="Getting Started"
-        primaryAction={{
-          content: 'Start setup',
-          onAction: () => navigate('/faq'),
-        }}
-        description="Learn how to setup Smart Carts so you can start using your new app!"
+        title="Overview of Smart Carts"
+        description="We've made a short video going over the full functionality of Smart Carts, so you can use it to the fullest extent!"
         popoverActions={[
           {
             content: 'Dont show this again',

@@ -23,9 +23,10 @@ const SubscribtionContextProvider: React.FC<Props> = ({ children }) => {
     if (isLoading) {
       const plan = fetch('/api/subscribe/get')
         .then(res => res.json())
-        .then(data => setPlan(data));
-
-      setIsLoading(false);
+        .then(data => {
+          setPlan(data);
+          setIsLoading(false);
+        });
     }
   }, [plan]);
 

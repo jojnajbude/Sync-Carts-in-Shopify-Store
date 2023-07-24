@@ -1,9 +1,14 @@
 import { CalloutCard, FooterHelp, Layout, Page } from '@shopify/polaris';
+import MediaCardBanner from '../components/MediaCard';
+import { SubscribtionContext } from '../context/SubscribtionContext';
+import { useContext } from 'react';
 import CollapsibleTab from '../components/CollapsibleTab';
 
-export default function NotFound() {
+export default function SupportPage() {
+  const context = useContext(SubscribtionContext);
+
   return (
-    <Page title="FAQ">
+    <Page title="Support">
       <Layout>
         <Layout.Section>
           <CalloutCard
@@ -21,7 +26,14 @@ export default function NotFound() {
               answering general questions!
             </p>
           </CalloutCard>
-          <CollapsibleTab></CollapsibleTab>
+        </Layout.Section>
+        {context.plan ? (
+          <Layout.Section>
+            <MediaCardBanner plan={context.plan}></MediaCardBanner>
+          </Layout.Section>
+        ) : null}
+        <Layout.Section>
+          <CollapsibleTab />
         </Layout.Section>
       </Layout>
 

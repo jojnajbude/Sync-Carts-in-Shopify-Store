@@ -68,6 +68,9 @@ export class Shop {
   @Column({ nullable: true })
   email_domain: string;
 
+  @Column({ nullable: true })
+  email_from_name: string;
+
   @Column({ type: 'json', nullable: true })
   domain_verified: string;
 }

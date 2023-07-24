@@ -39,6 +39,7 @@ type State = {
   low_priority: number;
   min_priority: number;
   add_email: string;
+  email_from_name: string;
   reminder_email: string;
   expire_soon_email: string;
   expired_email: string;
@@ -55,6 +56,7 @@ type Action = {
     | 'changeNormal'
     | 'changeLow'
     | 'changeMin'
+    | 'changeFromName'
     | 'changeAddEmail'
     | 'changeReminderEmail'
     | 'changeExpireSoonEmail'
@@ -74,6 +76,7 @@ let initialState: State = {
   normal_priority: 24,
   low_priority: 8,
   min_priority: 1,
+  email_from_name: '',
   add_email: '',
   reminder_email: '',
   expire_soon_email: '',
@@ -107,6 +110,9 @@ function reducer(state: State, action: Action) {
 
     case 'changeMin':
       return { ...state, min_priority: action.value, isEdit: true };
+
+    case 'changeFromName':
+      return { ...state, email_from_name: action.value, isEdit: true };
 
     case 'changeAddEmail':
       return { ...state, add_email: action.value, isEdit: true };
@@ -162,7 +168,10 @@ export default function Settings() {
 
         if (settingsData.ok) {
           const settings = await settingsData.json();
-          const state: State = { ...settings[0], ...settings[1] };
+          const state: State = {
+            ...settings.priorities,
+            email_from_name: settings.email_from_name || '',
+          };
 
           initialState = state;
           dispatch({ type: 'setStates', states: state });
@@ -250,13 +259,6 @@ export default function Settings() {
     dispatch({ type: 'setToast', value: true });
   };
 
-  const injectSnippet = async (theme: string) => {
-    const editTheme = await fetch(`/api/shop/theme/edit?name=${theme}`);
-
-    setToastText('Timer successfully injected');
-    dispatch({ type: 'setToast', value: true });
-  };
-
   return (
     <Frame>
       <Page
@@ -276,41 +278,6 @@ export default function Settings() {
         backAction={{ onAction: () => navigate(-1) }}
       >
         <Layout>
-        <Layout.Section oneThird>
-            <div style={{ marginTop: 'var(--p-space-5)' }}>
-              <VerticalStack gap={'4'}>
-                <Text id="storeDetails" variant="headingMd" as="h2">
-                  Inject timer in Shopify theme.
-                </Text>
-                <Text color="subdued" as="p">
-                  To allow users to see reservation timers in their carts,
-                  inject the timer snippet into your current Shopify theme.
-                </Text>
-              </VerticalStack>
-            </div>
-          </Layout.Section>
-
-          <Layout.Section oneHalf>
-            <LegacyCard sectioned title="Inject snippet">
-              <Select
-                label="Theme"
-                options={themes.map(theme => theme.name)}
-                onChange={setSelectedTheme}
-                value={selectedTheme}
-              />
-
-              <div style={{ marginTop: '10px' }}>
-                <Button primary onClick={() => injectSnippet(selectedTheme)}>
-                  Inject
-                </Button>
-              </div>
-            </LegacyCard>
-          </Layout.Section>
-
-          <Layout.Section fullWidth>
-            <Divider></Divider>
-          </Layout.Section>
-
           <Layout.Section oneThird>
             <div style={{ marginTop: 'var(--p-space-5)' }}>
               <VerticalStack gap={'4'}>
@@ -473,6 +440,40 @@ export default function Settings() {
                       Verify
                     </Button>
                   }
+                />
+              )}
+            </LegacyCard>
+          </Layout.Section>
+
+          <Layout.Section oneThird>
+            <div style={{ marginTop: 'var(--p-space-5)' }}>
+              <VerticalStack gap={'4'}>
+                <Text id="fromNameSettingsHeader" variant="headingMd" as="h2">
+                  Email settings
+                </Text>
+                <Text color="subdued" as="p">
+                  {'This is where you can configure From Name for App emails.'}
+                </Text>
+              </VerticalStack>
+            </div>
+          </Layout.Section>
+
+          <Layout.Section oneHalf>
+            <LegacyCard sectioned title="Email From settings">
+              {isLoading ? (
+                <FormLayout>
+                  <SkeletonBodyText />
+                </FormLayout>
+              ) : (
+                <TextField
+                  label="From Name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={state.email_from_name}
+                  onChange={newValue =>
+                    dispatch({ type: 'changeFromName', value: newValue })
+                  }
+                  autoComplete="off"
                 />
               )}
             </LegacyCard>

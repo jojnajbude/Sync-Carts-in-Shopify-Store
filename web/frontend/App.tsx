@@ -40,8 +40,8 @@ export default function App() {
                     destination: '/subscribe',
                   },
                   {
-                    label: 'FAQ',
-                    destination: '/faq',
+                    label: 'Support',
+                    destination: '/support',
                   },
                 ]}
               />

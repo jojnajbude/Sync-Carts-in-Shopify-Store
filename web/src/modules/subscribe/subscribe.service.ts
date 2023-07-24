@@ -52,7 +52,7 @@ export class SubscribeService {
         recurring_application_charge.name = plan_config.name;
         recurring_application_charge.price = plan_config.price;
         recurring_application_charge.return_url = `https://${session.shop}/admin/apps/better-carts-1/subscribe`;
-        // recurring_application_charge.test = true;
+        recurring_application_charge.test = null;
         await recurring_application_charge.save({
           update: true,
         });

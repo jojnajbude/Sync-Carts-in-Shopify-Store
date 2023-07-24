@@ -278,7 +278,7 @@ export class StorefrontService {
                 cart_id: cart?.id, 
                 price: line_item.price, 
                 title: product.title, 
-                image_link: imgSrc.src, 
+                image_link: imgSrc ? imgSrc.src : null, 
                 product_id: variant.product_id,
                 expire_at: await expireTime,
               }))
@@ -398,6 +398,11 @@ export class StorefrontService {
         left join shops on shops.id = carts.shop_id
         where carts.cart_token = '${cart_token}'`
       );
+
+      if (!cart) {
+        // TODO: Handle if cart not found
+        return [];
+      }
   
       const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
       const paidItems = await this.itemRepository.createQueryBuilder()
