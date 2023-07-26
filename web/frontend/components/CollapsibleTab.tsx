@@ -53,8 +53,6 @@ export default function CollapsibleTab() {
     return shopThemes.find(theme => theme.role === 'main');
   }, [shopThemes]);
 
-  console.log('mainShopTheme', mainShopTheme);
-
   const handleSelectChange = useCallback(
     (value: string) => setSelectedTheme(value),
     [],

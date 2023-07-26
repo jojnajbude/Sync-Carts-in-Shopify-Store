@@ -157,6 +157,7 @@ export class NotificationsService {
           expired_items_html: data.expired_items_html,
           domain: data.domain,
           email: data.email,
+          email_from_name: data.email_from_name,
         }
 
         const emails = [data.customer_email];

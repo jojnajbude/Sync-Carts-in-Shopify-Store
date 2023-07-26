@@ -10,14 +10,14 @@ export class StorefrontController {
   async updateData(@Query() query: { cart_id: string, customer: string, shop_id: string, os: string }, @Res() res: Response) {
     const cartItems = await this.storefrontService.updateData(query.cart_id, query.customer, query.shop_id, query.os);
 
-    cartItems ? res.status(200).send(cartItems) : res.status(500).send('Server error');
+    cartItems ? res.status(200).send(cartItems) : res.status(200).send('Server error');
   }
 
   @Get('cart/add')
   async handleAdding(@Query() query: { shop: string, variant: number, qty: number }, @Res() res: Response ) {
     const result = await this.storefrontService.handleAdding(query.shop, query.variant, query.qty); 
 
-    result ? res.status(200).send(result) : res.status(500).send('Server error');
+    result ? res.status(200).send(result) : res.status(200).send('Server error');
   }
 
   @Post('cart/create')
@@ -26,7 +26,7 @@ export class StorefrontController {
 
     if (shopDomain) {
       const cart = await this.storefrontService.updateCart(req.body, shopDomain);
-      cart ? res.status(200).send(cart) : res.status(500).send('Server error');
+      cart ? res.status(200).send(cart) : res.status(200).send('Server error');
     } else {
       res.status(404).send('Unable to identify the store');
     }
@@ -38,7 +38,7 @@ export class StorefrontController {
 
     if (shopDomain) {
       const changedItems = await this.storefrontService.updateCart(req.body, shopDomain);
-      changedItems ? res.status(200).send(changedItems) : res.status(500).send('Server error');
+      changedItems ? res.status(200).send(changedItems) : res.status(200).send('Server error');
     } else {
       res.status(404).send('Unable to identify the store');
     }
@@ -72,7 +72,7 @@ export class StorefrontController {
 
     const paidCart = await this.storefrontService.handleOrderPaid(cart_token, totalPrice);
 
-    paidCart ? res.status(200).send(paidCart) : res.status(500).send('Server error'); 
+    paidCart ? res.status(200).send(paidCart) : res.status(200).send('Server error'); 
   }
 
   @Post('update/time')
