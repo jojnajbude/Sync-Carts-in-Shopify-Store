@@ -39,6 +39,7 @@ export class NotificationsController {
 
     await this.notificationService.sendEmail(type, shop, [customer.email]);
 
+    // TODO: Handle email sending status
     res.status(200).send('OK');
   }
 

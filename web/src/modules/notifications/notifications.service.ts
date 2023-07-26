@@ -88,7 +88,13 @@ export class NotificationsService {
         case 'expired':
           return 'The items in your cart have expired'
       }
-    })(type)
+    })(type);
+
+    let from = shop.email_domain ? shop.email_domain : "YourCart@smartcartsapp.com";
+
+    if (shop.email_from_name) {
+      from = `${shop.email_from_name} <${from}>`
+    }
 
     const emailData = {
       Recipients: {
@@ -102,8 +108,7 @@ export class NotificationsService {
             Content: content
           },
         ],
-        From: shop.email_domain ? shop.email_domain : "YourCart@smartcartsapp.com",
-        FromName: shop.email_from_name || '',
+        From: from,
         Subject: subject
       }
     }
