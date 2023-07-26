@@ -38,6 +38,8 @@ export class NotificationsController {
     const shop = await this.shopRepository.findOneBy({ domain: session.shop })
 
     await this.notificationService.sendEmail(type, shop, [customer.email]);
+
+    res.status(200).send('OK');
   }
 
   @Get('domain/add')
