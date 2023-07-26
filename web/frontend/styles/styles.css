@@ -1,3 +1,12 @@
 .Polaris-DatePicker__Day--inRange {
   background: var(--p-color-bg-interactive-subdued-active)!important;
 }
+
+.plain-button {
+  font-size: inherit;
+  font-style: inherit;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}

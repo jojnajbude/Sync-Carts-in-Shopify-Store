@@ -18,7 +18,11 @@ import {
   CircleAlertMajor,
 } from '@shopify/polaris-icons';
 import { useState, useCallback, useContext, useEffect, useMemo } from 'react';
-import { Toast, useAuthenticatedFetch, useNavigate } from '@shopify/app-bridge-react';
+import {
+  Toast,
+  useAuthenticatedFetch,
+  useNavigate,
+} from '@shopify/app-bridge-react';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import { themes } from '../constants/themes';
 
@@ -37,8 +41,9 @@ export default function CollapsibleTab() {
   const [thirdChecked, setThirdChecked] = useState(
     context.plan?.email_domain ? true : false,
   );
-  const [selectedTheme, setSelectedTheme] = useState(themes[0].value);
-  const [shopThemes, setShopThemes] = useState<{
+  const [selectedTheme, setSelectedTheme] = useState(undefined);
+  const [shopThemes, setShopThemes] = useState<
+    {
       id: number;
       name: string;
       role: string;
@@ -49,7 +54,6 @@ export default function CollapsibleTab() {
   }, [shopThemes]);
 
   console.log('mainShopTheme', mainShopTheme);
-  
 
   const handleSelectChange = useCallback(
     (value: string) => setSelectedTheme(value),
@@ -126,9 +130,8 @@ export default function CollapsibleTab() {
                   source={firstChecked ? CircleTickMajor : CircleDownMajor}
                   color={firstChecked ? 'success' : 'subdued'}
                 ></Icon>
-                <Button
-                  removeUnderline
-                  plain
+                <button
+                  className="plain-button"
                   onClick={() => setFirstTabOpen(!firstTabOpen)}
                 >
                   <Text
@@ -138,7 +141,7 @@ export default function CollapsibleTab() {
                   >
                     1. Add Smart Carts embed block to your shopify theme.
                   </Text>
-                </Button>
+                </button>
               </HorizontalStack>
             </HorizontalStack>
 
@@ -194,9 +197,8 @@ export default function CollapsibleTab() {
                   source={secondChecked ? CircleTickMajor : CircleDownMajor}
                   color={secondChecked ? 'success' : 'subdued'}
                 ></Icon>
-                <Button
-                  removeUnderline
-                  plain
+                <button
+                  className="plain-button"
                   onClick={() => setSecondTabOpen(!secondTabOpen)}
                 >
                   <Text
@@ -204,9 +206,9 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={secondChecked ? 'success' : 'subdued'}
                   >
-                    2. Istall reserve timer into your theme
+                    2. Install reserve timer into your theme
                   </Text>
-                </Button>
+                </button>
               </HorizontalStack>
             </HorizontalStack>
 
@@ -220,54 +222,65 @@ export default function CollapsibleTab() {
                 <div style={{ maxWidth: '200px' }}>
                   <Select
                     label="Theme"
-                    options={themes}
+                    options={[
+                      {
+                        label: '---',
+                        value: undefined,
+                      },
+                      ...themes,
+                    ]}
                     onChange={handleSelectChange}
                     value={selectedTheme}
                   />
-                  <div style={{ marginTop: '10px' }}>
-                    <Button
-                      primary
-                      onClick={() => injectSnippet(selectedTheme)}
-                    >
-                      Inject
-                    </Button>
-                  </div>
                 </div>
 
-                <iframe
-                  width={isMobile ? '380' : '560'}
-                  height={isMobile ? '250' : '315'}
-                  src={
-                    themes.find(theme => theme.value === selectedTheme).video
-                  }
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
+                {selectedTheme && (
+                  <>
+                    <div style={{ marginTop: '10px' }}>
+                      <Button
+                        primary
+                        onClick={() => injectSnippet(selectedTheme)}
+                      >
+                        Inject
+                      </Button>
+                    </div>
+                    <iframe
+                      width={isMobile ? '380' : '560'}
+                      height={isMobile ? '250' : '315'}
+                      src={
+                        themes.find(theme => theme.value === selectedTheme)
+                          .video
+                      }
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
 
-                <List type="number">
-                  {themes
-                    .find(theme => theme.value === selectedTheme)
-                    .steps.map((step, index) => (
-                      <List.Item key={index}>{step}</List.Item>
-                    ))}
-                </List>
+                    <List type="number">
+                      {themes
+                        .find(theme => theme.value === selectedTheme)
+                        .steps.map((step, index) => (
+                          <List.Item key={index}>{step}</List.Item>
+                        ))}
+                    </List>
+                    <div style={{ maxWidth: 250 }}>
+                      <Button
+                        primary
+                        onClick={() => {
+                          setSecondChecked(true);
+                          navigate(
+                            `${window.location.ancestorOrigins[0]}/admin/themes`,
+                            { target: 'new' },
+                          );
+                        }}
+                      >
+                        Add Reservation Timer
+                      </Button>
+                    </div>
+                  </>
+                )}
 
-                <div style={{ maxWidth: 250 }}>
-                  <Button
-                    primary
-                    onClick={() => {
-                      setSecondChecked(true);
-                      navigate(
-                        `${window.location.ancestorOrigins[0]}/admin/themes`,
-                        { target: 'new' },
-                      );
-                    }}
-                  >
-                    Add Reservation Timer
-                  </Button>
-                </div>
 
                 <Divider></Divider>
 
@@ -295,9 +308,8 @@ export default function CollapsibleTab() {
                   source={thirdChecked ? CircleTickMajor : CircleDownMajor}
                   color={thirdChecked ? 'success' : 'subdued'}
                 ></Icon>
-                <Button
-                  removeUnderline
-                  plain
+                <button
+                  className="plain-button"
                   onClick={() => setThirdTabOpen(!thirdTabOpen)}
                 >
                   <Text
@@ -307,7 +319,7 @@ export default function CollapsibleTab() {
                   >
                     3. Verify your custom domain for email notifications.
                   </Text>
-                </Button>
+                </button>
               </HorizontalStack>
             </HorizontalStack>
 

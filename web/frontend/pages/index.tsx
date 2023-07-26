@@ -150,25 +150,11 @@ export default function HomePage() {
             title="Getting Started"
             primaryFooterAction={{
               content: 'Start setup',
-              onAction: () => navigate('/settings'),
+              onAction: () => navigate('/support'),
             }}
             footerActionAlignment="left"
           >
             Learn how to setup Smart Carts so you can start using your new app!
-          </LegacyCard>
-        </Layout.Section>
-
-        <Layout.Section fullWidth>
-          <LegacyCard
-            sectioned
-            title="Inject timer snippet to your Shopify Theme"
-            primaryFooterAction={{
-              content: 'Inject snippet',
-              onAction: () => navigate('/settings'),
-            }}
-          >
-            To allow users to see reservation timers in their carts, inject the
-            timer snippet into your current Shopify theme.
           </LegacyCard>
         </Layout.Section>
 

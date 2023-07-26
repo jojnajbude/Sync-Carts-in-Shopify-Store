@@ -223,8 +223,8 @@ class BetterCartsTimer extends HTMLElement {
   }
 
   getData() {
-    if (window.better_carts.hasOwnProperty('id')) {
-      return new Promise(async (res, rej) => {
+    return new Promise(async (res, rej) => {
+      if (window.better_carts.hasOwnProperty('id')) {
         setTimeout(async () => {
           let retryCount = 0;
           const variantId = Number(this.dataset.timerId);
@@ -252,8 +252,10 @@ class BetterCartsTimer extends HTMLElement {
     
           await fromServ();
         }, 1000)
-      });
-    }
+      } else {
+        rej(new Error('User not a logged in.'))
+      }
+    });
   }
 
   async initializeTimer(cartItemData) {
