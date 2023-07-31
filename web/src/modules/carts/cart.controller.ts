@@ -13,7 +13,7 @@ export class CartController {
     const session = res.locals.shopify.session;
     const newCart = await this.cartService.createNewCart(cart, customer, session);
 
-    newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
+    newCart ? res.status(201).send(newCart) : res.status(400).send('Bad request');
   }
 
   @Post('update')
@@ -22,7 +22,7 @@ export class CartController {
 
     const newCart = await this.cartService.updateCartItems(cart, customer);
 
-    newCart ? res.status(201).send(newCart) : res.status(500).send('Server error');
+    newCart ? res.status(201).send(newCart) : res.status(400).send('Bad request');
   }
 
   @Get('last')
@@ -49,7 +49,7 @@ export class CartController {
 
     const carts = await this.cartService.getFilteredCarts(session, query.index);
 
-    carts ? res.status(200).send(carts) : res.status(500).send('Server error')
+    carts ? res.status(200).send(carts) : res.status(400).send('Bad request')
   }
 
   @Get('sort')
@@ -70,20 +70,20 @@ export class CartController {
   async expandTimers(@Body() body: number[], @Query() query: { ms: string }, @Res() res: Response) {
     const newTimers = await this.cartService.expandTimers(body, query.ms);
 
-    newTimers ? res.status(200).send(newTimers) : res.status(500).send('Server error')
+    newTimers ? res.status(200).send(newTimers) : res.status(404).send('Not found')
   }
 
   @Post('unreserve')
   async unreserveItems(@Body() body: number[], @Res() res: Response) {
     const unreservedItems = await this.cartService.unreserveItems(body)
 
-    unreservedItems ? res.status(200).send(unreservedItems) : res.status(500).send('Server error')
+    unreservedItems ? res.status(200).send(unreservedItems) : res.status(404).send('Not found')
   }
 
   @Post('remove')
   async removeItems(@Body() body: number[], @Res() res: Response) {
     const removedItems = await this.cartService.removeItems(body)
 
-    removedItems ? res.status(200).send(removedItems) : res.status(500).send('Server error')
+    removedItems ? res.status(200).send(removedItems) : res.status(404).send('Not found')
   }
 }

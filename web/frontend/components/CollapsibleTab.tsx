@@ -239,7 +239,7 @@ export default function CollapsibleTab() {
                         primary
                         onClick={() => injectSnippet(selectedTheme)}
                       >
-                        Inject
+                        Inject in current theme
                       </Button>
                     </div>
                     <iframe

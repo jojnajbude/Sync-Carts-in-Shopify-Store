@@ -19,6 +19,7 @@ export class getShopDataMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const session = res.locals.shopify.session;
+    console.log(session)
 
     try {
       const [shopifyShopData] = await shopify.api.rest.Shop.all({ session });
@@ -42,7 +43,7 @@ export class getShopDataMiddleware implements NestMiddleware {
         })
 
         const newShop = await this.shopsRepository.insert({ 
-          domain: shopifyShopData.domain, 
+          domain: shopifyShopData.permanent_domain, 
           shopify_id: shopifyShopData.id, 
           email: shopifyShopData.email,
           session: sessionJSON, 

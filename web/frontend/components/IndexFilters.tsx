@@ -41,9 +41,11 @@ const IndexTableFilters: React.FC<Props> = ({
       result = await fetch(`/api/carts/filter?index=${index}`);
     }
 
-    const carts = await result.json();
-    setCarts(carts);
-    setIsLoading(false);
+    if (!result.ok) {
+      const carts = await result.json();
+      setCarts(carts);
+      setIsLoading(false);
+    }
   };
 
   const tabs: AlphaTabProps[] = itemStrings.map((item, index) => ({

@@ -76,10 +76,12 @@ export class CartService {
   }
 
   async createNewCart(cart: any, customer: any, session: shopifySession) {
-    const [shop] = await this.shopsService.getShopData(session);
-    const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop.id });
+    try {
+      const [shop] = await this.shopsService.getShopData(session);
+      const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop.id });
 
-    if (shopData) {
+      if (!shopData) throw new Error('Shop not found');
+
       let customerData = await this.customerRepository.findOneBy({ shopify_user_id: customer.id })
 
       if (!customerData) {
@@ -116,7 +118,12 @@ export class CartService {
 
       const newItems = await this.itemRepository.save(items);
 
-      return newItems ? newCart : false;
+      if (!newItems) throw new Error('Items not saved');
+
+      return newItems
+    } catch (err) {
+      console.log(err)
+      return false;
     }
   }
 

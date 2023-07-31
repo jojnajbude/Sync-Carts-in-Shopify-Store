@@ -54,6 +54,8 @@ export default function CartsTable() {
           const result = await fetch(
             `/api/carts/sort?dir=descending&index=6&shop=true`,
           );
+          if (!result.ok) throw new Error('Something went wrong');
+
           const data = await result.json();
 
           if (!ignore) {
@@ -118,11 +120,14 @@ export default function CartsTable() {
       const carts = await fetch(
         `/api/carts/sort?dir=${direction}&index=${index}`,
       );
-      const cartsData = await carts.json();
 
-      setCarts(cartsData);
-      setSortDirection(sortDirection);
-      setIsLoading(false);
+      if (carts.ok) {
+        const cartsData = await carts.json();
+
+        setCarts(cartsData);
+        setSortDirection(sortDirection);
+        setIsLoading(false);
+      }
     },
     [carts, isLoading, sortDirection],
   );

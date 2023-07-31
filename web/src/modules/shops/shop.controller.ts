@@ -6,24 +6,24 @@ import { ShopService } from "./shop.service.js";
 export class ShopController {
   constructor(private shopService: ShopService) {}
 
-  @Get() 
-  async getShopData(@Res() res: Response) {
-    const shop = await this.shopService.getShopData(res.locals.shopify.session)
-    res.status(200).send(shop)
-  }
+  // @Get() 
+  // async getShopData(@Res() res: Response) {
+  //   const shop = await this.shopService.getShopData(res.locals.shopify.session)
+  //   res.status(200).send(shop)
+  // }
 
   @Get('settings')
   async getShopSettings(@Res() res: Response) {
     const settings = await this.shopService.getShopSettings(res.locals.shopify.session.shop)
 
-    settings ? res.status(200).send(settings) : res.status(500).send('Server error')
+    settings ? res.status(200).send(settings) : res.status(404).send('Can\'t find settings for that shop')
   }
 
   @Post('update')
   async updateShopSettings(@Body() body: any, @Res() res: Response) {
     const updates = await this.shopService.updateShopSettings(res.locals.shopify.session.shop, body)
 
-    updates ? res.status(200).send(updates) : res.status(500).send('Server error')  
+    updates ? res.status(200).send(updates) : res.status(400).send('Bad request')  
   }
 
   @Get('tutorial')

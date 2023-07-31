@@ -25,7 +25,13 @@ import { formatter } from '../../services/formatter';
 import { Cart } from '../../types/cart';
 import { SubscribtionContext } from '../../context/SubscribtionContext';
 
-type Modal = 'remove' | 'unreserve' | 'expand' | 'update' | 'reminder';
+type Modal =
+  | 'remove'
+  | 'unreserve'
+  | 'expand'
+  | 'update'
+  | 'reminder'
+  | 'emailError';
 
 export default function CartPage() {
   const [initialCart, setInitialCart] = useState(null);
@@ -85,13 +91,10 @@ export default function CartPage() {
           last_action: '',
         };
 
-        const shopData = await fetch('/api/shop');
-        const [shop] = await shopData.json();
-
         setIsEditing(true);
         setInitialCart(newCart);
         setInitialCustomer(null);
-        setCurrency(shop.currency);
+        setCurrency(context.plan.currency);
         setCustomer(null);
         setCart(newCart);
         setIsLoading(false);
@@ -187,6 +190,15 @@ export default function CartPage() {
             onDismiss={toggleActiveToast}
           />
         );
+
+      case modalType === 'emailError':
+        return (
+          <Toast
+            content="Can't send email. Try again later."
+            error={true}
+            onDismiss={toggleActiveToast}
+          />
+        );
     }
   };
 
@@ -254,13 +266,19 @@ export default function CartPage() {
   };
 
   const sendReminder = async (type: string, cart: any, customer: any) => {
-    fetch('/api/notifications/send', {
+    const emailSend = await fetch('/api/notifications/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: await JSON.stringify({ type, cart, customer }),
     });
+
+    if (!emailSend.ok) {
+      setModalType('emailError');
+      setActiveToast(true);
+      return;
+    }
 
     setModalType('reminder');
     setActiveToast(true);

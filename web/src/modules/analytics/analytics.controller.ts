@@ -13,6 +13,10 @@ export class AnalyticsController {
 
     const analytics = await this.analyticsService.getAnalytics(domain, body);
 
-    analytics ? res.status(200).send(analytics) : res.status(500).send('Server error');
+    analytics ? res.status(200).send(analytics) : res.status(404).send({
+      error: {
+        message: 'Analytics not found'
+      }
+    });
   }
 }

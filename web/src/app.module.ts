@@ -34,7 +34,6 @@ import { Customer } from "./modules/customers/customer.entity.js";
 import { Cart } from "./modules/carts/cart.entity.js";
 import { Analytics } from "./modules/analytics/analytics.entity.js";
 
-import { injectSnippet } from "./middlewares/inject-snippet.middleware.js";
 import { createWebhooks } from "./middlewares/create-webhooks.middleware.js";
 import { getShopDataMiddleware } from "./middlewares/get-shop-data.middleware.js";
 
@@ -58,11 +57,12 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
-      // synchronize: true,
-      migrations: [migrations1685455045580],
-      ssl: {
-        ca: process.env.SSL_CERT,
-      },
+      synchronize: true,
+      // TODO: Really? Please set just pattern, you don't need migrations import
+      // migrations: [migrations1685455045580],
+      // ssl: {
+      //   ca: process.env.SSL_CERT,
+      // },
     }),
     MongooseModule.forRoot(
       process.env.MONGO_URI!,
@@ -139,14 +139,6 @@ export class AppModule implements NestModule {
         { path: "/storefront/(.*)", method: RequestMethod.ALL },
       )
       .forRoutes({ path: "/api/subscribe/get", method: RequestMethod.ALL})
-
-    consumer
-      .apply(injectSnippet)
-      .exclude(
-        // { path: "/api/(.*)", method: RequestMethod.ALL },
-        { path: "/storefront/(.*)", method: RequestMethod.ALL },
-      )
-      .forRoutes({ path: "/api/subscribe/get", method: RequestMethod.ALL })
 
     consumer
       .apply(createWebhooks)

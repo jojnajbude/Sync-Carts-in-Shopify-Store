@@ -19,7 +19,7 @@ export class NotificationsController {
 
     const savedTemplate = await this.notificationService.saveTemplate(session.shop, name, design, html);
 
-    savedTemplate ? res.status(200).send('saved') : res.status(500).send('Server error')
+    savedTemplate ? res.status(201).send('saved') : res.status(400).send('Something went wrong')
   }
 
   @Get('get')
@@ -28,7 +28,7 @@ export class NotificationsController {
 
     const template = await this.notificationService.getTemplate(session.shop, query.name);
 
-    template ? res.status(200).send(template) : res.status(500).send('Server error')
+    template ? res.status(200).send(template) : res.status(400).send('Incorrect template name')
   }
 
   @Post('send')
@@ -37,10 +37,9 @@ export class NotificationsController {
     const { type, cart, customer } = body;
     const shop = await this.shopRepository.findOneBy({ domain: session.shop })
 
-    await this.notificationService.sendEmail(type, shop, [customer.email]);
+    const emailStatus = await this.notificationService.sendEmail(type, shop, [customer.email]);
 
-    // TODO: Handle email sending status
-    res.status(200).send('OK');
+    emailStatus === 200 ? res.status(200).send('Email sent') : res.status(400).send('Something went wrong');
   }
 
   @Get('domain/add')
@@ -54,6 +53,6 @@ export class NotificationsController {
   async verifyDomain(@Query() query: { domain: string }, @Res() res: Response) {
     const verificationStatus = await this.notificationService.verifyDomain(query.domain, res.locals.shopify.session.shop);
 
-    verificationStatus ? res.status(200).send(verificationStatus) : res.status(500).send('Server error')
+    verificationStatus ? res.status(200).send(verificationStatus) : res.status(400).send('Can\'t verify domain')
   }
 }

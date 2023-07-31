@@ -121,24 +121,7 @@ export default function Subscribe() {
     );
 
   return (
-    <Page
-      title="Subscriptions"
-      backAction={{ onAction: () => navigate('/') }}
-      // primaryAction={
-      //   plan ? (
-      //     <div style={{ color: '#bf0711' }}>
-      //       <Button
-      //         disabled={plan.plan === 'Free'}
-      //         monochrome
-      //         outline
-      //         onClick={handleModal}
-      //       >
-      //         Cancel subscription
-      //       </Button>
-      //     </div>
-      //   ) : null
-      // }
-    >
+    <Page title="Subscriptions" backAction={{ onAction: () => navigate('/') }}>
       <Frame>
         {plan ? (
           <Layout>

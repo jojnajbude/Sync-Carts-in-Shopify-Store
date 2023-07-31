@@ -9,8 +9,6 @@ import {
   SkeletonBodyText,
   Banner,
   EmptySearchResult,
-  Button,
-  VerticalStack,
 } from '@shopify/polaris';
 
 import AreaChart from '../components/charts/AreaChart';
@@ -23,7 +21,6 @@ import { Cart } from '../types/cart';
 import { Analytics } from '../types/analytics';
 import { Logs } from '../types/logs';
 import { SubscribtionContext } from '../context/SubscribtionContext';
-import MediaCardBanner from '../components/MediaCard';
 import formatTime from '../services/timeFormatter';
 
 type State = {

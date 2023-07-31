@@ -113,16 +113,28 @@ export class NotificationsService {
       }
     }
 
-    const callback = (error: any, data: any, response: any) => {
-      if (error) {
-          console.error(error);
-      } else {
-          console.log('API called successfully.');
-          console.log('Email sent.');
-      }
-    };
+    let status = 200
 
-    emailsApi.emailsTransactionalPost(emailData, callback);
+    const emailStatus = await new Promise((resolve, reject) => {
+      const callback = (error: any, data: any, response: any) => {
+        if (error) {
+          console.error(error);
+          resolve('error'); 
+        } else {
+            console.log('API called successfully.');
+            console.log('Email sent.');
+            resolve('success');
+        }
+      };
+  
+      emailsApi.emailsTransactionalPost(emailData, callback);
+    });
+
+    if (emailStatus === 'error') {
+      status = 400
+    }
+
+    return status;
   }
 
   async sendMultipleEmails(ids: number[], dataType: 'carts' | 'items', emailType: string) {

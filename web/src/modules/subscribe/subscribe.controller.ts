@@ -12,7 +12,8 @@ export class SubscribeController {
 
     const plan = await this.subscribeService.getSubscription(session);
 
-    plan ? res.status(200).send(plan) : res.status(500).send('Server error');
+    // PLEASE do not respond 500's errors OR HANDLE it on Frontend
+    plan ? res.status(200).send(plan) : res.status(200).send({});
   }
 
   @Get()

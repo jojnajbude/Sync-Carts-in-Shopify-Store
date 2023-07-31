@@ -47,14 +47,14 @@ export class StorefrontController {
   @Post('app/uninstalled')
   async handleAppUninstalled(@Req() req: Request, @Res() res: Response) {
     const shopDomain = req.get('x-shopify-shop-domain');
-    console.log(shopDomain)
-    console.log('here')
 
     if (shopDomain) {
-      await this.storefrontService.handleAppUninstalled(shopDomain);
+      this.storefrontService.handleAppUninstalled(shopDomain);
+      //TODO: You have 503 Errors. I've removed await for now
       res.status(200).send('OK');
     } else {
-      res.status(404).send('Unable to identify the store');
+      // Please do not respond non 200's for webhooks in this case
+      res.status(200).send('Unable to identify the store');
     }
   }
 
