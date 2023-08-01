@@ -50,9 +50,9 @@ export default function CartsTable() {
     let ignore = false;
     const getCarts = async () => {
       try {
-        if (isLoading) {
+        if (isLoading && !carts.length) {
           const result = await fetch(
-            `/api/carts/sort?dir=descending&index=6&shop=true`,
+            `/api/carts/sort?dir=descending&index=5&shop=true`,
           );
           if (!result.ok) throw new Error('Something went wrong');
 
@@ -247,9 +247,9 @@ export default function CartsTable() {
               bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
               condensed={isMobile}
-              sortable={[true, true, true, true, true, true, true]}
+              sortable={[true, true, true, true, true, true]}
               headings={[
-                { title: 'Cart ID' },
+                // { title: 'Cart ID' },
                 { title: 'Customer' },
                 { title: 'Cart Total' },
                 { title: 'Reserved Status' },
@@ -294,7 +294,6 @@ export default function CartsTable() {
                                   variant="bodySm"
                                   color="subdued"
                                 >
-                                  {'#' + id} •{' '}
                                   {formatTime(
                                     Date.now() -
                                       new Date(last_action).getTime(),
@@ -356,11 +355,6 @@ export default function CartsTable() {
                           position={index}
                           onClick={() => navigate(`/cart/${id}`)}
                         >
-                          <IndexTable.Cell>
-                            <Text fontWeight="semibold" as="span">
-                              {id}
-                            </Text>
-                          </IndexTable.Cell>
                           <IndexTable.Cell>
                             {customer_name || 'Unlogged user'}
                           </IndexTable.Cell>

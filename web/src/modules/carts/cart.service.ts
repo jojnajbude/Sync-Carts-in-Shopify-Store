@@ -76,6 +76,7 @@ export class CartService {
   }
 
   async createNewCart(cart: any, customer: any, session: shopifySession) {
+    console.log(cart)
     try {
       const [shop] = await this.shopsService.getShopData(session);
       const shopData = await this.shopsRepository.findOneBy({ shopify_id: shop.id });
@@ -103,6 +104,7 @@ export class CartService {
         const expireTime = this.storefrontService.countExpireDate(new Date(), customerData.priority, JSON.parse(shopData.priorities));
         const newItem = {
           variant_id: item.id,
+          variant_title: item.variant_title,
           product_id: item.product_id,
           qty: item.qty,
           expire_at: await expireTime,
@@ -329,7 +331,9 @@ export class CartService {
   }
 
   sortCarts(carts: TableRow[], index: number, direction: 'ascending' | 'descending') {
-    if (index === 6) {
+    const columns = ['customer_name', 'total', 'reserved_indicator', 'reservation_time', 'qty', 'last_action'];
+
+    if (columns[index] === 'last_action') {
       return [...carts].sort((rowA: TableRow, rowB: TableRow) => {
         const dateA = new Date(rowA['last_action']);
         const dateB = new Date(rowB['last_action']);
@@ -340,9 +344,9 @@ export class CartService {
       });
     }
 
-    return [...carts].sort((rowA: TableRow, rowB: TableRow) => {
-      const amountA = rowA[Object.keys(rowA)[index] as keyof TableRow];
-      const amountB = rowB[Object.keys(rowB)[index] as keyof TableRow];
+    return [...carts].sort((rowA: any, rowB: any) => {
+      const amountA = rowA[columns[index]];
+      const amountB = rowB[columns[index]];
 
       if (typeof amountA === 'number' && typeof amountB === 'number') {
         return direction === 'descending'

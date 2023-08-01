@@ -10,5 +10,4 @@ export class migrations1685455045580 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE "items" DROP COLUMN "variant_title"`);
     }
-
 }

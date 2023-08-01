@@ -12,7 +12,6 @@ export class SubscribeController {
 
     const plan = await this.subscribeService.getSubscription(session);
 
-    // PLEASE do not respond 500's errors OR HANDLE it on Frontend
     plan ? res.status(200).send(plan) : res.status(200).send({});
   }
 
@@ -28,7 +27,7 @@ export class SubscribeController {
       result = await this.subscribeService.createRecurringApplicationCharge(session, query.plan);
     }
   
-    result ? res.status(200).send(result) : res.status(500).send('Server error')
+    result ? res.status(200).send(result) : res.status(400).send('Bad request')
   }
 
   @Get('active')
@@ -36,7 +35,7 @@ export class SubscribeController {
     const session = res.locals.shopify.session;
     const activePlan = await this.subscribeService.activatePlan(session, query.charge_id)
 
-    activePlan ? res.status(200).send(activePlan) : res.status(500).send('Server error');
+    activePlan ? res.status(200).send(activePlan) : res.status(400).send('Incorrect data');
   }
 
   @Get('cancel')

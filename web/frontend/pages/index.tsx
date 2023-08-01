@@ -9,6 +9,7 @@ import {
   SkeletonBodyText,
   Banner,
   EmptySearchResult,
+  Button,
 } from '@shopify/polaris';
 
 import AreaChart from '../components/charts/AreaChart';
@@ -22,6 +23,7 @@ import { Analytics } from '../types/analytics';
 import { Logs } from '../types/logs';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import formatTime from '../services/timeFormatter';
+import { useMediaQuery } from 'react-responsive';
 
 type State = {
   isLoading: boolean;
@@ -68,6 +70,7 @@ function reducer(state: State, action: Action) {
 export default function HomePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const context = useContext(SubscribtionContext);
+  const isMobile = useMediaQuery({ query: '(max-width: 1003px)' });
 
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
@@ -113,17 +116,40 @@ export default function HomePage() {
     <Page
       divider
       title="Dashboard"
-      primaryAction={{
-        content: 'Create new cart',
-        onAction: () => navigate('/cart/create'),
-        disabled: !context.plan || context.plan.carts >= context.plan.limit,
-      }}
-      secondaryActions={[
-        {
-          content: 'View all carts',
-          onAction: () => navigate('/summary'),
-        },
-      ]}
+      primaryAction={
+        isMobile ? (
+          <Button
+            primary
+            connectedDisclosure={{
+              accessibilityLabel: 'View all carts',
+              actions: [
+                {
+                  content: 'View all carts',
+                  onAction: () => navigate('/summary'),
+                },
+              ],
+            }}
+          >
+            Create new cart
+          </Button>
+        ) : (
+          {
+            content: 'Create new cart',
+            onAction: () => navigate('/cart/create'),
+            disabled: !context.plan || context.plan.carts >= context.plan.limit,
+          }
+        )
+      }
+      secondaryActions={
+        isMobile
+          ? []
+          : [
+              {
+                content: 'View all carts',
+                onAction: () => navigate('/summary'),
+              },
+            ]
+      }
     >
       <Layout>
         {context.plan && context.plan.carts >= context.plan.limit && (

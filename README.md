@@ -16,7 +16,7 @@ docker push registry.digitalocean.com/better-carts/app
 
 ```
 start - npm run dev
-pass to pgadmin - 1736
+pass to pgadmin - 123456
 
 when launch local: 
   comment in app.module.ts migrations and ssl (rows 62-63)

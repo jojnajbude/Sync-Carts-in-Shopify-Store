@@ -274,6 +274,7 @@ export class StorefrontService {
 
               updatedItems.push(await this.itemRepository.save({ 
                 variant_id: line_item.variant_id, 
+                variant_title: line_item.variant.title,
                 qty: line_item.quantity, 
                 cart_id: cart?.id, 
                 price: line_item.price, 
@@ -303,7 +304,7 @@ export class StorefrontService {
                 cart_id: cart?.id, 
                 price: line_item.price, 
                 title: product.title, 
-                image_link: imgSrc.src, 
+                image_link: imgSrc ? imgSrc.src : null, 
                 product_id: variant.product_id,
                 status: 'recount',
                 expire_at: await expireTime,

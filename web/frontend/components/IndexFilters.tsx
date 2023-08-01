@@ -36,7 +36,7 @@ const IndexTableFilters: React.FC<Props> = ({
     let result = null;
 
     if (index === 0) {
-      result = await fetch('/api/carts/sort?dir=ascending&index=0');
+      result = await fetch('/api/carts/sort?dir=ascending&index=5');
     } else {
       result = await fetch(`/api/carts/filter?index=${index}`);
     }

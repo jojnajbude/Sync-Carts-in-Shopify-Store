@@ -10,7 +10,7 @@ export class StorefrontController {
   async updateData(@Query() query: { cart_id: string, customer: string, shop_id: string, os: string }, @Res() res: Response) {
     const cartItems = await this.storefrontService.updateData(query.cart_id, query.customer, query.shop_id, query.os);
 
-    cartItems ? res.status(200).send(cartItems) : res.status(200).send('Server error');
+    cartItems ? res.status(200).send(cartItems) : res.status(200).send({ type: 'error', message: 'Server error' });
   }
 
   @Get('cart/add')

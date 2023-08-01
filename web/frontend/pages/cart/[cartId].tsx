@@ -305,12 +305,20 @@ export default function CartPage() {
     );
   }
 
+  console.log(customer);
+
   if (!isLoading) {
     return (
       <Frame>
         <Page
           backAction={{ onAction: () => navigate('/summary') }}
-          title={cartId !== 'create' ? `Cart #${cartId}` : 'Create cart'}
+          title={
+            cartId !== 'create'
+              ? `${
+                  cart.customer_name || customer.first_name + customer.last_name
+                } cart`
+              : 'Create cart'
+          }
           titleMetadata={
             cartId !== 'create' && cart ? (
               <CartBadge indicator={cart.reserved_indicator}></CartBadge>

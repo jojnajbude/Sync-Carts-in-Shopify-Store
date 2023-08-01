@@ -38,7 +38,7 @@ export class ShopController {
 
     const themes = await this.shopService.getThemes(session);
 
-    themes ? res.status(200).send(themes) : res.status(500).send('Server error')  
+    themes ? res.status(200).send(themes) : res.status(400).send('Incorrect request')  
   }
 
   @Get('theme/edit')
@@ -47,6 +47,6 @@ export class ShopController {
 
     const editedTheme = await this.shopService.injectSnippet(session, query.name);
 
-    editedTheme ? res.status(200).send(editedTheme) : res.status(500).send('Server error')  
+    editedTheme ? res.status(200).send(editedTheme) : res.status(400).send('Incorrect data')  
   }
 }

@@ -75,7 +75,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 onClick={() => navigate(`/cart/${cart_id}`)}
               >
-                {`Cart ${cart_id}`}
+                {`Cart`}
               </Link>{' '}
               just expired
             </Text>
@@ -99,7 +99,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 onClick={() => navigate(`/cart/${cart_id}`)}
               >
-                {`Cart ${cart_id}`}
+                {`Cart`}
               </Link>
             </Text>
           );
@@ -122,7 +122,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 onClick={() => navigate(`/cart/${cart_id}`)}
               >
-                {`Cart ${cart_id}`}
+                {`Cart`}
               </Link>
             </Text>
           );
@@ -162,7 +162,7 @@ export default function LogActivity({ logs, isLoading }: Props) {
                 removeUnderline
                 onClick={() => navigate(`/cart/${cart_id}`)}
               >
-                {`Cart ${cart_id}`}
+                {`Cart`}
               </Link>
             </Text>
           );
