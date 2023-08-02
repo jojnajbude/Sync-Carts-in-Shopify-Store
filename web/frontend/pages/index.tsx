@@ -129,6 +129,7 @@ export default function HomePage() {
                 },
               ],
             }}
+            onClick={() => navigate('/cart/create')}
           >
             Create new cart
           </Button>

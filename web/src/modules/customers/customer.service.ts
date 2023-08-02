@@ -64,7 +64,7 @@ export class CustomerService {
     }
 
     const customersData = await this.customerRepository.query(
-      `select customers.*, carts.id as cart_id 
+      `select customers.*, carts.id as cart_id, carts.closed_at as closed_at
       from customers
       left join carts
       on customers.id = carts.customer_id
@@ -73,14 +73,12 @@ export class CustomerService {
 
     for (const customer of data.body.data.customers.edges) {
       const id = customer.node.id.split('/').slice(-1)[0];
-      const index = customersData.findIndex((user: { shopify_user_id: any; }) => id === user.shopify_user_id);
-      if (index !== -1) {
-        if (customersData[index].cart_id) {
-          customer.node.hasCart = customersData[index].cart_id;
-          continue;
-        }
-      }
+      const carts = customersData.filter((cart: { shopify_user_id: number; cart_id: number; closed_at: Date }) => cart.shopify_user_id === id && cart.cart_id && !cart.closed_at);
 
+      if (carts.length) {
+        customer.node.hasCart = carts[0].cart_id;
+        continue;
+      }
       customer.node.hasCart = false;
     }
 

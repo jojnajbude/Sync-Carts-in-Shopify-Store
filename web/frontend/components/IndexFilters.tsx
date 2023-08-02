@@ -41,7 +41,7 @@ const IndexTableFilters: React.FC<Props> = ({
       result = await fetch(`/api/carts/filter?index=${index}`);
     }
 
-    if (!result.ok) {
+    if (result.ok) {
       const carts = await result.json();
       setCarts(carts);
       setIsLoading(false);

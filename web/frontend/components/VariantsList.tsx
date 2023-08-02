@@ -8,7 +8,7 @@ import {
   Icon,
   VerticalStack,
 } from '@shopify/polaris';
-import { ProductsMajor } from '@shopify/polaris-icons';
+import { ProductsMajor, ImageMajor } from '@shopify/polaris-icons';
 import { Product, Variant } from '../types/product';
 
 import { formatter } from '../services/formatter';
@@ -68,7 +68,7 @@ export default function VariantsList({
               media={
                 <Thumbnail
                   size="small"
-                  source={variant.image_link}
+                  source={variant.image_link ? variant.image_link : ImageMajor}
                   alt={title}
                 ></Thumbnail>
               }

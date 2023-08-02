@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Not, Repository } from "typeorm";
 import { Cart } from "../carts/cart.entity.js";
 import { Customer } from "../customers/customer.entity.js";
 import { Shop } from "../shops/shop.entity.js";
@@ -46,7 +46,7 @@ export class StorefrontService {
         }
 
         if (cart_id === 'undefined') {
-          const newCart = await this.cartRepository.findOneBy({ customer_id: user?.id });
+          const newCart = await this.cartRepository.findOne({ where: {customer_id: user?.id } });
 
           if (newCart?.cart_token) {
             return { type: 'Ok' };
@@ -185,6 +185,7 @@ export class StorefrontService {
   }
 
   async updateCart(cartData: any, shop: string) {
+    console.log('webhook works', cartData)
     try {
       const store = await this.shopsRepository.findOneBy({ domain: shop });
 
@@ -236,6 +237,7 @@ export class StorefrontService {
         }
 
         for (const line_item of cartData.line_items) {
+          console.log( 'line_item', line_item)
           const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
 
           if (item && Number(item.qty) !== line_item.quantity) {
@@ -274,7 +276,7 @@ export class StorefrontService {
 
               updatedItems.push(await this.itemRepository.save({ 
                 variant_id: line_item.variant_id, 
-                variant_title: line_item.variant.title,
+                variant_title: line_item.title,
                 qty: line_item.quantity, 
                 cart_id: cart?.id, 
                 price: line_item.price, 
@@ -299,7 +301,7 @@ export class StorefrontService {
               expireTime = this.countExpireDate(new Date(), 'unknown', JSON.parse(store.priorities));
               const newItem = { 
                 variant_id: line_item.variant_id,
-                variant_title: line_item.variant.title,
+                variant_title: line_item.title,
                 qty: line_item.quantity, 
                 cart_id: cart?.id, 
                 price: line_item.price, 
@@ -410,7 +412,14 @@ export class StorefrontService {
         .update()
         .set({ status: 'paid' })
         .where({ cart_id: cart.id })
+        .andWhere({ status: Not('unsynced')})
         .returning('*')
+        .execute();
+
+      const unsyncedItems = await this.itemRepository.createQueryBuilder()
+        .delete()
+        .where({ cart_id: cart.id })
+        .andWhere({ status: 'unsynced' })
         .execute();
   
       await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })

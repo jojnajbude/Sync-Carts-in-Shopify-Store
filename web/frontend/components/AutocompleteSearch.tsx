@@ -227,7 +227,7 @@ export default function AutocompleteSearch({
         const product = productWithVariants;
 
         if (!variant.image_id) {
-          variant.image_link = product.image.src;
+          variant.image_link = product.image ? product.image.src : null;
         } else {
           variant.image_link = product.images.find(
             (image: { id: number }) => image.id === variant.image_id,

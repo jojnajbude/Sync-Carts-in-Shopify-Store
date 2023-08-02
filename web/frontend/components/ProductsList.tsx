@@ -10,7 +10,7 @@ import {
   Button,
   Icon,
 } from '@shopify/polaris';
-import { CancelMajor } from '@shopify/polaris-icons';
+import { CancelMajor, ImageMajor } from '@shopify/polaris-icons';
 
 import Counter from './Counter';
 import AutocompleteSearch from './AutocompleteSearch';
@@ -126,7 +126,11 @@ export default function ProductsList({
     return items.map(item => {
       const product = (
         <LegacyStack>
-          <Thumbnail source={item.image_link} alt={item.title} size="medium" />
+          <Thumbnail
+            source={item.image_link ? item.image_link : ImageMajor}
+            alt={item.title}
+            size="medium"
+          />
 
           <Text variant="bodyMd" fontWeight="bold" as="h3">
             {item.title}
@@ -207,7 +211,11 @@ export default function ProductsList({
                 accessibilityLabel={`View details for ${title}`}
               >
                 <LegacyStack>
-                  <Thumbnail source={image_link} alt={title} size="large" />
+                  <Thumbnail
+                    source={image_link ? image_link : ImageMajor}
+                    alt={title}
+                    size="large"
+                  />
 
                   <LegacyStack.Item fill>
                     <VerticalStack gap="3">

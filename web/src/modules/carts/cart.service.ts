@@ -141,6 +141,43 @@ export class CartService {
         where items.cart_id = ${cartId}`
       )
 
+      console.log(cartItems)
+
+      if (!cartItems.length) {
+        const cart = await this.cartRepository.query(
+          `select carts.*, customers.name, customers.id as customer_id, customers.shopify_user_id, customers.priority
+          from carts
+          left join customers
+          on carts.customer_id = customers.id
+          where carts.id = ${cartId}`
+        );
+
+        if (!cart) {
+          return false;
+        }
+
+        const handledCart = {
+          id: cart[0].id,
+          customer_name: cart[0].name,
+          total: 0,
+          reserved_indicator: 'no',
+          reservation_time: '',
+          qty: 0,
+          items: [],
+          customer_shopify_id: cart[0].shopify_user_id,
+          shop_domain: session.shop,
+          priority: cart[0].priority,
+          last_action: String(new Date(cart[0].last_action))
+        }
+
+        const customer = await this.customerService.getCustomer(session, cart[0].shopify_user_id);
+        const shop = await shopify.api.rest.Shop.all({
+          session,
+        });
+        
+        return [[handledCart], customer, shop];
+      }
+
       let customer = null;
   
       if (cartItems[0].shopify_user_id) {
