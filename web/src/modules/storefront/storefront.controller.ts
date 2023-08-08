@@ -1,16 +1,27 @@
 import { Body, Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
 import { Response, Request } from "express";
 import { StorefrontService } from "./storefront.service.js";
+import { CartService } from "../carts/cart.service.js";
 
 @Controller('/storefront')
 export class StorefrontController {
-  constructor (private storefrontService: StorefrontService) {}
+  constructor (private storefrontService: StorefrontService, private cartService: CartService) {}
 
   @Get('update')
   async updateData(@Query() query: { cart_id: string, customer: string, shop_id: string, os: string }, @Res() res: Response) {
     const cartItems = await this.storefrontService.updateData(query.cart_id, query.customer, query.shop_id, query.os);
 
     cartItems ? res.status(200).send(cartItems) : res.status(200).send({ type: 'error', message: 'Server error' });
+  }
+
+  @Get('cart/get')
+  async getCart(@Query() query: { cart_id: string, shop: number }, @Res() res: Response) {
+    const session = await this.storefrontService.getSession(query.shop);
+    const cartId = await this.storefrontService.getCartId(query.cart_id);
+    
+    const cart = cartId ? await this.cartService.getCart(String(cartId), session) : null;
+
+    cart ? res.status(200).send(cart[0]) : res.status(400).send({ type: 'error', message: 'Invalid data' });
   }
 
   @Get('cart/add')

@@ -1,5 +1,5 @@
 const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-const APP_URL_DEV = 'https://better-carts.dev-test.pro';
+const APP_URL_DEV = 'https://smart-carts.dev-test.pro';
 
 (function initializeBetterCarts() {
   initializeObserver();
@@ -61,6 +61,7 @@ function getCartCookie() {
 async function updateData(id, cart_id, shop_id, os) {
   const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}&os=${os}`);
   const response = await checkUpdates.json();
+  const smartCarts = document.querySelector('.smart-cart');
 
   if (response.type === 'New cart') {
     const newItems = [];
@@ -89,7 +90,11 @@ async function updateData(id, cart_id, shop_id, os) {
       headers: { 'Content-Type': 'application/json' },
       body: await JSON.stringify([response.data.items, cookie])
     })
+
+    setTimeout(() => smartCarts.updateData(newItems.length), 2000);
   } else if (response.type === 'Update') {
+    const smartCarts = document.querySelector('.smart-cart');
+
     const updatedItems = {
       updates: {}
     };
@@ -112,11 +117,15 @@ async function updateData(id, cart_id, shop_id, os) {
       }
     }
 
+    const keys = Object.keys(updatedItems.updates);
+
     const updateItems = await fetch(window.Shopify.routes.root + 'cart/update.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedItems)
     });
+
+    setTimeout(() => smartCarts.updateData(keys.length), 2000);
   }
 }
 
@@ -171,6 +180,12 @@ async function addToCart() {
 
         if (customer) {
           updateData(customer, cookie, window.better_carts.shop, os);
+
+          setTimeout(() => {
+            console.log('timeout worked')
+            const smartCart = document.querySelector('.smart-cart');
+            smartCart.updateData();
+          }, 2000)
         }
       }, 1000)
     }
@@ -204,6 +219,12 @@ async function addToCart() {
 
         if (customer) {
           updateData(customer, cookie, window.better_carts.shop, os);
+
+          setTimeout(() => {
+            console.log('timeout worked')
+            const smartCart = document.querySelector('.smart-cart');
+            smartCart.updateData();
+          }, 2000)
         }
       }, 1000)
     }

@@ -20,6 +20,36 @@ export class StorefrontService {
     private analyticsService: AnalyticsService,
   ) {}
 
+  async getSession(shop_id: number) {
+    try {
+      const shop = await this.shopsRepository.findOneBy({ shopify_id: shop_id });
+
+      if (shop) {
+        return JSON.parse(shop.session);
+      }
+      
+      return false;
+    } catch(err) {
+      console.log(err);
+      return false;
+    }
+  }
+
+  async getCartId(cart_id: string) {
+    try {
+      const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+
+      if (cart) {
+        return cart.id;
+      }
+      
+      return false;
+    } catch(err) {
+      console.log(err);
+      return false;
+    }
+  }
+
   async updateData(cart_id: string, customer_id: string, shop_id: string, os: string) {
     try {
       const shopData = await this.shopsRepository.findOneBy({ shopify_id: Number(shop_id) });

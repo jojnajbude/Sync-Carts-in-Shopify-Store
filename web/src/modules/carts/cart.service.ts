@@ -9,7 +9,6 @@ import { Cart } from "./cart.entity.js";
 import shopify from "../../utils/shopify.js";
 import { CustomerService } from "../customers/customer.service.js";
 import { ShopService } from "../shops/shop.service.js";
-import { StorefrontService } from "../storefront/storefront.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
 
 type TableRow = {
@@ -35,7 +34,6 @@ export class CartService {
     @InjectRepository(Item) private itemRepository: Repository<Item>,
     private readonly customerService: CustomerService,
     private readonly shopsService: ShopService,
-    private readonly storefrontService: StorefrontService,
     private readonly notificationsService: NotificationsService
   ) {}
 
@@ -101,7 +99,7 @@ export class CartService {
       const items = [];
 
       for (const item of cart.items) {
-        const expireTime = this.storefrontService.countExpireDate(new Date(), customerData.priority, JSON.parse(shopData.priorities));
+        const expireTime = this.countExpireDate(new Date(), customerData.priority, JSON.parse(shopData.priorities));
         const newItem = {
           variant_id: item.id,
           variant_title: item.variant_title,
@@ -214,12 +212,12 @@ export class CartService {
 
         if (existItemIndex !== -1) {
           if (oldItems[existItemIndex].qty !== item.qty) {
-            const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
+            const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
             await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced', expire_at: await expireTime })
           }
         } else {
           console.log(item)
-          const expireTime = this.storefrontService.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
+          const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
           await this.itemRepository.save({ 
             cart_id: cart.id, 
             variant_id: item.variant_id, 
@@ -398,4 +396,37 @@ export class CartService {
       }
     });
   };
+
+  countExpireDate(startDate: Date, priority: string, priorities: any) {
+    try {
+      let reservationTime = 0;
+
+      switch(true) {
+        case priority === 'max':
+          reservationTime = priorities.max_priority;
+          break;
+        case priority === 'high':
+          reservationTime = priorities.high_priority;
+          break;
+        case priority === 'normal':
+          reservationTime = priorities.normal_priority;
+          break;
+        case priority === 'low':
+          reservationTime = priorities.low_priority;
+          break;
+        case priority === 'min':
+          reservationTime = priorities.min_priority;
+          break;
+        default:
+          reservationTime = 24;
+          break;
+      }
+      
+      const expandTime = 3600000 * reservationTime;
+
+      return new Date(startDate.getTime() + expandTime);
+    } catch(err) {
+      console.log(err);
+    }
+  }
 }
