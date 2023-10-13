@@ -1,5 +1,28 @@
-const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-const APP_URL_DEV = 'https://smart-carts.dev-test.pro';
+// const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+// const APP_URL_DEV = 'https://smart-carts.dev-test.pro';
+const APP_URL = 'https://andrii.ngrok.app';
+
+const socket = io('https://andrii.ngrok.app', {
+  path: '/storefront/synchronize',
+});
+
+socket.on('connect', () => {
+  console.log('socket connected');
+});
+
+socket.on('error', (error) => {
+  console.log('socket error', error);
+})
+
+socket.on('message', (event) => {
+  console.log('socket message', event);
+});
+
+socket.on('disconnect', () => {
+  console.log('socket disconnected');
+});
+
+window.socket = socket;
 
 (function initializeBetterCarts() {
   initializeObserver();
@@ -327,4 +350,5 @@ class BetterCartsTimer extends HTMLElement {
   }
 }
 
-window.customElements.define('better-carts-timer', BetterCartsTimer)
+window.customElements.define('better-carts-timer', BetterCartsTimer);
+

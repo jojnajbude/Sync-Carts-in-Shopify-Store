@@ -1,3 +1,5 @@
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
 <script>
   window.better_carts = {
     {% if customer %}
@@ -476,8 +478,10 @@
         }
       ]
 
-      this.APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-      this.APP_URL_DEV = 'https://smart-carts.dev-test.pro';
+      // this.APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+      // this.APP_URL_DEV = 'https://smart-carts.dev-test.pro';
+
+      const APP_URL = 'https://andrii.ngrok.app';
 
       this.init();
     }

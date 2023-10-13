@@ -38,6 +38,7 @@ import { createWebhooks } from "./middlewares/create-webhooks.middleware.js";
 import { getShopDataMiddleware } from "./middlewares/get-shop-data.middleware.js";
 
 import { migrations1685455045580 } from "../migrations/1685455045580-migrations.js";
+import { SynchronizeGateway } from './synchronize/synchronize.gateway.js';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -57,12 +58,12 @@ const STATIC_PATH =
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [Shop, Item, Customer, Cart, Analytics],
-      // synchronize: true,
+      synchronize: true,
       // TODO: Really? Please set just pattern, you don't need migrations import
-      migrations: [migrations1685455045580],
-      ssl: {
-        ca: process.env.SSL_CERT,
-      },
+      // migrations: [migrations1685455045580],
+      // ssl: {
+      //   ca: process.env.SSL_CERT,
+      // },
     }),
     MongooseModule.forRoot(
       process.env.MONGO_URI!,
@@ -79,11 +80,14 @@ const STATIC_PATH =
     SubscribeModule,
     NotificationsModule,
     MandatoryModule,
+    SynchronizeGateway,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
   ],
+  providers: [SynchronizeGateway],
 })
+
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Authentication Middleware
