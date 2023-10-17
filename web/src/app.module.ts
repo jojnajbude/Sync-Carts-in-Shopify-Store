@@ -38,7 +38,7 @@ import { createWebhooks } from "./middlewares/create-webhooks.middleware.js";
 import { getShopDataMiddleware } from "./middlewares/get-shop-data.middleware.js";
 
 import { migrations1685455045580 } from "../migrations/1685455045580-migrations.js";
-import { SynchronizeGateway } from './synchronize/synchronize.gateway.js';
+// import { SynchronizeGateway } from './synchronize/synchronize.gateway.js';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -80,12 +80,12 @@ const STATIC_PATH =
     SubscribeModule,
     NotificationsModule,
     MandatoryModule,
-    SynchronizeGateway,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
   ],
-  providers: [SynchronizeGateway],
+  providers: [
+  ],
 })
 
 export class AppModule implements NestModule {

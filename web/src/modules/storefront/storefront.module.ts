@@ -10,10 +10,11 @@ import { ShopModule } from "../shops/shop.module.js";
 import { LogModule } from "../log/logs.module.js";
 import { AnalyticsModule } from "../analytics/analytics.module.js";
 import { CartModule } from "../carts/cart.module.js";
+import {SynchronizeGateway} from "../../synchronize/synchronize.gateway.js";
 
 @Module({
   controllers: [StorefrontController],
-  providers: [StorefrontService],
+  providers: [StorefrontService, SynchronizeGateway],
   imports: [TypeOrmModule.forFeature([Shop, Customer, Cart, Item]), 
     CartModule,
     LogModule,

@@ -196,6 +196,34 @@ export class StorefrontService {
     } 
   }
 
+  async updateLastActivity(customer: string) {
+    const lastUpdateCart = await this.cartRepository.createQueryBuilder('carts')
+        .leftJoin('carts.customer', 'customers')
+        .where('customers.shopify_user_id = :id', { id: customer })
+        .orderBy('carts.last_action', 'DESC')
+        .getOne();
+
+    return lastUpdateCart;
+  }
+
+  async getLastUpdatedItems(customer: string) {
+    const lastUpdateCart = await this.cartRepository.createQueryBuilder('carts')
+        .leftJoin('carts.customer', 'customers')
+        .where('customers.shopify_user_id = :id', { id: customer })
+        .orderBy('carts.last_action', 'DESC')
+        .getOne();
+
+    if (!lastUpdateCart) {
+      return [];
+    }
+
+    const items = await this.itemRepository.createQueryBuilder('items')
+        .where('items.id = :id', { id: lastUpdateCart.id })
+        .getMany();
+
+    return items;
+  }
+
   async createCart(shop: string, cartData: any) {
     try {
       const store = await this.shopsRepository.findOneBy({ domain: shop });
@@ -215,7 +243,6 @@ export class StorefrontService {
   }
 
   async updateCart(cartData: any, shop: string) {
-    console.log('webhook works', cartData)
     try {
       const store = await this.shopsRepository.findOneBy({ domain: shop });
 
@@ -267,7 +294,6 @@ export class StorefrontService {
         }
 
         for (const line_item of cartData.line_items) {
-          console.log( 'line_item', line_item)
           const item = items.find(item => Number(item.variant_id) === line_item.variant_id)
 
           if (item && Number(item.qty) !== line_item.quantity) {

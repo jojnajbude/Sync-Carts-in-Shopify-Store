@@ -34,7 +34,7 @@ export class CartService {
     @InjectRepository(Item) private itemRepository: Repository<Item>,
     private readonly customerService: CustomerService,
     private readonly shopsService: ShopService,
-    private readonly notificationsService: NotificationsService
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getShopCarts(session: shopifySession) {
@@ -216,7 +216,6 @@ export class CartService {
             await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced', expire_at: await expireTime })
           }
         } else {
-          console.log(item)
           const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
           await this.itemRepository.save({ 
             cart_id: cart.id, 

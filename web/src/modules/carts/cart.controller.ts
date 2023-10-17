@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import { Response } from "express";
 import { ShopService } from "../shops/shop.service.js";
 import { CartService } from "./cart.service.js";
+import {SynchronizeGateway} from "../../synchronize/synchronize.gateway";
 
 @Controller('/api/carts')
 export class CartController {

@@ -43,17 +43,36 @@ export class StorefrontController {
     }
   }
 
+  @Get('cart/last-updated/items')
+  async lastUpdatedItems(@Query() query: { customer: string }, @Res() res: Response) {
+    const items = await this.storefrontService.getLastUpdatedItems(query.customer);
+
+    res.status(200).send(items);
+  }
+
+  @Get('cart/last-updated')
+  async lastUpdated(@Query() query: { customer: string, shop: string }, @Res() res: Response) {
+    const lastUpdated = await this.storefrontService.updateLastActivity(query.customer);
+
+    lastUpdated ? res.status(200).send(lastUpdated) : res.status(404).send({
+      type: 'error',
+      message: 'Not found'
+    });
+  }
+
   @Post('cart/update')
   async updateCart(@Req() req: Request, @Res() res: Response) {
-    const shopDomain = req.get('x-shopify-shop-domain');
-    console.log(shopDomain)
-
-    if (shopDomain) {
-      const changedItems = await this.storefrontService.updateCart(req.body, shopDomain);
-      changedItems ? res.status(200).send(changedItems) : res.status(200).send('Server error');
-    } else {
-      res.status(404).send('Unable to identify the store');
-    }
+    res.sendStatus(200);
+    return;
+    //
+    // const shopDomain = req.get('x-shopify-shop-domain');
+    //
+    // if (shopDomain) {
+    //   const changedItems = await this.storefrontService.updateCart(req.body, shopDomain);
+    //   changedItems ? res.status(200).send(changedItems) : res.status(200).send('Server error');
+    // } else {
+    //   res.status(404).send('Unable to identify the store');
+    // }
   }
 
   @Post('app/uninstalled')

@@ -2,31 +2,192 @@
 // const APP_URL_DEV = 'https://smart-carts.dev-test.pro';
 const APP_URL = 'https://andrii.ngrok.app';
 
-const socket = io('https://andrii.ngrok.app', {
-  path: '/storefront/synchronize',
-});
+const customer = window.better_carts.id;
 
-socket.on('connect', () => {
-  console.log('socket connected');
-});
+const Sync = window.Sync = {};
 
-socket.on('error', (error) => {
-  console.log('socket error', error);
-})
+class SynchronizeCart {
+  constructor() {
+    this.customer = customer;
 
-socket.on('message', (event) => {
-  console.log('socket message', event);
-});
+    this.init();
+  }
 
-socket.on('disconnect', () => {
-  console.log('socket disconnected');
-});
+  async init() {
+    if (!customer) {
+      this.error = {
+        message: 'User not logged in.'
+      }
+      return;
+    }
 
-window.socket = socket;
+    const [
+      lastUpdatedCart,
+      currentCart
+    ] = await Promise.all([
+      fetch(APP_URL + '/storefront/cart/last-updated?customer=' + customer)
+        .then(res => res.json()),
+      fetch('/cart.js').then(res => res.json())
+    ]);
+
+    if (lastUpdatedCart && !currentCart.items.length) {
+      const items = await fetch(APP_URL + '/storefront/cart/last-updated/items?customer=' + customer)
+        .then(res => res.json());
+
+      const response = await fetch('/cart/update.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          updates: items.reduce((obj, item) => {
+            obj[item.variant_id] = item.qty;
+
+            return obj;
+          }, {})
+        })
+      }).then(res => res.json());
+
+      console.log(response);
+    }
+
+    console.log(lastUpdatedCart, currentCart);
+
+    this.createSocket();
+  }
+
+  createSocket() {
+    const socket = this.socket = io('https://andrii.ngrok.app', {
+      path: '/storefront/synchronize',
+    });
+
+    socket.on('connect', () => {
+      console.log('socket connected', socket.id);
+      socket.emit('session', customer);
+    });
+
+    socket.on('error', (error) => {
+      console.log('socket error', error);
+    })
+
+    socket.on('synchronize', (customer, items) => {
+      console.log('socket synchronize', customer, items);
+
+      if (this.resolve) {
+        console.log('awaited');
+        this.resolve();
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('socket disconnected');
+    });
+  }
+
+  synchronize(formData) {
+    this.socket.emit('synchronize', {
+      customer: this.customer,
+      formData: formData || {}
+    });
+
+    return new Promise((resolve, reject) => {
+      this.resolve = resolve;
+
+    });
+  }
+}
+
+Sync.SynchronizeCart = new SynchronizeCart()
+
+class SyncObserver {
+  constructor() {
+    this.observe();
+  }
+
+  formObserve() {
+    const forms = document.querySelectorAll('form[action^="/cart"]');
+
+    console.log(forms);
+
+    forms.forEach((form) => {
+      const observer = new MutationObserver((mutationsList, observer) => {
+        for (let mutation of mutationsList) {
+          console.log(mutation);
+        }
+      })
+      observer.observe(form, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        characterDataOldValue: true
+      });
+
+      let submitBtn = form.querySelector('[type="submit"]');
+
+      if (!submitBtn) {
+        submitBtn = document.querySelector(`[form="${form.id}"][type="submit"]`);
+      }
+
+      if (!submitBtn) {
+        return;
+      }
+
+      const cloneSubmitBtn = submitBtn.cloneNode(true);
+      cloneSubmitBtn.type = 'button';
+
+      submitBtn.style.display = 'none';
+
+      submitBtn.before(cloneSubmitBtn);
+
+      cloneSubmitBtn.onclick = this.cloneClickHandler.bind(this, form, submitBtn);
+    });
+  }
+
+  linkObserve() {
+    const links = document.querySelectorAll('a[href^="/cart/"]');
+
+    links.forEach(link => {
+      const url = new URL(link.href);
+
+      const id = url.searchParams.get('id')?.split(':').shift();
+      const qty = url.searchParams.get('quantity');
+
+      link.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        await Sync.SynchronizeCart.synchronize({
+          id,
+          qty
+        })
+      });
+    });
+  }
+
+  async cloneClickHandler(form, submitter, event) {
+    const formData = new FormData(form);
+
+    const formDataJSON = {};
+
+    formData.forEach((value, key) => {
+      formDataJSON[key] = value;
+    });
+
+    await Sync.SynchronizeCart.synchronize(formDataJSON);
+
+    if (submitter && submitter instanceof HTMLElement) {
+      submitter.click();
+    }
+  }
+
+  observe() {
+    this.formObserve();
+    this.linkObserve();
+  }
+}
+
+Sync.observer = new SyncObserver();
 
 (function initializeBetterCarts() {
   initializeObserver();
-  swapAddToCartBtn();
+  // swapAddToCartBtn();
 
   if (window.better_carts.hasOwnProperty('id')) {
     setInterval(() => {
@@ -36,7 +197,7 @@ window.socket = socket;
       updateData(window.better_carts.id, cookie, window.better_carts.shop, os)
     }, 10000)
   }
-})()
+})();
 
 function getOS() {
   let userAgent = navigator.userAgent;
@@ -64,7 +225,7 @@ function initializeObserver() {
 
   const callback = function(mutationsList, observer) {
     for (let mutation of mutationsList) {
-      swapAddToCartBtn();
+      // swapAddToCartBtn();
     }
   }
 
@@ -223,6 +384,8 @@ async function addToCart() {
 
     const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
     const resText = await addCart.text();
+
+    console.log(resText);
 
     if (resText === 'All items reserved') {
       this.setAttribute('disabled', true)

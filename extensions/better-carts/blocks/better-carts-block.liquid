@@ -3,9 +3,10 @@
 <script>
   window.better_carts = {
     {% if customer %}
-      id : {{ customer.id | json }},
-    {% endif %}
-    shop: '{{ shop.id }}'
+      id: "{{ customer.id }}",
+      email: "{{ customer.email }}"
+    {% endif %},
+    shop: "{{ shop.id }}"
   };
 </script>
 
@@ -481,7 +482,7 @@
       // this.APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
       // this.APP_URL_DEV = 'https://smart-carts.dev-test.pro';
 
-      const APP_URL = 'https://andrii.ngrok.app';
+      this.APP_URL = 'https://andrii.ngrok.app';
 
       this.init();
     }

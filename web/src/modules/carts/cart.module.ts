@@ -9,11 +9,18 @@ import { Customer } from "../customers/customer.entity.js";
 import { CustomerModule } from "../customers/customer.module.js";
 import { ShopModule } from "../shops/shop.module.js";
 import { NotificationsModule } from "../notifications/notifications.module.js";
+import {SynchronizeGateway} from "../../synchronize/synchronize.gateway.js";
+
 
 @Module({
   controllers: [CartController],
-  providers: [CartService],
-  imports: [TypeOrmModule.forFeature([Cart, Shop, Item, Customer]), CustomerModule, ShopModule, NotificationsModule],
+  providers: [CartService, SynchronizeGateway],
+  imports: [
+    TypeOrmModule.forFeature([Cart, Shop, Item, Customer]),
+    CustomerModule,
+    ShopModule,
+    NotificationsModule,
+  ],
   exports: [TypeOrmModule, CartService]
 })
 export class CartModule {}

@@ -8,7 +8,13 @@ import {
   MessageBody,
   ConnectedSocket
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import {Injectable} from "@nestjs/common";
+import {Server, Socket} from 'socket.io';
+
+type SyncProps = {
+  customer: string;
+  items: any[];
+}
 
 @WebSocketGateway({
   path: '/storefront/synchronize',
@@ -16,25 +22,37 @@ import { Server } from 'socket.io';
     origin: '*'
   }
 })
+@Injectable()
 export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  public server: Server;
 
-  afterInit(@ConnectedSocket() client: Server): void {
+  afterInit(@ConnectedSocket() client: Socket): void {
     console.log('Initialized');
   }
 
-  handleConnection(@ConnectedSocket() client: Server): void {
-    console.log('Connected');
+  handleConnection(@ConnectedSocket() client: Socket): void {
+    console.log('Connected', client.id, client.rooms);
   }
 
-  handleDisconnect(@ConnectedSocket() client: Server): void {
-    console.log('Disconnected');
+  handleDisconnect(@ConnectedSocket() client: Socket): void {
+    // console.log('Disconnected');
+  }
+
+  @SubscribeMessage('session')
+  async handleSession(@MessageBody() customer: string, @ConnectedSocket() client: Socket): Promise<void> {
+    console.log(customer);
+
+    if (customer) {
+      client.join(customer);
+    }
+
+    this.server.in(customer).emit('synchronize', customer);
   }
 
   @SubscribeMessage('synchronize')
-  async handleMessage(@MessageBody() data: string, @ConnectedSocket() client: Server): Promise<void> {
-    (await this.server.fetchSockets())
-      .forEach(socket => console.log(socket.id));
+  async handleMessage(@MessageBody() { customer, items }: SyncProps, @ConnectedSocket() client: Socket): Promise<void> {
+    console.log('here', customer);
+    this.server.to(customer).emit('synchronize', customer, items);
   }
 }
