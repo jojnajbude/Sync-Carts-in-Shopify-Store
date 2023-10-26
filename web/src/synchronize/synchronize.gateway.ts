@@ -8,7 +8,7 @@ import {
   MessageBody,
   ConnectedSocket
 } from '@nestjs/websockets';
-import {Injectable} from "@nestjs/common";
+import {Injectable, Req} from "@nestjs/common";
 import { Server, Socket } from 'socket.io';
 import {Cart} from "../modules/carts/cart.entity.js";
 import {IsNull, LessThan, MoreThanOrEqual, Repository} from "typeorm";
@@ -72,7 +72,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
   }
 
   @SubscribeMessage('session')
-  async handleSession(@MessageBody() body: any, @ConnectedSocket() client: Socket): Promise<void> {
+  async handleSession(@MessageBody() body: any, @ConnectedSocket() client: Socket, @Req() request: Request): Promise<void> {
     const [customerId, os] = body;
 
     if (customerId) {
@@ -85,7 +85,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
       client.in(String(customerId)).emit('online', online);
     }
 
-    const customerModel = await this.customerRepository.findOne({ where: {
+    let customerModel = await this.customerRepository.findOne({ where: {
       shopify_user_id: Number(customerId)
     }});
 
@@ -165,6 +165,9 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
         customer_id: customer.id,
         shop_id: shop.id,
       });
+
+      this.updateLocationAnalytics(customer, shop);
+      this.updateConversionRate(shop.id, 'add');
 
       const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities));
 
@@ -325,5 +328,74 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
           .where({ id: analytics.id })
           .execute()
       }
+  }
+
+  async updateLocationAnalytics(customer: Customer, shop: Shop) {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+    nextDay.setHours(0, 0, 0, 0);
+
+    const location = customer.location;
+
+    const analytics = await this.analyticsRepository.createQueryBuilder('analytics')
+      .where({ shop_id: shop.id })
+      .andWhere({ type: 'locations' })
+      .andWhere({ date: MoreThanOrEqual(currentDate.toISOString())})
+      .andWhere({ date: LessThan(nextDay.toISOString())})
+      .getOne();
+
+    if (analytics) {
+      const locations = JSON.parse(analytics.value);
+      locations.value[location] = locations.value[location] ? locations.value[location] + 1 : 1;
+
+      await this.analyticsRepository.createQueryBuilder('analytics')
+        .update(Analytics)
+        .set({ value: JSON.stringify(locations) })
+        .where({ id: analytics.id })
+        .execute()
+    }
+  }
+
+  async updateConversionRate(shop_id: number, type: string) {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+    nextDay.setHours(0, 0, 0, 0);
+
+    const analytics = await this.analyticsRepository.createQueryBuilder('analytics')
+      .where({ shop_id })
+      .andWhere({ type: 'conversion_rates' })
+      .andWhere({ date: MoreThanOrEqual(currentDate.toISOString())})
+      .andWhere({ date: LessThan(nextDay.toISOString())})
+      .getOne()
+      || await this.analyticsRepository.save({
+        shop_id, 
+        type: 'conversion_rates',
+        value: JSON.stringify({
+          key: currentDate.toDateString(),
+          value: [
+            {
+              key: 'Opens',
+              value: 0
+            }, 
+            {
+              key: 'Paid',
+              value: 0 
+            }
+          ]
+        }),
+        date: currentDate.toISOString() });
+
+    if (analytics) {
+      const rate = JSON.parse(analytics.value);
+      rate.value[type === 'add' ? 0: 1].value += 1;
+
+      await this.analyticsRepository.createQueryBuilder('analytics')
+        .update(Analytics)
+        .set({ value: JSON.stringify(rate) })
+        .where({ id: analytics.id })
+        .execute()
+    }
   }
 }

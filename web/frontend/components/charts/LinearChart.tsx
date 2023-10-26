@@ -66,7 +66,7 @@ export default function LinearChart({
         {context.plan ? (
           <Text as="h1" variant="headingLg">
             {mainTitle === 'Total Sales'
-              ? formatter(total, context.plan.currency)
+              ? formatter(total * 100, context.plan.currency)
               : `${total.toFixed(2)}%`}
           </Text>
         ) : null}

@@ -43,7 +43,7 @@ export default function AreaChart({
         </HorizontalStack>
 
         <Text as="h1" variant="headingLg">
-          {context.plan ? formatter(total, context.plan.currency) : null}
+          {context.plan ? formatter(total * 100, context.plan.currency) : null}
         </Text>
 
         <HorizontalStack>

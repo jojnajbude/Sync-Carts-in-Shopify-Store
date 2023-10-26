@@ -54,7 +54,7 @@ export default function EmptyStateExample() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: await JSON.stringify(selectedDates),
+          body: JSON.stringify(selectedDates),
         });
 
         if (analyticsData.ok) {

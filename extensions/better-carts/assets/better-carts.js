@@ -86,12 +86,8 @@ class SynchronizeCart {
           })
         }).then(res => res.json());
 
-        console.log(response);
-
         this.renderSections(response.sections);
       }
-
-      console.log('sync', notSynchronized, this.cart.items, items);
     }
 
     this.createSocket();
@@ -113,8 +109,21 @@ class SynchronizeCart {
     });
 
     socket.on('connect', () => {
-      console.log('socket connected', socket.id, getOS());
-      socket.emit('session', customer, getOS());
+      console.log('socket connected');
+      const os = getOS();
+
+      if (!Cookies.get('session')) {
+        socket.emit('session', customer, os);
+      } else if (this.cart && Cookies.get('session') !== this.cart.token) {
+        socket.emit('session', customer, os);
+        Cookies.set('session', this.cart.token, { expires: 1 });
+      } else {
+        socket.emit('session', customer, null);
+      }
+
+      if (this.cart) {
+        Cookies.set('session', this.cart.token, { expires: 1 });
+      }
     });
 
     socket.on('synchronize', this.onSynchronize.bind(this));
@@ -215,8 +224,6 @@ class SynchronizeCart {
   }
 
   synchronize(data) {
-    console.log(data);
-
     if (!this.socket) {
       return Promise.resolve();
     }
@@ -249,11 +256,12 @@ class SyncObserver {
 
     forms.forEach((form) => {
       const observer = new MutationObserver((mutationsList, observer) => {
-        for(let mutation of mutationsList) {
-          console.log(mutation);
-        }
         this.getCart()
-          .then(() => this.synchronize({ cart: this.cart }));
+          .then(() => {
+            if (JSON.stringify(this.previousItems) !== JSON.stringify(this.items)) {
+              this.synchronize({ cart: this.cart })
+            }
+          });
       })
       observer.observe(form, {
         subtree: true,
@@ -894,7 +902,6 @@ class SmartCart extends HTMLElement {
 
         if (totalCartQuantity !== lineItemsQuantity) {
           const cartScreen = this.querySelector('.smart-cart__body');
-          console.log(items)
           const newCartScreen = this.createCartScreen(items);
           cartScreen.replaceWith(newCartScreen);
 
@@ -934,15 +941,10 @@ customElements.define('smart-cart', SmartCart);
 Sync.smartCart = document.querySelector('smart-cart');
 
 (function initializeBetterCarts() {
-  initializeObserver();
-  // swapAddToCartBtn();
-
   if (window.better_carts.hasOwnProperty('id')) {
-    setInterval(() => {
       const cookie = getCartCookie();
 
-      // updateData(window.better_carts.id, cookie, window.better_carts.shop)
-    }, 10000)
+      updateData(window.better_carts.id, cookie, window.better_carts.shop)
   }
 })();
 
@@ -967,23 +969,6 @@ function getOS() {
   return os;
 }
 
-function initializeObserver() {
-  const target = document.body;
-
-  const config = {
-    childList: true
-  }
-
-  const callback = function(mutationsList, observer) {
-    for (let mutation of mutationsList) {
-      // swapAddToCartBtn();
-    }
-  }
-
-  const observer = new MutationObserver(callback);
-  observer.observe(target, config);
-}
-
 function getCartCookie() {
   const cookie = document.cookie
     .split('; ')
@@ -993,76 +978,76 @@ function getCartCookie() {
   return cookie;
 }
 
-// async function updateData(id, cart_id, shop_id) {
-//   const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}`);
-//   const response = await checkUpdates.json();
-//   const smartCarts = document.querySelector('.smart-cart');
+async function updateData(id, cart_id, shop_id) {
+  const checkUpdates = await fetch(`${APP_URL}/storefront/update?cart_id=${cart_id}&customer=${id}&shop_id=${shop_id}`);
+  const response = await checkUpdates.json();
+  const smartCarts = document.querySelector('.smart-cart');
 
-//   if (response.type === 'New cart') {
-//     const newItems = [];
+  if (response.type === 'New cart') {
+    const newItems = [];
 
-//     for (const item of response.data.items) {
-//       newItems.push({
-//         'id': Number(item.variant_id),
-//         'quantity': Number(item.qty)
-//       })
-//     }
+    for (const item of response.data.items) {
+      newItems.push({
+        'id': Number(item.variant_id),
+        'quantity': Number(item.qty)
+      })
+    }
 
-//     const formData = {
-//       'items': newItems
-//     }
+    const formData = {
+      'items': newItems
+    }
 
-//     const newCartData = await fetch(window.Shopify.routes.root + 'cart/add.js', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(formData)
-//     });
+    const newCartData = await fetch(window.Shopify.routes.root + 'cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
 
-//     const cookie = getCartCookie();
+    const cookie = getCartCookie();
 
-//     const updateExpireDate = await fetch(`${APP_URL}/storefront/update/time`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: await JSON.stringify([response.data.items, cookie])
-//     })
+    const updateExpireDate = await fetch(`${APP_URL}/storefront/update/time`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: await JSON.stringify([response.data.items, cookie])
+    })
 
-//     setTimeout(() => smartCarts.updateData(newItems.length), 2000);
-//   } else if (response.type === 'Update') {
-//     const smartCarts = document.querySelector('.smart-cart');
+    setTimeout(() => smartCarts.updateData(newItems.length), 2000);
+  } else if (response.type === 'Update') {
+    const smartCarts = document.querySelector('.smart-cart');
 
-//     const updatedItems = {
-//       updates: {}
-//     };
+    const updatedItems = {
+      updates: {}
+    };
 
-//     if (response.data.hasOwnProperty('addedItems')) {
-//       for (const item of response.data.addedItems) {
-//         updatedItems.updates[item.variant_id] = item.qty;
-//       }
-//     }
+    if (response.data.hasOwnProperty('addedItems')) {
+      for (const item of response.data.addedItems) {
+        updatedItems.updates[item.variant_id] = item.qty;
+      }
+    }
 
-//     if (response.data.hasOwnProperty('updatedItems')) {
-//       for (const item of response.data.updatedItems) {
-//         updatedItems.updates[item.variant_id] = item.qty;
-//       }
-//     }
+    if (response.data.hasOwnProperty('updatedItems')) {
+      for (const item of response.data.updatedItems) {
+        updatedItems.updates[item.variant_id] = item.qty;
+      }
+    }
     
-//     if (response.data.hasOwnProperty('removedItems')) {
-//       for (const item of response.data.removedItems) {
-//         updatedItems.updates[item.variant_id] = 0;
-//       }
-//     }
+    if (response.data.hasOwnProperty('removedItems')) {
+      for (const item of response.data.removedItems) {
+        updatedItems.updates[item.variant_id] = 0;
+      }
+    }
 
-//     const keys = Object.keys(updatedItems.updates);
+    const keys = Object.keys(updatedItems.updates);
 
-//     const updateItems = await fetch(window.Shopify.routes.root + 'cart/update.js', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(updatedItems)
-//     });
+    const updateItems = await fetch(window.Shopify.routes.root + 'cart/update.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedItems)
+    });
 
-//     setTimeout(() => smartCarts.updateData(keys.length), 2000);
-//   }
-// }
+    setTimeout(() => smartCarts.updateData(keys.length), 2000);
+  }
+}
 
 function swapAddToCartBtn() {
   const addToCartBtn = document.querySelector('form[action="/cart/add"] button[type="submit"]');

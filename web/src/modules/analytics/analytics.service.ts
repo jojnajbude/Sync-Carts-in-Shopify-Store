@@ -80,6 +80,7 @@ export class AnalyticsService {
       where domain = '${domain}'
       AND date between timestamp '${startDate.toISOString().slice(0, -1)}'
       AND timestamp '${endDate.toISOString().slice(0, -1)}'
+      ORDER BY date ASC
       `
     );
 
@@ -367,9 +368,9 @@ export class AnalyticsService {
         const product = sold_products.value.find((product: any) => product.product_id === item.product_id);
 
         if (product) {
-          sold_products.value.find((product: any) => product.product_id === item.product_id).value += item.qty;
+          sold_products.value.find((product: any) => product.product_id === item.product_id).value += Number(item.qty);
         } else {
-          sold_products.value.push({ product_id: item.product_id, product_title: item.title, value: item.qty });
+          sold_products.value.push({ product_id: item.product_id, product_title: item.title, value: Number(item.qty) });
         }
       }
 
