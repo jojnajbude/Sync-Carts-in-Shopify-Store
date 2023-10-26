@@ -35,9 +35,15 @@ export class StorefrontService {
     }
   }
 
-  async getCartId(cart_id: string) {
+  async getCartId(customer: string) {
     try {
-      const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
+      const customerData = await this.customerRepository.findOneBy({ shopify_user_id: Number(customer) });
+
+      if (!customerData) {
+        return false;
+      }
+
+      const cart = await this.cartRepository.findOneBy({ customer_id: customerData.id });
 
       if (cart) {
         return cart.id;
@@ -104,7 +110,6 @@ export class StorefrontService {
 
           if (cart && !cart.os) {
             await this.cartRepository.update({ id: cart.id }, { os: os })
-            await this.analyticsService.updateDevices(cart.shop_id, os)
           }
 
           if(cart && cart?.customer_id !== user?.id) {
@@ -448,14 +453,14 @@ export class StorefrontService {
     }
   }
 
-  async handleOrderPaid(cart_token: string, totalPrice: number) {
+  async handleOrderPaid(cartID: number, totalPrice: number) {
     try {
       const [cart] = await this.cartRepository.query(
         `select carts.*, shops.domain, customers.name 
         from carts
         left join customers on customers.id = carts.customer_id
         left join shops on shops.id = carts.shop_id
-        where carts.cart_token = '${cart_token}'`
+        where carts.id = '${cartID}'`
       );
 
       if (!cart) {
@@ -463,7 +468,9 @@ export class StorefrontService {
         return [];
       }
   
-      const paidCart = await this.cartRepository.update({ cart_token },{ closed_at: new Date(), final_price: totalPrice });
+      const paidCart = await this.cartRepository
+        .update({ id: cartID }, { closed_at: new Date(), final_price: totalPrice });
+
       const paidItems = await this.itemRepository.createQueryBuilder()
         .update()
         .set({ status: 'paid' })

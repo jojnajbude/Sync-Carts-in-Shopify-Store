@@ -78,7 +78,9 @@ export class AnalyticsService {
       from analytics
       left join shops on shops.id = analytics.shop_id
       where domain = '${domain}'
-      AND date between timestamp '${startDate.toISOString().slice(0, -1)}' AND timestamp '${endDate.toISOString().slice(0, -1)}'`
+      AND date between timestamp '${startDate.toISOString().slice(0, -1)}'
+      AND timestamp '${endDate.toISOString().slice(0, -1)}'
+      `
     );
 
     const analytics: IAnalytics = {
@@ -203,7 +205,12 @@ export class AnalyticsService {
         .andWhere({ type: 'sales' })
         .andWhere({ date: MoreThanOrEqual(currentDate.toISOString())})
         .andWhere({ date: LessThan(nextDay.toISOString())})
-        .getOne();
+        .getOne() || await this.analyticsRepository.save({
+          shop_id, 
+          type: 'sales',
+          value: JSON.stringify({ key: currentDate.toDateString(), value: 0 }),
+          date: currentDate.toISOString()
+        });
 
       if (analytics) {
         const sales = JSON.parse(analytics.value);

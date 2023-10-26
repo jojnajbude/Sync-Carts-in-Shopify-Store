@@ -18,6 +18,8 @@ import { formatter } from '../services/formatter';
 
 import { Cart, Item } from '../types/cart';
 import { useAuthenticatedFetch } from '../hooks';
+import { SetStateAction } from 'react';
+import { Dispatch } from '@shopify/app-bridge';
 
 type Props = {
   openModal: (value: 'remove' | 'unreserve' | 'expand' | 'update') => void;
@@ -39,7 +41,7 @@ export default function ProductsList({
   const fetch = useAuthenticatedFetch();
 
   const handleChange = async (newValue: string, item: Item) => {
-    setIsUnvalidInputs('none');
+    setIsUnvalidInputs("none");
 
     const updatedCart = { ...cart };
     const index = updatedCart.items.findIndex(

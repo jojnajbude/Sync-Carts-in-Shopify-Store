@@ -311,7 +311,7 @@ export default function CartsTable() {
                                     {new Intl.NumberFormat('en-US', {
                                       style: 'currency',
                                       currency: currency,
-                                    }).format(cartTotal)}
+                                    }).format(cartTotal / 100)}
                                   </Text>
                                 </HorizontalStack>
                                 <HorizontalStack align="start" gap="1">
@@ -362,7 +362,7 @@ export default function CartsTable() {
                             {new Intl.NumberFormat('en-US', {
                               style: 'currency',
                               currency: currency,
-                            }).format(cartTotal)}
+                            }).format(cartTotal / 100)}
                           </IndexTable.Cell>
                           <IndexTable.Cell>
                             <CartBadge

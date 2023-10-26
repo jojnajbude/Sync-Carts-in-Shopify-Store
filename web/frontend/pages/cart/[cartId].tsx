@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import { useAuthenticatedFetch } from '../../hooks';
 import {
   Page,
@@ -25,6 +25,9 @@ import { formatter } from '../../services/formatter';
 import { Cart } from '../../types/cart';
 import { SubscribtionContext } from '../../context/SubscribtionContext';
 
+import { io } from 'socket.io-client';
+import { useSocket } from '../../hooks/useSocket';
+
 type Modal =
   | 'remove'
   | 'unreserve'
@@ -46,13 +49,57 @@ export default function CartPage() {
   const [isError, setIsError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUnvalidInputs, setIsUnvalidInputs] = useState('none');
+  const [isUnvalidInputs, setIsUnvalidInputs] = useState<string>('none');
   const [isPriorityChange, setIsPriorityChange] = useState(false);
+
+  const [cartTotalPrice, setCartTotalPrice] = useState(0);
+
+  const {
+    socket,
+    data: items,
+    isOnline,
+    synchronize
+  } = useSocket(customer);
 
   const { cartId } = useParams();
   const navigate = useNavigate();
   const fetch = useAuthenticatedFetch();
   const context = useContext(SubscribtionContext);
+
+  useEffect(() => {
+    if (!items) {
+      return;
+    }
+
+    setInitialCart((current: Cart) => ({
+      ...current,
+      items: [...items],
+    }))
+    setCart((current: Cart) => ({
+      ...current,
+      items: [...items],
+    }))
+  }, [items]);
+
+  useEffect(() => {
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return;
+    }
+
+    setCartTotalPrice(cart.items.reduce((acc: number, cur: any) => acc + Number(cur.qty) * Number(cur.price), 0));
+  }, [cart]);
+
+  useEffect(() => {
+    const jsonCart = JSON.stringify(cart);
+    const jsonInitialCart = JSON.stringify(initialCart);
+
+    if (jsonCart !== jsonInitialCart) {
+      synchronize({
+        admin: true,
+        cart: initialCart
+      });
+    }  
+  }, [initialCart])
 
   useEffect(() => {
     let ignore = false;
@@ -224,7 +271,7 @@ export default function CartPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: await JSON.stringify({ cart, customer }),
+        body: JSON.stringify({ cart, customer }),
       });
 
       if (newCartData.ok) {
@@ -246,7 +293,7 @@ export default function CartPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: await JSON.stringify([cart, customer]),
+          body: JSON.stringify([cart, customer]),
         });
       }
 
@@ -304,8 +351,6 @@ export default function CartPage() {
       </Page>
     );
   }
-
-  console.log(customer);
 
   if (!isLoading) {
     return (
@@ -380,7 +425,7 @@ export default function CartPage() {
                     <Text variant="bodyMd" as="p" alignment="end">
                       {`${
                         cart.items.length
-                          ? formatter(cart.total, currency)
+                          ? formatter(cartTotalPrice, currency)
                           : formatter(0, currency)
                       }`}
                     </Text>
@@ -393,6 +438,7 @@ export default function CartPage() {
               <CustomerCard
                 isEditing={isEditing}
                 cart={cart}
+                isOnline={isOnline}
                 setCart={setCart}
                 customer={customer}
                 initialCustomer={initialCustomer}
@@ -428,44 +474,44 @@ export default function CartPage() {
         </Page>
       </Frame>
     );
-  } else {
-    return (
-      <SkeletonPage primaryAction backAction>
-        <Layout>
-          <Layout.Section>
-            <LegacyCard sectioned title="Products">
-              <LegacyCard.Section>
-                <SkeletonBodyText />
-              </LegacyCard.Section>
-              <LegacyCard.Section>
-                <SkeletonBodyText />
-              </LegacyCard.Section>
-              <LegacyCard.Section>
-                <SkeletonBodyText />
-              </LegacyCard.Section>
-            </LegacyCard>
-            <LegacyCard sectioned title="Payment">
-              <SkeletonBodyText />
-            </LegacyCard>
-          </Layout.Section>
-          <Layout.Section secondary>
-            <LegacyCard title="Customer">
-              <LegacyCard.Section>
-                <SkeletonBodyText lines={2} />
-              </LegacyCard.Section>
-              <LegacyCard.Section title="Contact information">
-                <SkeletonBodyText lines={2} />
-              </LegacyCard.Section>
-              <LegacyCard.Section title="Shipping address">
-                <SkeletonBodyText lines={4} />
-              </LegacyCard.Section>
-              <LegacyCard.Section title="Statistic">
-                <SkeletonBodyText lines={3} />
-              </LegacyCard.Section>
-            </LegacyCard>
-          </Layout.Section>
-        </Layout>
-      </SkeletonPage>
-    );
   }
+
+  return (
+    <SkeletonPage primaryAction backAction>
+      <Layout>
+        <Layout.Section>
+          <LegacyCard sectioned title="Products">
+            <LegacyCard.Section>
+              <SkeletonBodyText />
+            </LegacyCard.Section>
+            <LegacyCard.Section>
+              <SkeletonBodyText />
+            </LegacyCard.Section>
+            <LegacyCard.Section>
+              <SkeletonBodyText />
+            </LegacyCard.Section>
+          </LegacyCard>
+          <LegacyCard sectioned title="Payment">
+            <SkeletonBodyText />
+          </LegacyCard>
+        </Layout.Section>
+        <Layout.Section secondary>
+          <LegacyCard title="Customer">
+            <LegacyCard.Section>
+              <SkeletonBodyText lines={2} />
+            </LegacyCard.Section>
+            <LegacyCard.Section title="Contact information">
+              <SkeletonBodyText lines={2} />
+            </LegacyCard.Section>
+            <LegacyCard.Section title="Shipping address">
+              <SkeletonBodyText lines={4} />
+            </LegacyCard.Section>
+            <LegacyCard.Section title="Statistic">
+              <SkeletonBodyText lines={3} />
+            </LegacyCard.Section>
+          </LegacyCard>
+        </Layout.Section>
+      </Layout>
+    </SkeletonPage>
+  );
 }

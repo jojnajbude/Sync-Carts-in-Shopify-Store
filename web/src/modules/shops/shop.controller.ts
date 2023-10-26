@@ -6,11 +6,11 @@ import { ShopService } from "./shop.service.js";
 export class ShopController {
   constructor(private shopService: ShopService) {}
 
-  // @Get() 
-  // async getShopData(@Res() res: Response) {
-  //   const shop = await this.shopService.getShopData(res.locals.shopify.session)
-  //   res.status(200).send(shop)
-  // }
+  @Get() 
+  async getShopData(@Res() res: Response) {
+    const shop = await this.shopService.getShopData(res.locals.shopify.session)
+    res.status(200).send(shop)
+  }
 
   @Get('settings')
   async getShopSettings(@Res() res: Response) {

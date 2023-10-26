@@ -10,13 +10,14 @@ import { CustomerModule } from "../customers/customer.module.js";
 import { ShopModule } from "../shops/shop.module.js";
 import { NotificationsModule } from "../notifications/notifications.module.js";
 import {SynchronizeGateway} from "../../synchronize/synchronize.gateway.js";
+import { Analytics } from "../analytics/analytics.entity.js";
 
 
 @Module({
   controllers: [CartController],
   providers: [CartService, SynchronizeGateway],
   imports: [
-    TypeOrmModule.forFeature([Cart, Shop, Item, Customer]),
+    TypeOrmModule.forFeature([Cart, Shop, Item, Customer, Analytics]),
     CustomerModule,
     ShopModule,
     NotificationsModule,

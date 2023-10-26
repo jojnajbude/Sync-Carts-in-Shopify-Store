@@ -139,8 +139,6 @@ export class CartService {
         where items.cart_id = ${cartId}`
       )
 
-      console.log(cartItems)
-
       if (!cartItems.length) {
         const cart = await this.cartRepository.query(
           `select carts.*, customers.name, customers.id as customer_id, customers.shopify_user_id, customers.priority
@@ -198,45 +196,55 @@ export class CartService {
   async updateCartItems(cart: any, customer: any) {
     const shop = await this.shopsRepository.findOneBy({ domain: cart.shop_domain });
 
-    if (shop) {
-      const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
-
-      for (const oldItem of oldItems) {
-        if (!cart.items.find((item: any) => item.variant_id == oldItem.variant_id)) {
-          await this.itemRepository.save({ id: oldItem.id, status: 'removed' })
-        }
-      }
-
-      for (const item of cart.items) {
-        const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);
-
-        if (existItemIndex !== -1) {
-          if (oldItems[existItemIndex].qty !== item.qty) {
-            const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
-            await this.itemRepository.save({ id: oldItems[existItemIndex].id, qty: item.qty, status: 'unsynced', expire_at: await expireTime })
-          }
-        } else {
-          const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
-          await this.itemRepository.save({ 
-            cart_id: cart.id, 
-            variant_id: item.variant_id, 
-            qty: item.qty, 
-            status: item.reserved_indicator, 
-            price: item.price, 
-            title: item.title, 
-            image_link: item.image_link, 
-            product_id: item.product_id,
-            expire_at: await expireTime,
-            variant_title: item.variant_title,
-          })
-        }
-      }
-
-      await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
-      await this.notificationsService.sendEmail('update', shop, [customer.email]);
-
-      return true
+    if (!shop) {
+      return;
     }
+
+    const oldItems = await this.itemRepository.findBy({ cart_id: cart.id });
+
+    for (const oldItem of oldItems) {
+      if (!cart.items.find((item: any) => item.variant_id == oldItem.variant_id)) {
+        await this.itemRepository.remove(oldItem);
+      }
+    }
+
+    for (const item of cart.items) {
+      const existItemIndex = oldItems.findIndex(oldItem => oldItem.variant_id === item.variant_id);
+
+      if (existItemIndex !== -1) {
+        if (oldItems[existItemIndex].qty !== item.qty) {
+          const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
+
+          const itemToUpdate = oldItems[existItemIndex];
+
+          itemToUpdate.qty = item.qty;
+
+          if (expireTime) {
+            itemToUpdate.expire_at = expireTime;
+          }
+
+          await this.itemRepository.save(itemToUpdate);
+        }
+      } else {
+        const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities))
+        await this.itemRepository.save({ 
+          cart_id: cart.id, 
+          variant_id: item.variant_id, 
+          qty: item.qty, 
+          price: item.price, 
+          title: item.title, 
+          image_link: item.image_link, 
+          product_id: item.product_id,
+          expire_at: expireTime,
+          variant_title: item.variant_title,
+        });
+      }
+    }
+
+    await this.cartRepository.update({ id: cart.id }, { last_action: new Date() })
+    await this.notificationsService.sendEmail('update', shop, [customer.email]);
+
+    return true
   }
 
   async getSortedCarts(session: shopifySession, direction: 'ascending' | 'descending', index: string,) {

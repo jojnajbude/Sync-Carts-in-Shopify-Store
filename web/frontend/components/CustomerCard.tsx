@@ -6,6 +6,8 @@ import {
   Text,
   Icon,
   Select,
+  Tag,
+  Badge,
 } from '@shopify/polaris';
 import { CancelMajor } from '@shopify/polaris-icons';
 
@@ -17,6 +19,7 @@ import { Customer } from '../types/customer';
 type Props = {
   isEditing: boolean;
   cart: Cart;
+  isOnline: boolean;
   customer: Customer;
   initialCustomer: Customer | null;
   setCart: (value: Cart) => void;
@@ -37,6 +40,7 @@ export default function CustomerCard({
   setIsPriorityChange,
   setIsLoading,
   setIsEditing,
+  isOnline,
 }: Props) {
   const priorityLevels = [
     { label: 'Minimal', value: 'min' },
@@ -74,7 +78,34 @@ export default function CustomerCard({
   if (customer) {
     return (
       <LegacyCard
-        title="Customer"
+        title={(() => {
+          return <Text
+            as='h1'
+            variant='headingMd'
+          >
+            Customer
+
+            <span style={{
+              margin: '0 5px'
+            }}>
+              {
+                isOnline
+                  ? (
+                    <Badge
+                      status='success'>
+                      Online
+                    </Badge>
+                  )
+                  : (
+                    <Badge>
+                      Offline
+                    </Badge>
+                  )
+              }
+              
+            </span>
+          </Text>
+        })()}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         /*
         // @ts-ignore */
@@ -93,9 +124,10 @@ export default function CustomerCard({
               ]
             : []
         }
-      >
+      >        
         <LegacyCard.Section>
           <LegacyStack vertical>
+            
             <Link
               target="_blank"
               url={`https://${cart.shop_domain}/admin/customers/${customer.id}`}
