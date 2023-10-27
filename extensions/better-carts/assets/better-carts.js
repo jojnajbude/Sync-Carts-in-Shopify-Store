@@ -36,7 +36,8 @@ class SynchronizeCart {
     const items = this.items = await fetch(APP_URL + '/storefront/cart/last-updated/items?customer=' + customer)
       .then(res => res.json());
 
-    if (lastUpdatedCart && !currentCart.items.length && Array.isArray(items)) {
+    if (lastUpdatedCart && !lastUpdatedCart.type === 'error'
+      && !currentCart.items.length && Array.isArray(items)) {
       const response = await fetch('/cart/update.js', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

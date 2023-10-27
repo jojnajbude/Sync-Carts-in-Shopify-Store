@@ -81,31 +81,7 @@ export class StorefrontService {
           }) 
         }
 
-        if (cart_id === 'undefined') {
-          const newCart = await this.cartRepository.findOne({ where: {customer_id: user?.id } });
-
-          if (newCart?.cart_token) {
-            return { type: 'Ok' };
-          }
-
-          if (newCart) {
-            const newItems = await this.itemRepository.findBy({ cart_id: newCart.id });
-
-            await this.itemRepository.remove(newItems);
-            await this.cartRepository.remove(newCart);
-
-            return {
-              type: 'New cart',
-              data: {
-                cart: newCart, 
-                items: newItems
-              }
-            };
-          }
-
-
-          return true;
-        } else {
+        if (cart_id) {
           const cart = await this.cartRepository.findOneBy({ cart_token: cart_id });
 
           if (cart && !cart.os) {

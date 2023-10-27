@@ -62,7 +62,9 @@ export class StorefrontController {
 
   @Get('cart/last-updated/items')
   async lastUpdatedItems(@Query() query: { customer: string }, @Res() res: Response) {
-    const customer = await this.customerRepository.findOneBy({ shopify_user_id: Number(query.customer) });
+    const customer = await this.customerRepository.findOneBy({
+      shopify_user_id: Number(query.customer)
+    });
 
     if (!customer) {
       res.status(404).send({

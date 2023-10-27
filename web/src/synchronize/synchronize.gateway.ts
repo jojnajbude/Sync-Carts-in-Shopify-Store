@@ -55,7 +55,6 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
 
     client.on('disconnecting', () => {
       client.rooms.forEach(async (room: string) => {
-        console.log(room);
         if (room !== client.id) {
           const sockets = await this.server.in(room).fetchSockets();
   
@@ -132,7 +131,6 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
 
   @SubscribeMessage('synchronize')
   async handleMessage(@MessageBody() { customer: customerId, data, shop: shopId }: SyncProps, @ConnectedSocket() client: Socket): Promise<void> {
-    console.log(customerId);
     const customer = await this.customerRepository.findOne({
       where: {
         shopify_user_id: Number(customerId)
