@@ -2,15 +2,31 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Socket, io } from "socket.io-client";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
-// const APP_URL = "https://6f9b-109-68-43-50.ngrok-free.app";
-const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+const APP_URL = "https://andrii.ngrok.app";
+// const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
 
-const useSocket = (customer: any) => {
+const useSocket = (customer?: string | number | undefined) => {
   const fetch = useAuthenticatedFetch();
 
   const [customerID, setCustomerID] = useState(null);
   const [data, setData] = useState<any[]>(null);
   const [online, setOnline] = useState(false);
+
+  const [update, setUpdate] = useState(false);
+  const [updateCounter, setUpdateCounter] = useState(0);
+  const [updateTimer, setUpdateTimer] = useMemo(() => {
+    let timer: NodeJS.Timeout = null;
+
+    const setTimer = () => {
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+        setUpdate(true);
+      }, 500);
+    }
+
+    return [timer, setTimer]
+  }, []);
 
   const [shop, setShop] = useState(null);
 
@@ -38,6 +54,10 @@ const useSocket = (customer: any) => {
     socket.on('online', (isOnline) => {
       setOnline(isOnline);
     })
+
+    socket.on('update', () => {
+      setUpdateTimer();
+    });
 
     socket.on('disconnect', () => {
       console.log('disconnected');
@@ -69,8 +89,17 @@ const useSocket = (customer: any) => {
   useEffect(() => {
     if (customerID) {
       socket.emit('session', customerID, null);
+    } else {
+      socket.emit('session');
     }
   }, [customerID]);
+
+  useEffect(() => {
+    if (update) {
+      setUpdateCounter(updateCounter + 1);
+      setUpdate(false);
+    }    
+  }, [update])
 
   const synchronize = useCallback((data: any) => {
     socket.emit('synchronize',{
@@ -81,7 +110,13 @@ const useSocket = (customer: any) => {
   }, [customerID]);
     
 
-  return { socket, data, isOnline: online, synchronize };
+  return {
+    socket, 
+    data, 
+    isOnline: online, 
+    synchronize,
+    toUpdate: updateCounter
+  };
 };
 
 export {

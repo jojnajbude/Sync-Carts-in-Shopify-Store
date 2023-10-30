@@ -33,11 +33,11 @@ export class StorefrontController {
     const session = await this.storefrontService.getSession(query.shop);
     const cartId = await this.storefrontService.getCartId(query.customer);
 
-    console.log(cartId);
-    
     const cart = cartId ? await this.cartService.getCart(String(cartId), session) : null;
 
-    cart ? res.status(200).send(cart[0]) : res.status(400).send({ type: 'error', message: 'Invalid data' });
+    cart 
+      ? res.status(200).send(cart[0])
+      : res.status(400).send({ type: 'error', message: 'Invalid data' });
   }
 
   @Get('cart/add')
@@ -49,15 +49,14 @@ export class StorefrontController {
 
   @Post('cart/create')
   async createCart(@Req() req: Request, @Res() res: Response) {
-    res.sendStatus(200);
-    // const shopDomain = req.get('x-shopify-shop-domain');
-    //
-    // if (shopDomain) {
-    //   const cart = await this.storefrontService.updateCart(req.body, shopDomain);
-    //   cart ? res.status(200).send(cart) : res.status(200).send('Server error');
-    // } else {
-    //   res.status(404).send('Unable to identify the store');
-    // }
+    const shopDomain = req.get('x-shopify-shop-domain');
+    
+    if (shopDomain) {
+      const cart = await this.storefrontService.updateCart(req.body, shopDomain);
+      cart ? res.status(200).send(cart) : res.status(200).send('Server error');
+    } else {
+      res.status(404).send('Unable to identify the store');
+    }
   }
 
   @Get('cart/last-updated/items')

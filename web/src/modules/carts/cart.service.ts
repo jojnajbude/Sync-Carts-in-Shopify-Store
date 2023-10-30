@@ -136,8 +136,9 @@ export class CartService {
         on items.cart_id = carts.id
         left join customers
         on carts.customer_id = customers.id
-        where items.cart_id = ${cartId}`
-      )
+        where items.cart_id = ${cartId}
+        order by items.created_at asc`
+      );
 
       if (!cartItems.length) {
         const cart = await this.cartRepository.query(
@@ -184,7 +185,7 @@ export class CartService {
         session,
       });
   
-      const cart = await this.handleData(cartItems, session.shop);
+      const cart = this.handleData(cartItems, session.shop);
   
       return cart && shop ? [cart, customer, shop] : false
     } catch (err) {

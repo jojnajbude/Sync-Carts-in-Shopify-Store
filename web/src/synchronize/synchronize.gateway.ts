@@ -51,7 +51,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
   }
 
   handleConnection(@ConnectedSocket() client: Socket): void {
-    console.log('Connected', client.id);
+    console.log('Connected');
 
     client.on('disconnecting', () => {
       client.rooms.forEach(async (room: string) => {
@@ -72,7 +72,11 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
 
   @SubscribeMessage('session')
   async handleSession(@MessageBody() body: any, @ConnectedSocket() client: Socket, @Req() request: Request): Promise<void> {
-    const [customerId, os] = body;
+    let customerId, os;
+
+    if (body) {
+      [customerId, os] = body;
+    }
 
     if (customerId) {
       client.join(String(customerId));
@@ -82,6 +86,8 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
       const online = sockets.filter(socket => socket.id !== client.id).length > 0
 
       client.in(String(customerId)).emit('online', online);
+    } else {
+      client.join('admin');
     }
 
     let customerModel = await this.customerRepository.findOne({ where: {
@@ -133,7 +139,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
   async handleMessage(@MessageBody() { customer: customerId, data, shop: shopId }: SyncProps, @ConnectedSocket() client: Socket): Promise<void> {
     const customer = await this.customerRepository.findOne({
       where: {
-        shopify_user_id: Number(customerId)
+        shopify_user_id: Number(customerId || 0)
       }
     });
 
@@ -259,7 +265,14 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
       .orderBy('item.created_at', 'ASC')
       .getMany();
 
+    cart.last_action = new Date();
+    await this.cartRepository.save(cart);
+
     this.server.to(customerId).emit('synchronize', items);
+
+    console.log('here');
+
+    this.server.to('admin').emit('update');
   }
 
   countExpireDate(startDate: Date, priority: string, priorities: any) {

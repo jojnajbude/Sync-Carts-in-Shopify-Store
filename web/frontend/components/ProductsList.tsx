@@ -192,7 +192,7 @@ export default function ProductsList({
       {!isEditing ? (
         <ResourceList
           resourceName={{ singular: 'product', plural: 'products' }}
-          items={cart ? cart.items : []}
+          items={cart ? cart.items.reverse() : []}
           renderItem={item => {
             const {
               id,
@@ -268,7 +268,7 @@ export default function ProductsList({
             <DataTable
               columnContentTypes={['text', 'text', 'text', 'text']}
               headings={['Product', 'Quantity', 'Total', '']}
-              rows={setEditableTable(cart.items)}
+              rows={setEditableTable(cart.items.reverse())}
               hoverable={false}
             ></DataTable>
           ) : null}

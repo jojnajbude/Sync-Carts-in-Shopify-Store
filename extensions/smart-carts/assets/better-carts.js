@@ -1,6 +1,5 @@
-const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-// const APP_URL = 'https://6f9b-109-68-43-50.ngrok-free.app ';
-// const APP_URL = 'https://andrii.ngrok.app';
+// const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+const APP_URL = 'https://andrii.ngrok.app';
 
 const customer = window.better_carts.id;
 const shop = window.better_carts.shop;
@@ -101,7 +100,7 @@ class SynchronizeCart {
       return cartItems.getSectionsToRender();
     }
 
-    return [];
+    return []; 
   }
 
   createSocket() {
@@ -493,9 +492,14 @@ class SmartCart extends HTMLElement {
 
       }
 
-      const [cart] = await cartData.json();
+      const response = await cartData.json();
+      let cart;
 
-      this.container.append(header, this.createCartScreen(cart.items), this.initFooter(cart));
+      if (Array.isArray(response)) {
+        [cart] = response;
+
+        this.container.append(header, this.createCartScreen(cart.items), this.initFooter(cart));
+      }
     } else {
       this.container.append(header, this.createLoginScreen(), this.initFooter());
     }
@@ -846,7 +850,7 @@ class SmartCart extends HTMLElement {
     const lineItems = document.createElement('div');
     lineItems.classList.add('smart-cart__line-items');
 
-    items.forEach(item => {
+    items.reverse().forEach(item => {
       const lineItem = this.createLineItem(item);
       lineItems.append(lineItem);
     });
@@ -941,7 +945,7 @@ Sync.smartCart = document.querySelector('smart-cart');
   if (window.better_carts.hasOwnProperty('id')) {
       const cookie = getCartCookie();
 
-      updateData(window.better_carts.id, cookie, window.better_carts.shop)
+      // updateData(window.better_carts.id, cookie, window.better_carts.shop)
   }
 })();
 

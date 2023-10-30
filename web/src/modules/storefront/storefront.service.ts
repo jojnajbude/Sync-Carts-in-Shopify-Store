@@ -57,6 +57,7 @@ export class StorefrontService {
   }
 
   async updateData(cart_id: string, customer_id: string, shop_id: string, os: string) {
+    
     try {
       const shopData = await this.shopsRepository.findOneBy({ shopify_id: Number(shop_id) });
 

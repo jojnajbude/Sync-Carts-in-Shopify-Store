@@ -24,6 +24,7 @@ import CartBadge from './CartBadge';
 import { SubscribtionContext } from '../context/SubscribtionContext';
 import Counter from './Counter';
 import formatTime from '../services/timeFormatter';
+import { useSocket } from '../hooks/useSocket';
 
 type Sort = 'ascending' | 'descending';
 type Modal = 'remove' | 'unreserve' | 'expand';
@@ -45,6 +46,35 @@ export default function CartsTable() {
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+
+  const {
+    socket,
+    toUpdate
+  } = useSocket();
+
+  useEffect(() => {
+    if (!toUpdate) return;
+
+    const getCarts = async () => {
+      try {
+        const result = await fetch(
+          `/api/carts/sort?dir=descending&index=5&shop=true`,
+        );
+        if (!result.ok) throw new Error('Something went wrong');
+
+        const data = await result.json();
+
+        setCurrency(data.shop.currency);
+        setCarts(data.sortedCarts);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    getCarts().then(() => {
+      console.log('updated');
+    });
+  }, [toUpdate])
 
   useEffect(() => {
     let ignore = false;
