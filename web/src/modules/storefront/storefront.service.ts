@@ -141,7 +141,6 @@ export class StorefrontService {
       console.log(err);
       return false;
     }
-    
   }
 
   async handleAdding(shop: string, variant: number, qty: number) {

@@ -1,6 +1,6 @@
-// const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-// const APP_URL_DEV = 'https://smart-carts.dev-test.pro';
-const APP_URL = 'https://andrii.ngrok.app';
+const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+// const APP_URL = 'https://6f9b-109-68-43-50.ngrok-free.app ';
+// const APP_URL = 'https://andrii.ngrok.app';
 
 const customer = window.better_carts.id;
 const shop = window.better_carts.shop;
@@ -105,7 +105,7 @@ class SynchronizeCart {
   }
 
   createSocket() {
-    const socket = this.socket = io('https://andrii.ngrok.app', {
+    const socket = this.socket = io(`${APP_URL}`, {
       path: '/storefront/synchronize',
     });
 
@@ -468,11 +468,7 @@ class SmartCart extends HTMLElement {
       }
     ]
 
-    // this.APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-    // this.APP_URL_DEV = 'https://smart-carts.dev-test.pro';
-
-    this.APP_URL = 'https://andrii.ngrok.app';
-
+    this.APP_URL = APP_URL;
     this.customer = window.better_carts.id;
     this.shop = window.better_carts.shop;
     this.shopCurrency = window.better_carts.shopCurrency;

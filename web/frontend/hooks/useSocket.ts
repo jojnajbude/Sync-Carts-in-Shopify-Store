@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Socket, io } from "socket.io-client";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
+// const APP_URL = "https://6f9b-109-68-43-50.ngrok-free.app";
+const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+
 const useSocket = (customer: any) => {
   const fetch = useAuthenticatedFetch();
 
@@ -24,7 +27,7 @@ const useSocket = (customer: any) => {
   useEffect(() => { console.log('shop', shop)}, [shop]);
 
   const socket = useMemo(() => {
-    const socket = io('https://andrii.ngrok.app', {
+    const socket = io(`${APP_URL}`, {
       path: '/storefront/synchronize'
     });
 
