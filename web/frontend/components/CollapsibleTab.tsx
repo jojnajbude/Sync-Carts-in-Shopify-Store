@@ -187,116 +187,116 @@ export default function CollapsibleTab() {
           </VerticalStack>
         </LegacyCard.Section>
 
-        <LegacyCard.Section>
-          <VerticalStack gap="4">
-            <HorizontalStack gap="2">
-              <HorizontalStack gap="2">
-                <Icon
-                  source={secondChecked ? CircleTickMajor : CircleDownMajor}
-                  color={secondChecked ? 'success' : 'subdued'}
-                ></Icon>
-                <button
-                  className="plain-button"
-                  onClick={() => setSecondTabOpen(!secondTabOpen)}
-                >
-                  <Text
-                    as="h1"
-                    fontWeight="bold"
-                    color={secondChecked ? 'success' : 'subdued'}
-                  >
-                    2. Install reserve timer into your theme
-                  </Text>
-                </button>
-              </HorizontalStack>
-            </HorizontalStack>
+        {/*<LegacyCard.Section>*/}
+        {/*  <VerticalStack gap="4">*/}
+        {/*    <HorizontalStack gap="2">*/}
+        {/*      <HorizontalStack gap="2">*/}
+        {/*        <Icon*/}
+        {/*          source={secondChecked ? CircleTickMajor : CircleDownMajor}*/}
+        {/*          color={secondChecked ? 'success' : 'subdued'}*/}
+        {/*        ></Icon>*/}
+        {/*        <button*/}
+        {/*          className="plain-button"*/}
+        {/*          onClick={() => setSecondTabOpen(!secondTabOpen)}*/}
+        {/*        >*/}
+        {/*          <Text*/}
+        {/*            as="h1"*/}
+        {/*            fontWeight="bold"*/}
+        {/*            color={secondChecked ? 'success' : 'subdued'}*/}
+        {/*          >*/}
+        {/*            2. Install reserve timer into your theme*/}
+        {/*          </Text>*/}
+        {/*        </button>*/}
+        {/*      </HorizontalStack>*/}
+        {/*    </HorizontalStack>*/}
 
-            <Collapsible
-              open={secondTabOpen}
-              id="basic-collapsible"
-              transition={{ duration: '500ms', timingFunction: 'ease-in-out' }}
-              expandOnPrint
-            >
-              <VerticalStack gap="4">
-                <div style={{ maxWidth: '200px' }}>
-                  <Select
-                    label="Theme"
-                    options={[
-                      {
-                        label: '---',
-                        value: undefined,
-                      },
-                      ...themes,
-                    ]}
-                    onChange={handleSelectChange}
-                    value={selectedTheme}
-                  />
-                </div>
+        {/*    <Collapsible*/}
+        {/*      open={secondTabOpen}*/}
+        {/*      id="basic-collapsible"*/}
+        {/*      transition={{ duration: '500ms', timingFunction: 'ease-in-out' }}*/}
+        {/*      expandOnPrint*/}
+        {/*    >*/}
+        {/*      <VerticalStack gap="4">*/}
+        {/*        <div style={{ maxWidth: '200px' }}>*/}
+        {/*          <Select*/}
+        {/*            label="Theme"*/}
+        {/*            options={[*/}
+        {/*              {*/}
+        {/*                label: '---',*/}
+        {/*                value: undefined,*/}
+        {/*              },*/}
+        {/*              ...themes,*/}
+        {/*            ]}*/}
+        {/*            onChange={handleSelectChange}*/}
+        {/*            value={selectedTheme}*/}
+        {/*          />*/}
+        {/*        </div>*/}
 
-                {selectedTheme && (
-                  <>
-                    <div style={{ marginTop: '10px' }}>
-                      <Button
-                        primary
-                        onClick={() => injectSnippet(selectedTheme)}
-                      >
-                        Inject in current theme
-                      </Button>
-                    </div>
-                    <iframe
-                      width={isMobile ? '380' : '560'}
-                      height={isMobile ? '250' : '315'}
-                      src={
-                        themes.find(theme => theme.value === selectedTheme)
-                          .video
-                      }
-                      title="YouTube video player"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    ></iframe>
+        {/*        {selectedTheme && (*/}
+        {/*          <>*/}
+        {/*            <div style={{ marginTop: '10px' }}>*/}
+        {/*              <Button*/}
+        {/*                primary*/}
+        {/*                onClick={() => injectSnippet(selectedTheme)}*/}
+        {/*              >*/}
+        {/*                Inject in current theme*/}
+        {/*              </Button>*/}
+        {/*            </div>*/}
+        {/*            <iframe*/}
+        {/*              width={isMobile ? '380' : '560'}*/}
+        {/*              height={isMobile ? '250' : '315'}*/}
+        {/*              src={*/}
+        {/*                themes.find(theme => theme.value === selectedTheme)*/}
+        {/*                  .video*/}
+        {/*              }*/}
+        {/*              title="YouTube video player"*/}
+        {/*              frameBorder="0"*/}
+        {/*              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"*/}
+        {/*              allowFullScreen*/}
+        {/*            ></iframe>*/}
 
-                    <List type="number">
-                      {themes
-                        .find(theme => theme.value === selectedTheme)
-                        .steps.map((step, index) => (
-                          <List.Item key={index}>{step}</List.Item>
-                        ))}
-                    </List>
-                    <div style={{ maxWidth: 250 }}>
-                      <Button
-                        primary
-                        onClick={() => {
-                          setSecondChecked(true);
-                          navigate(
-                            `${window.location.ancestorOrigins[0]}/admin/themes`,
-                            { target: 'new' },
-                          );
-                        }}
-                      >
-                        Add Reservation Timer
-                      </Button>
-                    </div>
-                  </>
-                )}
+        {/*            <List type="number">*/}
+        {/*              {themes*/}
+        {/*                .find(theme => theme.value === selectedTheme)*/}
+        {/*                .steps.map((step, index) => (*/}
+        {/*                  <List.Item key={index}>{step}</List.Item>*/}
+        {/*                ))}*/}
+        {/*            </List>*/}
+        {/*            <div style={{ maxWidth: 250 }}>*/}
+        {/*              <Button*/}
+        {/*                primary*/}
+        {/*                onClick={() => {*/}
+        {/*                  setSecondChecked(true);*/}
+        {/*                  navigate(*/}
+        {/*                    `${window.location.ancestorOrigins[0]}/admin/themes`,*/}
+        {/*                    { target: 'new' },*/}
+        {/*                  );*/}
+        {/*                }}*/}
+        {/*              >*/}
+        {/*                Add Reservation Timer*/}
+        {/*              </Button>*/}
+        {/*            </div>*/}
+        {/*          </>*/}
+        {/*        )}*/}
 
 
-                <Divider></Divider>
+        {/*        <Divider></Divider>*/}
 
-                <HorizontalStack gap="2">
-                  <Icon source={CircleAlertMajor} color="subdued"></Icon>
-                  <div style={{ width: '95%' }}>
-                    <Text as="h1" fontWeight="bold" color="subdued">
-                      Before deleting the app, make sure you remove the
-                      &apos;reserve-timer.liquid&apos; snippet from your Shopify
-                      Theme, and all added custom code (see &quot;Add
-                      Reservation Timer snippet your shop cart&quot; section)
-                    </Text>
-                  </div>
-                </HorizontalStack>
-              </VerticalStack>
-            </Collapsible>
-          </VerticalStack>
-        </LegacyCard.Section>
+        {/*        <HorizontalStack gap="2">*/}
+        {/*          <Icon source={CircleAlertMajor} color="subdued"></Icon>*/}
+        {/*          <div style={{ width: '95%' }}>*/}
+        {/*            <Text as="h1" fontWeight="bold" color="subdued">*/}
+        {/*              Before deleting the app, make sure you remove the*/}
+        {/*              &apos;reserve-timer.liquid&apos; snippet from your Shopify*/}
+        {/*              Theme, and all added custom code (see &quot;Add*/}
+        {/*              Reservation Timer snippet your shop cart&quot; section)*/}
+        {/*            </Text>*/}
+        {/*          </div>*/}
+        {/*        </HorizontalStack>*/}
+        {/*      </VerticalStack>*/}
+        {/*    </Collapsible>*/}
+        {/*  </VerticalStack>*/}
+        {/*</LegacyCard.Section>*/}
 
         <LegacyCard.Section>
           <VerticalStack gap="4">
@@ -315,7 +315,7 @@ export default function CollapsibleTab() {
                     fontWeight="bold"
                     color={thirdChecked ? 'success' : 'subdued'}
                   >
-                    3. Verify your custom domain for email notifications.
+                    2. Verify your custom domain for email notifications.
                   </Text>
                 </button>
               </HorizontalStack>

@@ -120,7 +120,6 @@ export class StorefrontController {
 
     if (shopDomain) {
       this.storefrontService.handleAppUninstalled(shopDomain);
-      //TODO: You have 503 Errors. I've removed await for now
       res.status(200).send('OK');
     } else {
       // Please do not respond non 200's for webhooks in this case
