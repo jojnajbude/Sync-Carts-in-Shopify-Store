@@ -40,8 +40,6 @@ const useSocket = (customer?: string | number | undefined) => {
       });
   }, []);
 
-  useEffect(() => { console.log('shop', shop)}, [shop]);
-
   const socket = useMemo(() => {
     const socket = io(`${APP_URL}`, {
       path: '/storefront/synchronize'
@@ -52,6 +50,7 @@ const useSocket = (customer?: string | number | undefined) => {
     });
 
     socket.on('online', (isOnline) => {
+      console.log('online', isOnline)
       setOnline(isOnline);
     })
 
@@ -64,6 +63,7 @@ const useSocket = (customer?: string | number | undefined) => {
     });
 
     socket.on('synchronize', (data) => {
+      console.log('sync', data);
       setData(data);
     })
 
@@ -74,8 +74,6 @@ const useSocket = (customer?: string | number | undefined) => {
     if (!customer) {
       return;
     }
-
-    console.log(customer);
 
     const id = Number(
       customer.admin_graphql_api_id.split('/').pop()
@@ -88,7 +86,10 @@ const useSocket = (customer?: string | number | undefined) => {
 
   useEffect(() => {
     if (customerID) {
-      socket.emit('session', customerID, null);
+      socket.emit('session', {
+        customer: customerID,
+        admin: true
+      });
     } else {
       socket.emit('session');
     }

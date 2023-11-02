@@ -144,9 +144,9 @@ export class StorefrontService {
     }
   }
 
-  async handleAdding(shop: string, variant: number, qty: number) {
+  async handleAdding(shop: number, variant: number, qty: number) {
     try {
-      const store = await this.shopsRepository.findOneBy({ domain: shop })
+      const store = await this.shopsRepository.findOneBy({ shopify_id: shop })
 
       if (store && store.carts < store.limit) {
         if (store && store.session) {

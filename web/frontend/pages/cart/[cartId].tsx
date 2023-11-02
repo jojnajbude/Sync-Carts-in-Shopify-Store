@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import { useAuthenticatedFetch } from '../../hooks';
@@ -34,7 +35,8 @@ type Modal =
   | 'expand'
   | 'update'
   | 'reminder'
-  | 'emailError';
+  | 'emailError'
+  | 'remove-cart';
 
 export default function CartPage() {
   const [initialCart, setInitialCart] = useState(null);
@@ -122,8 +124,8 @@ export default function CartPage() {
       };
 
       getCartData();
-    } else if (isLoading && cartId === 'create') {
-      const createCart = async () => {
+    } else if (isLoading && cartId === 'create' && context.plan) {
+      const createCart = () => {
         const newCart: Cart = {
           items: [],
           id: 0,
@@ -147,7 +149,9 @@ export default function CartPage() {
         setIsLoading(false);
       };
 
-      createCart();
+      if (!ignore) {
+        createCart();
+      }
     }
 
     return () => {
@@ -331,7 +335,7 @@ export default function CartPage() {
     setActiveToast(true);
   };
 
-  if (cartId === 'create' && context.plan.carts >= context.plan.limit) {
+  if (cartId === 'create' && context && context.plan && context.plan.carts >= context.plan.limit) {
     return (
       <Page backAction={{ onAction: () => navigate('/summary') }}>
         <Layout>

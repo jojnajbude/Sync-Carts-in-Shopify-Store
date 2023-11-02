@@ -16,7 +16,8 @@ type Props = {
     | 'expand'
     | 'update'
     | 'reminder'
-    | 'emailError';
+    | 'emailError'
+    | 'remove-cart';
   selectedRows: string[];
   setShowModal: (state: boolean) => void;
   setIsError: (state: boolean) => void;
@@ -77,13 +78,13 @@ export default function PopupModal({
       headers: {
         'Content-Type': 'application/json',
       },
-      body: await JSON.stringify(selectedRows),
+      body: JSON.stringify(selectedRows),
     });
 
     if (window.location.href.includes('/cart/')) {
       navigate('/summary');
     } else {
-      setIsLoading(true);
+      setIsLoading(false);
     }
 
     setIsModalLoading(false);

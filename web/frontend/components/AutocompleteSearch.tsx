@@ -262,8 +262,6 @@ export default function AutocompleteSearch({
     if (hasItem !== -1) {
       changedCart.items[hasItem].qty =
         Number(changedCart.items[hasItem].qty) + 1;
-
-      changedCart.items[hasItem].reserved_indicator = 'unsynced';
     } else {
       variant.variant_id = variant.id;
       variant.reserved_indicator = 'added';

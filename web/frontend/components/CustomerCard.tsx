@@ -113,12 +113,7 @@ export default function CustomerCard({
           isEditing && !initialCustomer
             ? [
                 {
-                  content: (
-                    <Button
-                      plain
-                      icon={<Icon source={CancelMajor} color="subdued" />}
-                    ></Button>
-                  ),
+                  content: <Icon source={CancelMajor} color="subdued" />,
                   onAction: () => removeUser(),
                 },
               ]

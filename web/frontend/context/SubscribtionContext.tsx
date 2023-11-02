@@ -1,3 +1,4 @@
+import { Banner, SkeletonPage } from '@shopify/polaris';
 import { useAuthenticatedFetch } from '../hooks';
 import React, { createContext, useEffect, useState } from 'react';
 
@@ -21,7 +22,7 @@ const SubscribtionContextProvider: React.FC<Props> = ({ children }) => {
 
   useEffect(() => {
     if (isLoading) {
-      const plan = fetch('/api/subscribe/get')
+      fetch('/api/subscribe/get')
         .then(res => res.json())
         .then(data => {
           setPlan(data);
@@ -29,6 +30,22 @@ const SubscribtionContextProvider: React.FC<Props> = ({ children }) => {
         });
     }
   }, [plan]);
+
+
+  if (isLoading) {
+    return (
+      <SubscribtionContext.Provider
+        value={{
+          plan,
+          setPlan,
+        }}
+      >
+        <SkeletonPage>
+          
+        </SkeletonPage>
+      </SubscribtionContext.Provider>
+    )
+  }
 
   return (
     <SubscribtionContext.Provider

@@ -85,6 +85,8 @@ export class CartController {
   async removeItems(@Body() body: number[], @Res() res: Response) {
     const removedItems = await this.cartService.removeItems(body)
 
-    removedItems ? res.status(200).send(removedItems) : res.status(404).send('Not found')
+    removedItems
+      ? res.status(200).send(removedItems)
+      : res.status(400).send('Bad request')
   }
 }

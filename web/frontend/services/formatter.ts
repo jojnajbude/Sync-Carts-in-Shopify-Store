@@ -4,5 +4,5 @@ export const formatter = (price: number | string, currency?: string) => {
     currency: currency || 'USD',
   });
 
-  return formatter.format(Number(price) / 100);
+  return formatter.format(Number(price));
 };

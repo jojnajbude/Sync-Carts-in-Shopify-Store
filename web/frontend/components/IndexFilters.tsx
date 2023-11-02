@@ -23,6 +23,7 @@ const IndexTableFilters: React.FC<Props> = ({
     'Partially reserved',
     'No items reserved',
     'Paid carts',
+    'Empty carts'
   ]);
   const [selected, setSelected] = useState(0);
   const [queryValue, setQueryValue] = useState<string>('');
@@ -36,7 +37,7 @@ const IndexTableFilters: React.FC<Props> = ({
     let result = null;
 
     if (index === 0) {
-      result = await fetch('/api/carts/sort?dir=ascending&index=5');
+      result = await fetch('/api/carts/sort?dir=descending&index=5');
     } else {
       result = await fetch(`/api/carts/filter?index=${index}`);
     }

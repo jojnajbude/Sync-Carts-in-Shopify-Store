@@ -35,8 +35,11 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.17",
+    "@types/react": "^18.2.34",
+    "@types/react-dom": "^18.2.14",
     "@typescript-eslint/eslint-plugin": "^5.46.1",
     "@typescript-eslint/parser": "^5.46.1",
+    "@vite/vitejs-client": "^2.2.10",
     "eslint": "^8.30.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",

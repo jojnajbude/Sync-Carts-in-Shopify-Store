@@ -278,9 +278,53 @@ export class CartService {
       case index === '4':
         indicator = 'paid'
         break;
+      case index === '5':
+        indicator = 'empty'
+        break;
     }
 
-    const filteredTable = table?.filter(cart => cart.reserved_indicator === indicator);
+    if (indicator === 'empty') {
+      const emptyCarts: Cart[] = await this.cartRepository.query(`
+        SELECT DISTINCT * FROM carts
+          WHERE NOT EXISTS (
+            SELECT * FROM items
+              WHERE items.cart_id = carts.id
+            )
+        ORDER BY carts.last_action DESC;
+      `);
+
+      const handledCarts = emptyCarts.map(async (cart: Cart) => {
+        const customer: Customer | {
+          name: string, 
+          priority: string,
+          shopify_user_id: null,
+        } = await this.customerRepository
+          .findOneBy({ id: cart.customer_id })
+          || { name: 'Unlogged user', priority: 'normal', shopify_user_id: null };
+
+        return {
+          id: cart.id,
+          customer_name: customer.name,
+          total: 0,
+          reserved_indicator: 'no',
+          reservation_time: '',
+          qty: 0,
+          items: [],
+          customer_shopify_id: customer.shopify_user_id,
+          shop_domain: session.shop,
+          priority: 'normal',
+          last_action: new Date(cart.last_action).toString()
+        }
+      });
+
+      const table = await Promise.all(handledCarts);
+
+      return table;
+    }
+
+    const filteredTable = table?.filter(cart => {
+      return cart.reserved_indicator === indicator
+    });
 
     return filteredTable
   }
@@ -306,10 +350,21 @@ export class CartService {
   }
 
   async removeItems(ids: number[]) {
-    const removedItems = await this.itemRepository.update({ cart_id: In(ids)}, { status: 'removed'})
+    if (!ids || !Array.isArray(ids)) {
+      return false;
+    }
+
+    const itemsToRemove = await this.itemRepository.find({
+      where: {
+        cart_id: In(ids)
+      }
+    });
+
+    await this.itemRepository.remove(itemsToRemove);
+
     await this.cartRepository.update({ id: In(ids) }, { last_action: new Date() })
 
-    return removedItems
+    return true;
   }
 
   handleData(data: any, shop: string) {
@@ -341,8 +396,6 @@ export class CartService {
         cart.reserved_indicator = 'paid';
       } else if (cart.items.every(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'all';
-      } else if (cart.items.find(item => item.status === 'unsynced' || item.status === 'removed' || item.status === 'added')) {
-        cart.reserved_indicator = 'unsynced'; 
       } else if (cart.items.find(item => item.status === 'reserved')) {
         cart.reserved_indicator = 'part';
       } else {

@@ -41,7 +41,7 @@ export class StorefrontController {
   }
 
   @Get('cart/add')
-  async handleAdding(@Query() query: { shop: string, variant: number, qty: number }, @Res() res: Response ) {
+  async handleAdding(@Query() query: { shop: number, variant: number, qty: number }, @Res() res: Response ) {
     const result = await this.storefrontService.handleAdding(query.shop, query.variant, query.qty); 
 
     result ? res.status(200).send(result) : res.status(200).send('Server error');

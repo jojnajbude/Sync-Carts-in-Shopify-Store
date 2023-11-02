@@ -113,12 +113,12 @@ class SynchronizeCart {
       const os = getOS();
 
       if (!Cookies.get('session')) {
-        socket.emit('session', customer, os);
+        socket.emit('session', { customer, os, shop });
       } else if (this.cart && Cookies.get('session') !== this.cart.token) {
-        socket.emit('session', customer, os);
+        socket.emit('session', { customer, os, shop });
         Cookies.set('session', this.cart.token, { expires: 1 });
       } else {
-        socket.emit('session', customer, null);
+        socket.emit('session', { customer, shop });
       }
 
       if (this.cart) {
@@ -313,6 +313,32 @@ class SyncObserver {
 
   async cloneClickHandler(form, submitter, event) {
     if (this.product) {
+      const variantElem = form.querySelector('[name="id"]');
+      let variantID;
+
+      if (variantElem.tagName.toLowerCase() !== 'select') {
+        const selectedOption = variantElem.querySelector('[selected]');
+        variantID = selectedOption.value;
+      } else {
+        variantID = variantElem.value;
+      }
+
+      const qtyInput = document.querySelector('[name="quantity"]');
+      const qty = qtyInput
+        ? Number(qtyInput.value)
+        : 1;
+  
+      const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${shop}&variant=${variantID}&qty=${qty}`)
+      const resText = await addCart.text();
+  
+      if (resText === 'All items reserved') {
+        const reservedText = document.createElement('span')
+        reservedText.textContent = 'All items already reserved!'
+        const parent = submitter.parentNode;
+        parent.insertBefore(reservedText, submitter.nextSibling)
+        return;
+      }
+
       const product = await fetch(`/products/${this.product.handle}.js`)
         .then(res => res.json());
 
@@ -498,10 +524,15 @@ class SmartCart extends HTMLElement {
       if (Array.isArray(response)) {
         [cart] = response;
 
-        this.container.append(header, this.createCartScreen(cart.items), this.initFooter(cart));
+        this.footer = this.initFooter(cart);
+
+
+        this.container.append(header, this.createCartScreen(cart.items), this.footer);
       }
     } else {
-      this.container.append(header, this.createLoginScreen(), this.initFooter());
+      this.footer = this.initFooter();
+
+      this.container.append(header, this.createLoginScreen(), this.footer);
     }
     const opener = this.initOpener();
 
@@ -558,6 +589,8 @@ class SmartCart extends HTMLElement {
     const footer = document.createElement('div');
     footer.classList.add('smart-cart__footer');
 
+    let amount;
+
     if (better_carts.id) {
       const totalWrapper = document.createElement('div');
       totalWrapper.classList.add('smart-cart__total-wrapper');
@@ -566,10 +599,10 @@ class SmartCart extends HTMLElement {
       total.classList.add('smart-cart__total');
       total.textContent = 'Total: ';
 
-      const amount = document.createElement('span');
+      amount = document.createElement('span');
       amount.classList.add('smart-cart__amount');
       amount.textContent = `${
-        this.formatter(cart.total / 100, this.shopCurrency)
+        this.formatter(cart.total, this.shopCurrency)
       }`;
 
       totalWrapper.append(total, amount);
@@ -577,6 +610,18 @@ class SmartCart extends HTMLElement {
       footer.append(totalWrapper);
     } else {
       footer.textContent = ' ';
+    }
+
+
+    footer.setTotal = (items) => {
+      const total = items
+        .reduce((sum, item) => sum + (Number(item.price) * Number(item.qty)), 0);
+
+      if (amount) {
+        amount.textContent = `${
+          this.formatter(total, this.shopCurrency)
+        }`;
+      }
     }
 
     return footer;
@@ -615,7 +660,7 @@ class SmartCart extends HTMLElement {
 
     const price = document.createElement('span');
     price.classList.add('smart-cart__price');
-    price.textContent = this.formatter(item.price / 100, this.shopCurrency) || this.formatter('0.00', this.shopCurrency);
+    price.textContent = this.formatter(item.price, this.shopCurrency) || this.formatter('0.00', this.shopCurrency);
 
     const variant = document.createElement('span');
     variant.classList.add('smart-cart__variant');
@@ -917,6 +962,8 @@ class SmartCart extends HTMLElement {
           //   iconBadge.textContent = '';
           // }
         }
+
+        this.footer.setTotal(items);        
       }
     }
   }
@@ -1069,90 +1116,90 @@ function swapAddToCartBtn() {
   } 
 }
 
-// async function addToCart() {
-//   const variantTag = document.querySelector('[name="id"]');
-//   if (variantTag.tagName === 'SELECT' || variantTag.tagName === 'select') {
-//     const selectedOption = variantTag.querySelector('option[selected="selected"]').value;
-//     const qtyInput = document.querySelector('[name="quantity"]');
-//     let qty = 1;
+async function addToCart() {
+  const variantTag = document.querySelector('[name="id"]');
+  if (variantTag.tagName === 'SELECT' || variantTag.tagName === 'select') {
+    const selectedOption = variantTag.querySelector('option[selected="selected"]').value;
+    const qtyInput = document.querySelector('[name="quantity"]');
+    let qty = 1;
 
-//     if (qtyInput) {
-//       qty = document.querySelector('[name="quantity"]').value;
-//     }
+    if (qtyInput) {
+      qty = document.querySelector('[name="quantity"]').value;
+    }
 
-//     const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${selectedOption}&qty=${qty}`)
-//     const resText = await addCart.text();
+    const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${selectedOption}&qty=${qty}`)
+    const resText = await addCart.text();
 
-//     if (resText === 'All items reserved') {
-//       this.setAttribute('disabled', true)
-//       const reservedText = document.createElement('span')
-//       reservedText.textContent = 'All items already reserved!'
-//       const parent = this.parentNode
-//       parent.insertBefore(reservedText, this.nextSibling)
-//     } else {
-//       const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
-//       button.click()
+    if (resText === 'All items reserved') {
+      this.setAttribute('disabled', true)
+      const reservedText = document.createElement('span')
+      reservedText.textContent = 'All items already reserved!'
+      const parent = this.parentNode
+      parent.insertBefore(reservedText, this.nextSibling)
+    } else {
+      const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
+      button.click()
 
-//       setTimeout(() => {
-//         const cookie = getCartCookie();
-//         const os = getOS();
+      setTimeout(() => {
+        const cookie = getCartCookie();
+        const os = getOS();
 
-//         const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
+        const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
 
-//         if (customer) {
-//           updateData(customer, cookie, window.better_carts.shop, os);
+        if (customer) {
+          updateData(customer, cookie, window.better_carts.shop, os);
 
-//           setTimeout(() => {
-//             console.log('timeout worked')
-//             const smartCart = document.querySelector('.smart-cart');
-//             smartCart.updateData();
-//           }, 2000)
-//         }
-//       }, 1000)
-//     }
-//   } else {
-//     const variantId = document.querySelector('input[name="id"]').value;
-//     const qtyInput = document.querySelector('input[name="quantity"]');
-//     let qty = 1;
+          setTimeout(() => {
+            console.log('timeout worked')
+            const smartCart = document.querySelector('.smart-cart');
+            smartCart.updateData();
+          }, 2000)
+        }
+      }, 1000)
+    }
+  } else {
+    const variantId = document.querySelector('input[name="id"]').value;
+    const qtyInput = document.querySelector('input[name="quantity"]');
+    let qty = 1;
 
-//     if (qtyInput) {
-//       qty = document.querySelector('input[name="quantity"]').value;
-//     }
+    if (qtyInput) {
+      qty = document.querySelector('input[name="quantity"]').value;
+    }
 
-//     const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
-//     const resText = await addCart.text();
+    const addCart = await fetch(`${APP_URL}/storefront/cart/add?shop=${window.location.hostname}&variant=${variantId}&qty=${qty}`)
+    const resText = await addCart.text();
 
-//     console.log(resText);
+    console.log(resText);
 
-//     if (resText === 'All items reserved') {
-//       this.setAttribute('disabled', true)
-//       const reservedText = document.createElement('span')
-//       reservedText.textContent = 'All items already reserved!'
-//       const parent = this.parentNode
-//       parent.insertBefore(reservedText, this.nextSibling)
-//     } else {
-//       const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
-//       button.click()
+    if (resText === 'All items reserved') {
+      this.setAttribute('disabled', true)
+      const reservedText = document.createElement('span')
+      reservedText.textContent = 'All items already reserved!'
+      const parent = this.parentNode
+      parent.insertBefore(reservedText, this.nextSibling)
+    } else {
+      const button = document.querySelector('form[action="/cart/add"] button[type="submit"]');
+      button.click()
 
-//       setTimeout(() => {
-//         const cookie = getCartCookie();
-//         const os = getOS();
+      setTimeout(() => {
+        const cookie = getCartCookie();
+        const os = getOS();
 
-//         const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
+        const customer = window.better_carts.hasOwnProperty('id') ? window.better_carts.id : null;
 
-//         if (customer) {
-//           updateData(customer, cookie, window.better_carts.shop, os);
+        if (customer) {
+          updateData(customer, cookie, window.better_carts.shop, os);
 
-//           setTimeout(() => {
-//             console.log('timeout worked')
-//             const smartCart = document.querySelector('.smart-cart');
-//             smartCart.updateData();
-//           }, 2000)
-//         }
-//       }, 1000)
-//     }
-//   }
-// }
+          setTimeout(() => {
+            console.log('timeout worked')
+            const smartCart = document.querySelector('.smart-cart');
+            smartCart.updateData();
+          }, 2000)
+        }
+      }, 1000)
+    }
+  }
+}
 
 class BetterCartsTimer extends HTMLElement {
   constructor() {

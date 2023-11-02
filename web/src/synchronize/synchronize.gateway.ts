@@ -18,6 +18,7 @@ import {Customer} from "../modules/customers/customer.entity.js";
 import {Shop} from "../modules/shops/shop.entity.js";
 import {Item} from "../modules/items/item.entity.js";
 import { Analytics } from '../modules/analytics/analytics.entity.js';
+import shopify from '../utils/shopify.js';
 
 
 type SyncProps = {
@@ -72,32 +73,54 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
 
   @SubscribeMessage('session')
   async handleSession(@MessageBody() body: any, @ConnectedSocket() client: Socket, @Req() request: Request): Promise<void> {
-    let customerId, os;
+    const { customer: customerId, os, shop, admin } = body || {};
 
-    if (body) {
-      [customerId, os] = body;
-    }
+    console.log('customer', customerId);
 
     if (customerId) {
       client.join(String(customerId));
 
       const sockets = await this.server.in(String(customerId)).fetchSockets();
 
-      const online = sockets.filter(socket => socket.id !== client.id).length > 0
+      const online = sockets.filter(socket => socket.id !== client.id).length > 0;
 
       client.in(String(customerId)).emit('online', online);
-    } else {
+    } else if (!customerId || (admin && customerId)){
       client.join('admin');
+
+      return;
     }
 
     let customerModel = await this.customerRepository.findOne({ where: {
-      shopify_user_id: Number(customerId)
+      shopify_user_id: Number(customerId || 0)
     }});
 
     if (!customerModel) {
-      console.log('no customer');
+      const shopModel = await this.shopRepository.findOneBy({ shopify_id: Number(shop || 0) });
 
-      return;
+      if (!shopModel) {
+        console.log('no shop');
+        return;
+      }
+
+      const shopifyUser = await shopify.api.rest.Customer.find({
+        session: JSON.parse(shopModel.session),
+        id: customerId
+      });
+
+      if (!shopifyUser) {
+        console.log('no shopify user');
+        return;
+      }
+
+      customerModel = await this.customerRepository.save({
+        name: `${shopifyUser.first_name} ${shopifyUser.last_name}`, 
+        shopify_user_id: shopifyUser.id, 
+        shop_id: shopModel?.id,
+        priority: 'normal',
+        email: shopifyUser.email,
+        location: shopifyUser.default_address.country_name,
+      });
     }
 
     const cart = await this.cartRepository.findOne({
@@ -183,7 +206,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
           qty: item.quantity,
           expire_at: expireTime,
           cart_id: cart?.id,
-          price: item.price,
+          price: this.formatPrice(item.price),
           title: item.title,
           image_link: item.image,
         })
@@ -200,6 +223,8 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
       const promises = data.items.map(async (item: any) => {
         const cartItem = cartItems.find((cartItem: Item) => Number(cartItem.variant_id) === Number(item.id));
 
+        console.log('price', item.price, this.formatPrice(item.price));
+
         if (!cartItem) {
           const expireTime = this.countExpireDate(new Date(), customer.priority, JSON.parse(shop.priorities));
 
@@ -210,7 +235,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
             qty: item.quantity,
             expire_at: expireTime,
             cart_id: cart?.id,
-            price: item.price,
+            price: this.formatPrice(item.price),
             title: item.title,
             image_link: item.image,
           });
@@ -218,7 +243,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
           return;
         } else {
           cartItem.qty = item.quantity;
-          cartItem.price = item.price;
+          cartItem.price = this.formatPrice(item.price);
           cartItem.title = item.title;
           cartItem.image_link = item.image;
 
@@ -253,7 +278,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
           expire_at: expireTime,
           cart_id: cart.id,
           variant_title: data.variants.find((variant: any) => variant.id === Number(data.id)).title,
-          price: data.price,
+          price: this.formatPrice(data.price),
           title: data.title,
           image_link: data.featured_image,
         });
@@ -269,8 +294,6 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
     await this.cartRepository.save(cart);
 
     this.server.to(customerId).emit('synchronize', items);
-
-    console.log('here');
 
     this.server.to('admin').emit('update');
   }
@@ -408,5 +431,13 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
         .where({ id: analytics.id })
         .execute()
     }
+  }
+
+  formatPrice(price: string | number) {
+    const stringPrice = String(price);
+
+    return stringPrice.includes('.')
+      ? stringPrice
+      : stringPrice.slice(0, -2) + '.' + stringPrice.slice(-2);
   }
 }
