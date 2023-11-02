@@ -1,5 +1,5 @@
-// const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
-const APP_URL = 'https://andrii.ngrok.app';
+const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+// const APP_URL = 'https://andrii.ngrok.app';
 
 const customer = window.better_carts.id;
 const shop = window.better_carts.shop;

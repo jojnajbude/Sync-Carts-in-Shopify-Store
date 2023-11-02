@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Socket, io } from "socket.io-client";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
-const APP_URL = "https://andrii.ngrok.app";
-// const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
+// const APP_URL = "https://andrii.ngrok.app";
+const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
 
 const useSocket = (customer?: string | number | undefined) => {
   const fetch = useAuthenticatedFetch();
