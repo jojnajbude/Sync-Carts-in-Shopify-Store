@@ -316,7 +316,7 @@ class SyncObserver {
       const variantElem = form.querySelector('[name="id"]');
       let variantID;
 
-      if (variantElem.tagName.toLowerCase() !== 'select') {
+      if (variantElem.tagName.toLowerCase() === 'select') {
         const selectedOption = variantElem.querySelector('[selected]');
         variantID = selectedOption.value;
       } else {
