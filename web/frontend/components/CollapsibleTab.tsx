@@ -80,7 +80,7 @@ export default function CollapsibleTab() {
 
   return (
     <LegacyCard
-      title="Setup is as easy as 1-2-3!"
+      title="Setup is super simple, and will only take a moment!"
       actions={[
         {
           content: (
@@ -104,10 +104,7 @@ export default function CollapsibleTab() {
       <LegacyCard.Section>
         <VerticalStack gap="2">
           <Text as="span">
-            There are only two simple steps needed to get your app running! Then
-            a third optional step to make the shopping experience just that much
-            better for your customers. If you ever need help, please contact
-            support and we can set it up for you!
+            There is only one simple step needed to get Smart Carts running! Then a second optional step to make the shopping experience just that much better for your customers. If you ever need help, please contact support and we can help set it up with you!
           </Text>
         </VerticalStack>
       </LegacyCard.Section>
