@@ -52,6 +52,9 @@ export default function CartsTable() {
     toUpdate
   } = useSocket();
 
+  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
+      useIndexResourceState(carts);
+
   useEffect(() => {
     if (!toUpdate) return;
 
@@ -80,7 +83,8 @@ export default function CartsTable() {
     let ignore = false;
     const getCarts = async () => {
       try {
-        if (isLoading && !carts.length) {
+        if (isLoading) {
+          clearSelection();
           const result = await fetch(
             `/api/carts/sort?dir=descending&index=5&shop=true`,
           );
@@ -110,9 +114,6 @@ export default function CartsTable() {
     singular: 'cart',
     plural: 'carts',
   };
-
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(carts);
 
   const promotedBulkActions = [
     {

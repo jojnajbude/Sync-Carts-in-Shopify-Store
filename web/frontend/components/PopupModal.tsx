@@ -172,6 +172,7 @@ export default function PopupModal({
       body: await JSON.stringify(selectedRows),
     });
 
+    console.log('response finished', response.ok);
     setIsModalLoading(false);
     setShowModal(false);
 

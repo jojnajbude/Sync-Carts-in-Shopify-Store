@@ -20,6 +20,7 @@ export class CartController {
   @Post('update')
   async updateCartItems(@Body() body: any, @Res() res: Response) {
     const [cart, customer] = body;
+    console.log('cart controller reached')
 
     const newCart = await this.cartService.updateCartItems(cart, customer);
 

@@ -127,7 +127,7 @@ export default function CustomerCard({
               target="_blank"
               url={`https://${cart.shop_domain}/admin/customers/${customer.id}`}
             >
-              {`${customer.first_name} ${customer.last_name}`}
+              {customer.first_name || customer.last_name ? `${customer.first_name} ${customer.last_name}` : `${customer.email}`}
             </Link>
 
             <Text color="subdued" as="span">
@@ -153,25 +153,25 @@ export default function CustomerCard({
 
         <LegacyCard.Section title="Shipping address">
           <LegacyStack vertical>
-            {customer.default_address.address1 && (
+            {customer.default_address && customer.default_address.address1 && (
               <Text color="subdued" as="span">
                 {customer.default_address.address1}
               </Text>
             )}
 
-            {customer.default_address.city && (
+            {customer.default_address && customer.default_address.city && (
               <Text color="subdued" as="span">
                 {customer.default_address.city}
               </Text>
             )}
 
-            {customer.default_address.country && (
+            {customer.default_address && customer.default_address.country && (
               <Text color="subdued" as="span">
                 {customer.default_address.country}
               </Text>
             )}
 
-            {customer.default_address.zip && (
+            {customer.default_address && customer.default_address.zip && (
               <Text color="subdued" as="span">
                 {customer.default_address.zip}
               </Text>

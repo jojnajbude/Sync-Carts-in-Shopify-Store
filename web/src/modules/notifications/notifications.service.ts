@@ -72,6 +72,7 @@ export class NotificationsService {
   }
 
   async sendEmail(type: string, shop: any, emails: string[]) {
+    console.log('Send email initialized')
     const content = await this.handleContent(type, shop)
 
     const subject = ((type: string) => {

@@ -73,7 +73,7 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
 
   @SubscribeMessage('session')
   async handleSession(@MessageBody() body: any, @ConnectedSocket() client: Socket, @Req() request: Request): Promise<void> {
-    const { customer: customerId, os, shop, admin } = body || {};
+    const { customer: customerId, os, shop, admin, cartId } = body || {};
 
     console.log('customer', customerId);
 
@@ -114,16 +114,22 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
       }
 
       customerModel = await this.customerRepository.save({
-        name: `${shopifyUser.first_name} ${shopifyUser.last_name}`, 
+        name: shopifyUser.last_name && shopifyUser.first_name ? `${shopifyUser.first_name} ${shopifyUser.last_name}` : shopifyUser.email,
         shopify_user_id: shopifyUser.id, 
         shop_id: shopModel?.id,
         priority: 'normal',
         email: shopifyUser.email,
-        location: shopifyUser.default_address.country_name,
+        location: shopifyUser.default_address ? shopifyUser.default_address.country_name : 'Unknown',
       });
     }
 
-    const cart = await this.cartRepository.findOne({
+    const cart = cartId
+      ? await this.cartRepository.findOne({
+        where: {
+          id: cartId
+        }
+      })
+      : await this.cartRepository.findOne({
       where: {
         customer_id: customerModel.id,
         closed_at: IsNull()
@@ -296,6 +302,20 @@ export class SynchronizeGateway implements OnGatewayInit, OnGatewayConnection, O
     this.server.to(customerId).emit('synchronize', items);
 
     this.server.to('admin').emit('update');
+  }
+
+  @SubscribeMessage('update')
+  async handleExpandTimers(@MessageBody() { customer: customerId, shop: shopId }: SyncProps,@ConnectedSocket() client: Socket) {
+    const cartItems = await this.itemRepository.query(`
+      SELECT * FROM items
+      LEFT JOIN carts ON items.cart_id = carts.id
+      LEFT JOIN CUSTOMERS ON carts.customer_id = customers.id
+      WHERE customers.shopify_user_id = ${customerId}
+    `)
+
+    console.log(cartItems)
+
+    client.emit('update', cartItems);
   }
 
   countExpireDate(startDate: Date, priority: string, priorities: any) {

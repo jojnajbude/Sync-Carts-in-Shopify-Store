@@ -264,7 +264,7 @@ export default function AutocompleteSearch({
         Number(changedCart.items[hasItem].qty) + 1;
     } else {
       variant.variant_id = variant.id;
-      variant.reserved_indicator = 'added';
+      variant.reserved_indicator = 'reserved';
       variant.variant_title = variant.title;
       variant.title = product.title;
       changedCart.items = [...changedCart.items, variant];

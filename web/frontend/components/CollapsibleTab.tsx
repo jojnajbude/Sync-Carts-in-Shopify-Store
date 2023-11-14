@@ -167,8 +167,9 @@ export default function CollapsibleTab() {
                     primary
                     onClick={() => {
                       setFirstChecked(true);
-                      let url = `${window.location.ancestorOrigins[0]}/admin/themes`;
-
+                      console.log(window)
+                      // let url = `${window.location.ancestorOrigins[0]}/admin/themes`;
+                      let url = `https://admin.shopify.com/admin/themes`;
                       if (mainShopTheme) {
                         url += `/${mainShopTheme.id}/editor?context=apps`;
                       }

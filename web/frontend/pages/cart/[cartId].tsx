@@ -14,6 +14,7 @@ import {
   SkeletonPage,
   SkeletonBodyText,
   Banner,
+  FooterHelp,
 } from '@shopify/polaris';
 
 import CartBadge from '../../components/CartBadge';
@@ -56,20 +57,22 @@ export default function CartPage() {
 
   const [cartTotalPrice, setCartTotalPrice] = useState(0);
 
+  const { cartId } = useParams();
+
   const {
     socket,
     data: items,
     isOnline,
-    synchronize
-  } = useSocket(customer);
+    synchronize,
 
-  const { cartId } = useParams();
+  } = useSocket(customer, cartId);
+
   const navigate = useNavigate();
   const fetch = useAuthenticatedFetch();
   const context = useContext(SubscribtionContext);
 
   useEffect(() => {
-    if (!items) {
+    if (!items || !Array.isArray(items)) {
       return;
     }
 
@@ -112,6 +115,7 @@ export default function CartPage() {
 
         if (cartData.ok) {
           const [[cart], customer, [shop]] = await cartData.json();
+          console.log(cart, customer, shop)
           if (!ignore) {
             setInitialCart(cart);
             setInitialCustomer(customer);
@@ -475,6 +479,8 @@ export default function CartPage() {
             {showModal && createModal()}
             {activeToast && toastMarkup()}
           </Layout>
+
+          <FooterHelp>© Simplify Apps. All rights reserved.</FooterHelp>
         </Page>
       </Frame>
     );

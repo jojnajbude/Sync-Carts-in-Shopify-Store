@@ -10,6 +10,7 @@ import shopify from "../../utils/shopify.js";
 import { CustomerService } from "../customers/customer.service.js";
 import { ShopService } from "../shops/shop.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
+import { SynchronizeGateway } from "../../synchronize/synchronize.gateway.js";
 
 type TableRow = {
   id: any;
@@ -35,6 +36,7 @@ export class CartService {
     private readonly customerService: CustomerService,
     private readonly shopsService: ShopService,
     private readonly notificationsService: NotificationsService,
+    private readonly synchronizeGateway: SynchronizeGateway,
   ) {}
 
   async getShopCarts(session: shopifySession) {
@@ -195,6 +197,7 @@ export class CartService {
   }
 
   async updateCartItems(cart: any, customer: any) {
+    console.log('Update Cart Service')
     const shop = await this.shopsRepository.findOneBy({ domain: cart.shop_domain });
 
     if (!shop) {
@@ -285,11 +288,12 @@ export class CartService {
 
     if (indicator === 'empty') {
       const emptyCarts: Cart[] = await this.cartRepository.query(`
-        SELECT DISTINCT * FROM carts
+        SELECT DISTINCT carts.* FROM carts
+        LEFT JOIN SHOPS ON carts.shop_id = shops.id
           WHERE NOT EXISTS (
             SELECT * FROM items
               WHERE items.cart_id = carts.id
-            )
+            ) AND shops.domain = '${session.shop}'
         ORDER BY carts.last_action DESC;
       `);
 
@@ -330,14 +334,23 @@ export class CartService {
   }
 
   async expandTimers(ids: number[], time: string) {
+    const customersIds = (await this.customerRepository.query(`
+      select customers.shopify_user_id from customers
+      left join carts
+      on carts.customer_id = customers.id
+      where carts.id IN (${ids.join(',')})
+    `)).map((customer: { shopify_user_id: string }) => customer.shopify_user_id)
+
     const items = await this.itemRepository.find({ where: { cart_id: In(ids) }});
-    
+
     for (const item of items) {
       item.status = 'reserved';
-      item.expire_at = new Date(new Date().getTime() + Number(time));
+      item.expire_at = new Date(new Date(item.expire_at).getTime() + Number(time));
     }
 
     const newTimers = await this.itemRepository.save(items);
+
+    this.synchronizeGateway.server.in(customersIds).emit('update')
     await this.cartRepository.update({ id: In(ids) }, { last_action: new Date() })
     return newTimers
   }

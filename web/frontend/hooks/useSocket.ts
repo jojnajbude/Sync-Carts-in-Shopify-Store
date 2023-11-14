@@ -5,7 +5,7 @@ import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 // const APP_URL = "https://andrii.ngrok.app";
 const APP_URL = 'https://better-carts-app-jif2w.ondigitalocean.app';
 
-const useSocket = (customer?: string | number | undefined) => {
+const useSocket = (customer?: string | number | undefined, cartId: string) => {
   const fetch = useAuthenticatedFetch();
 
   const [customerID, setCustomerID] = useState(null);
@@ -88,7 +88,8 @@ const useSocket = (customer?: string | number | undefined) => {
     if (customerID) {
       socket.emit('session', {
         customer: customerID,
-        admin: true
+        admin: true,
+        cartId: cartId
       });
     } else {
       socket.emit('session');

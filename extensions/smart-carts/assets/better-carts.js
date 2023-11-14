@@ -25,7 +25,7 @@ class SynchronizeCart {
       lastUpdatedCart,
       currentCart
     ] = await Promise.all([
-      fetch(APP_URL + '/storefront/cart/last-updated?customer=' + customer)
+      fetch(APP_URL + '/storefront/cart/last-updated?customer=' + customer, )
         .then(res => res.json()),
       fetch('/cart.js').then(res => res.json())
     ]);
@@ -127,6 +127,16 @@ class SynchronizeCart {
     });
 
     socket.on('synchronize', this.onSynchronize.bind(this));
+    socket.on('update', (data) => {
+      if (!data) {
+        socket.emit('update', { customer, shop });
+
+        return;
+      }
+
+      console.log(data);
+      Sync.smartCart.updateData({ items: data, timersUpdated: true });
+    })
 
     socket.on('disconnect', () => {
       console.log('socket disconnected');
@@ -927,7 +937,8 @@ class SmartCart extends HTMLElement {
     return button;
   }
 
-  async updateData({ items, cart }) {
+  async updateData({ items, timersUpdated }) {
+    console.log('update data', timersUpdated);
     if (this.initialized) {
       await this.initialized;
 
@@ -946,7 +957,8 @@ class SmartCart extends HTMLElement {
           return acc + Number(quantity);
         }, 0);
 
-        if (totalCartQuantity !== lineItemsQuantity) {
+        if (totalCartQuantity !== lineItemsQuantity || timersUpdated) {
+          console.log('update cart screen');
           const cartScreen = this.querySelector('.smart-cart__body');
           const newCartScreen = this.createCartScreen(items);
           cartScreen.replaceWith(newCartScreen);

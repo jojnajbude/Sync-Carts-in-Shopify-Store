@@ -6,15 +6,15 @@
   "scripts": {
     "shopify": "shopify",
     "build": "shopify app build",
-    "dev": "shopify app dev --tunnel-url=https://andrii.ngrok.app:9999",
+    "dev": "shopify app dev",
     "info": "shopify app info",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy"
   },
   "dependencies": {
     "@shopify/admin-ui-extensions": "^1.1.0",
-    "@shopify/app": "3.29.0",
-    "@shopify/cli": "3.29.0",
+    "@shopify/app": "^3.50.2",
+    "@shopify/cli": "^3.50.2",
     "socket.io-client": "^4.7.2"
   },
   "author": "DevIT"
